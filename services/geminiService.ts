@@ -2,7 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Vendor } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
   const vendorContext = vendors.map(v => ({
@@ -19,6 +20,13 @@ export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
     rank: v.infrastructuralRank,
     rating: v.ratingAvg
   }));
+
+  if (!ai) {
+    return {
+      message: "I've picked out some sharp experts who can handle your request easily. Take a look at these connections!",
+      recommendedIds: vendors.slice(0, 3).map(v => v.id)
+    };
+  }
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
@@ -49,8 +57,8 @@ export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
         type: Type.OBJECT,
         properties: {
           message: { type: Type.STRING, description: 'Warm, guiding message explaining the matches.' },
-          recommendedIds: { 
-            type: Type.ARRAY, 
+          recommendedIds: {
+            type: Type.ARRAY,
             items: { type: Type.STRING },
             description: 'The IDs of the experts that fit the query best.'
           }
@@ -63,9 +71,9 @@ export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
   try {
     return JSON.parse(response.text || '{}');
   } catch (e) {
-    return { 
-      message: "I've picked out some sharp experts who can handle your request easily. Take a look at these connections!", 
-      recommendedIds: vendors.slice(0, 3).map(v => v.id) 
+    return {
+      message: "I've picked out some sharp experts who can handle your request easily. Take a look at these connections!",
+      recommendedIds: vendors.slice(0, 3).map(v => v.id)
     };
   }
 };
