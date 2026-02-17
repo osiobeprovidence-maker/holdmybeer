@@ -28,32 +28,32 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="py-24 max-w-md mx-auto animate-in fade-in duration-700 px-6">
-      <div className="bg-white p-12 md:p-16 rounded-[48px] apple-shadow-lg border border-black/5">
-        <h2 className="text-5xl font-extrabold mb-6 tracking-tighter uppercase">{isSignup ? 'Register' : 'Sign In'}</h2>
-        <p className="text-[#86868b] mb-12 font-bold uppercase tracking-widest text-[11px] opacity-60">Direct access to the expert list.</p>
+    <div className="py-12 md:py-24 max-w-md mx-auto animate-in fade-in duration-700 px-4 md:px-6">
+      <div className="bg-white p-8 md:p-16 rounded-[32px] md:rounded-[48px] apple-shadow-lg border border-black/5">
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-4 md:mb-6 tracking-tighter uppercase">{isSignup ? 'Register' : 'Sign In'}</h2>
+        <p className="text-[#86868b] mb-8 md:mb-12 font-bold uppercase tracking-widest text-[10px] md:text-[11px] opacity-60">Direct access to the expert list.</p>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {isSignup && (
             <div className="space-y-3">
               <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#86868b] ml-4">Display Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#f5f5f7] border-none rounded-[28px] px-8 py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-lg"
+                className="w-full bg-[#f5f5f7] border-none rounded-[20px] md:rounded-[28px] px-6 md:px-8 py-4 md:py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-base md:text-lg"
                 placeholder="Your name"
               />
             </div>
           )}
           <div className="space-y-3">
             <label className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#86868b] ml-4">Email Address</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#f5f5f7] border-none rounded-[28px] px-8 py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-lg"
+              className="w-full bg-[#f5f5f7] border-none rounded-[20px] md:rounded-[28px] px-6 md:px-8 py-4 md:py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-base md:text-lg"
               placeholder="email@example.com"
             />
           </div>
@@ -63,7 +63,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         </form>
 
         <div className="mt-16 pt-10 border-t border-black/5 text-center">
-          <button 
+          <button
             onClick={() => setIsSignup(!isSignup)}
             className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#86868b] hover:text-black transition-colors"
           >

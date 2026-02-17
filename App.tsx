@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
-  
+
   // Protocol Access ID (PAID) for Guests
   const [protocolId] = useState<string>(() => {
     const saved = localStorage.getItem('hmb_protocol_id');
@@ -32,7 +32,7 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('hmb_unlocks');
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(() => {
     const saved = localStorage.getItem('hmb_requests');
     return saved ? JSON.parse(saved) : [];
@@ -74,10 +74,10 @@ const App: React.FC = () => {
       }
       setCurrentUser(existing);
     } else {
-      const newUser: User = { 
-        ...user, 
-        kycStatus: 'unverified', 
-        kycVerified: false, 
+      const newUser: User = {
+        ...user,
+        kycStatus: 'unverified',
+        kycVerified: false,
         reliabilityScore: 70,
         totalUnlocks: 0,
         isSuspended: false
@@ -85,7 +85,7 @@ const App: React.FC = () => {
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
     }
-    setCurrentView('home'); 
+    setCurrentView('home');
   };
 
   const handleUnlockSuccess = (vendorId: string, amount: number, type: 'standard' | 'urgent') => {
@@ -100,7 +100,7 @@ const App: React.FC = () => {
       timestamp: Date.now()
     };
     setServiceRequests(prev => [...prev, newRequest]);
-    
+
     setUsers(prev => prev.map(u => {
       if (u.id === vendorId) {
         return { ...u, totalUnlocks: (u.totalUnlocks || 0) + 1 };
@@ -122,7 +122,7 @@ const App: React.FC = () => {
   // Compute "Guest Nodes" for Admin visualization
   const guestNodes = useMemo(() => {
     const uniqueGuestIds = new Set(serviceRequests.filter(r => r.clientId.startsWith('HMB-NODE-')).map(r => r.clientId));
-    return Array.from(uniqueGuestIds).map(id => ({
+    return Array.from(uniqueGuestIds).map((id: string) => ({
       id,
       name: `Guest Node: ${id.split('-').pop()}`,
       email: 'Anonymous Device',
@@ -140,7 +140,7 @@ const App: React.FC = () => {
     switch (currentView) {
       case 'home':
         return (
-          <Home 
+          <Home
             vendors={users.filter(u => u.isCreator && !u.isSuspended)}
             filteredVendors={filteredVendors}
             selectedCategory={selectedCategory}
@@ -156,10 +156,10 @@ const App: React.FC = () => {
         );
       case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={setActiveUser} unlockedIds={unlockedUserIds} />;
       case 'pricing': return <Pricing />;
-      case 'dashboard': 
+      case 'dashboard':
         return currentUser ? (
-          <VendorDashboard 
-            user={currentUser} 
+          <VendorDashboard
+            user={currentUser}
             onUpdateUser={handleUpdateUser}
             serviceRequests={serviceRequests}
             unlockedVendors={users.filter(u => unlockedUserIds.includes(u.id))}
@@ -182,48 +182,48 @@ const App: React.FC = () => {
       <main className="flex-grow max-w-7xl mx-auto px-6 py-12 w-full">{renderCurrentView()}</main>
 
       {activeUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
           <div className="absolute inset-0 bg-white/80 backdrop-blur-xl" onClick={() => setActiveUser(null)} />
-          <div className="relative bg-white rounded-[48px] w-full max-w-5xl h-[80vh] overflow-hidden flex flex-col md:flex-row apple-shadow-lg animate-in zoom-in-95 duration-500 border border-black/5">
-            <div className="w-full md:w-1/2 h-full bg-[#f5f5f7]">
+          <div className="relative bg-white rounded-[32px] md:rounded-[48px] w-full max-w-5xl h-[90vh] md:h-[80vh] overflow-hidden flex flex-col md:flex-row apple-shadow-lg animate-in zoom-in-95 duration-500 border border-black/5">
+            <div className="w-full md:w-1/2 h-64 md:h-full bg-[#f5f5f7]">
               <img src={activeUser.portfolio?.[0] || activeUser.avatar} className="w-full h-full object-cover" />
             </div>
-            <div className="w-full md:w-1/2 p-12 md:p-20 flex flex-col h-full overflow-y-auto">
-              <div className="flex justify-between items-start mb-12">
+            <div className="w-full md:w-1/2 p-8 md:p-20 flex flex-col h-full overflow-y-auto">
+              <div className="flex justify-between items-start mb-8 md:mb-12">
                 <div>
-                  <span className="text-[12px] font-bold text-[#86868b] uppercase tracking-[0.2em]">{activeUser.category}</span>
-                  <h2 className="text-5xl font-extrabold text-black tracking-tighter mt-2">{activeUser.businessName || activeUser.name}</h2>
+                  <span className="text-[10px] md:text-[12px] font-bold text-[#86868b] uppercase tracking-[0.2em]">{activeUser.category}</span>
+                  <h2 className="text-3xl md:text-5xl font-extrabold text-black tracking-tighter mt-2">{activeUser.businessName || activeUser.name}</h2>
                 </div>
                 <button onClick={() => setActiveUser(null)} className="p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>
-              
-              <div className="grid grid-cols-2 gap-6 mb-12">
-                <div className="bg-[#f5f5f7] p-8 rounded-[32px]">
-                  <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Reliability</p>
-                  <p className="text-3xl font-extrabold text-black tracking-tight">{activeUser.reliabilityScore}%</p>
+
+              <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
+                <div className="bg-[#f5f5f7] p-6 md:p-8 rounded-[24px] md:rounded-[32px]">
+                  <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Reliability</p>
+                  <p className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">{activeUser.reliabilityScore}%</p>
                 </div>
-                <div className="bg-[#f5f5f7] p-8 rounded-[32px]">
-                  <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Unlocks</p>
-                  <p className="text-3xl font-extrabold text-black tracking-tight">{activeUser.totalUnlocks}</p>
+                <div className="bg-[#f5f5f7] p-6 md:p-8 rounded-[24px] md:rounded-[32px]">
+                  <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Unlocks</p>
+                  <p className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">{activeUser.totalUnlocks}</p>
                 </div>
               </div>
 
-              <div className="mb-12">
-                <h4 className="text-[11px] font-bold mb-4 uppercase text-[#86868b] tracking-widest">Expert Bio</h4>
-                <p className="text-black text-xl leading-relaxed font-medium">
+              <div className="mb-8 md:mb-12">
+                <h4 className="text-[10px] md:text-[11px] font-bold mb-4 uppercase text-[#86868b] tracking-widest">Expert Bio</h4>
+                <p className="text-black text-lg md:text-xl leading-relaxed font-medium">
                   {activeUser.bio}
                 </p>
               </div>
 
-              <div className="mt-auto pt-10">
+              <div className="mt-auto pt-6 md:pt-10">
                 {unlockedUserIds.includes(activeUser.id) ? (
-                  <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full btn-apple py-6 text-lg">View Contact Details</button>
+                  <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full btn-apple py-5 md:py-6 text-base md:text-lg">View Contact Details</button>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setShowUnlockModal(true)}
-                    className="w-full btn-apple py-6 text-lg flex items-center justify-center gap-4 group"
+                    className="w-full btn-apple py-5 md:py-6 text-base md:text-lg flex items-center justify-center gap-4 group"
                   >
                     <span>Unlock Contact</span>
                     <span className="opacity-30 group-hover:opacity-100 transition-opacity">/</span>
