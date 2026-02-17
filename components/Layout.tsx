@@ -90,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, current
           />
 
           {/* Solid Menu Panel */}
-          <div className="fixed inset-x-0 top-0 bg-white z-[160] flex flex-col p-8 pt-24 md:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl">
+          <div className="fixed inset-x-0 top-0 bg-white z-[160] flex flex-col p-8 pt-24 md:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl max-h-[100dvh] overflow-y-auto">
             <div className="flex flex-col gap-8 mb-16">
               <button
                 onClick={() => { onNavigate('discovery'); setIsMenuOpen(false); }}

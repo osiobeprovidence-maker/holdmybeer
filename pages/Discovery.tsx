@@ -41,9 +41,9 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
   return (
     <div className="py-12 animate-in fade-in duration-700">
       <div className="mb-12 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10 px-4 md:px-0">
-        <div>
-          <h1 className="text-5xl md:text-8xl font-extrabold mb-3 md:mb-4 tracking-tighter text-black uppercase leading-none">Discovered</h1>
-          <p className="text-[#86868b] font-bold uppercase text-[10px] md:text-[11px] tracking-[0.4em] opacity-50">Verified professionals ready to execute.</p>
+        <div className="w-full">
+          <h1 className="text-4xl md:text-8xl font-extrabold mb-3 md:mb-4 tracking-tighter text-black uppercase leading-none">Discovered</h1>
+          <p className="text-[#86868b] font-bold uppercase text-[9px] md:text-[11px] tracking-[0.4em] opacity-50">Verified professionals ready to execute.</p>
         </div>
 
         <button
@@ -66,9 +66,9 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
               placeholder="Search experts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#f5f5f7] border-none rounded-[20px] md:rounded-[28px] px-6 md:px-8 py-4 md:py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-base md:text-lg"
+              className="w-full bg-[#f5f5f7] border-none rounded-[20px] md:rounded-[28px] px-5 md:px-8 py-3.5 md:py-5 text-black outline-none focus:bg-[#ebebe7] transition-all font-bold text-sm md:text-lg"
             />
-            <button className="absolute right-2.5 top-1/2 -translate-y-1/2 btn-apple px-6 md:px-8 py-2 md:py-3 text-[10px] md:text-[11px] uppercase tracking-widest">Find</button>
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 btn-apple px-4 md:px-8 py-2 md:py-3 text-[9px] md:text-[11px] uppercase tracking-widest">Find</button>
           </div>
 
           <button

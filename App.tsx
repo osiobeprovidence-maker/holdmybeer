@@ -184,17 +184,17 @@ const App: React.FC = () => {
       {activeUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
           <div className="absolute inset-0 bg-white/80 backdrop-blur-xl" onClick={() => setActiveUser(null)} />
-          <div className="relative bg-white rounded-[32px] md:rounded-[48px] w-full max-w-5xl h-[90vh] md:h-[80vh] overflow-hidden flex flex-col md:flex-row apple-shadow-lg animate-in zoom-in-95 duration-500 border border-black/5">
-            <div className="w-full md:w-1/2 h-64 md:h-full bg-[#f5f5f7]">
+          <div className="relative bg-white rounded-[32px] md:rounded-[48px] w-full max-w-5xl h-[92vh] md:h-[80vh] overflow-hidden flex flex-col md:flex-row apple-shadow-lg animate-in zoom-in-95 duration-500 border border-black/5 mx-2">
+            <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-full bg-[#f5f5f7]">
               <img src={activeUser.portfolio?.[0] || activeUser.avatar} className="w-full h-full object-cover" />
             </div>
-            <div className="w-full md:w-1/2 p-8 md:p-20 flex flex-col h-full overflow-y-auto">
-              <div className="flex justify-between items-start mb-8 md:mb-12">
-                <div>
-                  <span className="text-[10px] md:text-[12px] font-bold text-[#86868b] uppercase tracking-[0.2em]">{activeUser.category}</span>
-                  <h2 className="text-3xl md:text-5xl font-extrabold text-black tracking-tighter mt-2">{activeUser.businessName || activeUser.name}</h2>
+            <div className="w-full md:w-1/2 p-6 md:p-16 lg:p-20 flex flex-col h-full overflow-y-auto">
+              <div className="flex justify-between items-start mb-6 md:mb-12">
+                <div className="flex-grow pr-4">
+                  <span className="text-[9px] md:text-[12px] font-bold text-[#86868b] uppercase tracking-[0.2em]">{activeUser.category}</span>
+                  <h2 className="text-2xl md:text-5xl font-extrabold text-black tracking-tighter mt-1 md:mt-2 leading-tight break-words">{activeUser.businessName || activeUser.name}</h2>
                 </div>
-                <button onClick={() => setActiveUser(null)} className="p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
+                <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform flex-shrink-0">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>

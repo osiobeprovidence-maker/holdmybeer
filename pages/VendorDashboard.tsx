@@ -145,18 +145,18 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
    return (
       <div className="py-12 animate-in fade-in duration-700 max-w-5xl mx-auto px-6">
          {/* Infrastructure Header */}
-         <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-10 mb-12 md:mb-20 border-b border-black/5 pb-10 md:pb-16 text-center md:text-left">
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+         <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-10 mb-10 md:mb-20 border-b border-black/5 pb-8 md:pb-16 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 w-full">
                <img
                   src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-[30px] md:rounded-[40px] object-cover border-4 border-white apple-shadow"
+                  className="w-16 h-16 md:w-24 md:h-24 rounded-[24px] md:rounded-[40px] object-cover border-4 border-white apple-shadow"
                />
-               <div>
-                  <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">{user.businessName || user.name}</h1>
-                  <div className="flex items-center justify-center md:justify-start gap-3">
-                     <span className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em]">{user.category || 'Standard User'}</span>
-                     <div className={`w-2 h-2 rounded-full ${user.kycVerified ? 'bg-black' : 'bg-gray-200'}`} />
-                     <span className="text-[10px] font-bold text-black uppercase tracking-widest">{user.kycVerified ? 'Verified Infrastructure' : 'Pending Check'}</span>
+               <div className="flex-grow min-w-0">
+                  <h1 className="text-2xl md:text-4xl font-black tracking-tighter uppercase break-words px-2 md:px-0">{user.businessName || user.name}</h1>
+                  <div className="flex items-center justify-center md:justify-start gap-2 md:gap-3 mt-1">
+                     <span className="text-[9px] font-black text-[#86868b] uppercase tracking-[0.3em]">{user.category || 'Standard User'}</span>
+                     <div className={`w-1.5 h-1.5 rounded-full ${user.kycVerified ? 'bg-black' : 'bg-gray-200'}`} />
+                     <span className="text-[9px] font-bold text-black uppercase tracking-widest">{user.kycVerified ? 'Verified Infrastructure' : 'Pending Check'}</span>
                   </div>
                </div>
             </div>
@@ -192,16 +192,16 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
                {activeTab === 'overview' && (
                   <div className="space-y-10">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                        <div className="bg-[#f5f5f7] p-8 md:p-12 rounded-[40px] md:rounded-[56px] apple-shadow">
-                           <p className="text-[9px] md:text-[10px] font-black text-[#86868b] uppercase tracking-widest mb-4 md:mb-6">Total Connections</p>
-                           <p className="text-5xl md:text-7xl font-black tracking-tighter">{user.totalUnlocks || 0}</p>
-                           <p className="text-[9px] md:text-[10px] font-bold text-black/20 uppercase tracking-widest mt-6 md:mt-8">Instances reveals on platform</p>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                        <div className="bg-[#f5f5f7] p-6 md:p-12 rounded-[32px] md:rounded-[56px] apple-shadow">
+                           <p className="text-[9px] md:text-[10px] font-black text-[#86868b] uppercase tracking-widest mb-3 md:mb-6">Total Connections</p>
+                           <p className="text-4xl md:text-7xl font-black tracking-tighter">{user.totalUnlocks || 0}</p>
+                           <p className="text-[8px] md:text-[10px] font-bold text-black/20 uppercase tracking-widest mt-4 md:mt-8">Instances reveals on platform</p>
                         </div>
-                        <div className="bg-black p-8 md:p-12 rounded-[40px] md:rounded-[56px] text-white shadow-2xl">
-                           <p className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-widest mb-4 md:mb-6">Reliability Score</p>
-                           <p className="text-5xl md:text-7xl font-black tracking-tighter">{user.reliabilityScore || 70}%</p>
-                           <div className="w-full bg-white/10 h-1 mt-6 md:mt-8 rounded-full overflow-hidden">
+                        <div className="bg-black p-6 md:p-12 rounded-[32px] md:rounded-[56px] text-white shadow-2xl">
+                           <p className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 md:mb-6">Reliability Score</p>
+                           <p className="text-4xl md:text-7xl font-black tracking-tighter">{user.reliabilityScore || 70}%</p>
+                           <div className="w-full bg-white/10 h-1 mt-4 md:mt-8 rounded-full overflow-hidden">
                               <div className="bg-white h-full" style={{ width: `${user.reliabilityScore}%` }} />
                            </div>
                         </div>

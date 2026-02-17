@@ -26,7 +26,7 @@ const UnlockModal: React.FC<UnlockModalProps> = ({ vendor, userEmail, onClose, o
         vendor_id: vendor.id,
         connection_type: type
       },
-      callback: function(response: any) {
+      callback: function (response: any) {
         setStep('paying');
         setTimeout(() => {
           setStep('success');
@@ -35,7 +35,7 @@ const UnlockModal: React.FC<UnlockModalProps> = ({ vendor, userEmail, onClose, o
           }, 1500);
         }, 1000);
       },
-      onClose: function() {
+      onClose: function () {
         console.log('Payment window closed');
       }
     });
@@ -43,22 +43,22 @@ const UnlockModal: React.FC<UnlockModalProps> = ({ vendor, userEmail, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-white/90 backdrop-blur-3xl" onClick={onClose} />
-      
-      <div className="relative bg-white p-12 md:p-20 rounded-[60px] apple-shadow-lg w-full max-w-lg text-center animate-in zoom-in-95 duration-500 border border-black/5">
+
+      <div className="relative bg-white p-8 md:p-20 rounded-[40px] md:rounded-[60px] apple-shadow-lg w-full max-w-lg text-center animate-in zoom-in-95 duration-500 border border-black/5 mx-2">
         {step === 'confirm' && (
           <div>
-            <div className="w-20 h-20 bg-black flex items-center justify-center rounded-[28px] mx-auto mb-8">
-              <span className="text-4xl text-white">🔓</span>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-black flex items-center justify-center rounded-[20px] md:rounded-[28px] mx-auto mb-6 md:mb-8 text-white">
+              <span className="text-3xl md:text-4xl">🔓</span>
             </div>
-            <h2 className="text-4xl font-extrabold mb-4 tracking-tighter text-black uppercase">Direct Access</h2>
-            <p className="text-[#86868b] font-bold uppercase text-[11px] tracking-widest mb-10 leading-relaxed">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 md:mb-4 tracking-tighter text-black uppercase">Direct Access</h2>
+            <p className="text-[#86868b] font-bold uppercase text-[10px] md:text-[11px] tracking-widest mb-8 md:mb-10 leading-relaxed px-2">
               Authorizing immediate retrieval of <br />
               <span className="text-black font-black">{vendor.businessName}</span>
             </p>
-            
-            <div className="bg-[#f5f5f7] p-8 rounded-[32px] mb-10 text-left">
+
+            <div className="bg-[#f5f5f7] p-6 md:p-8 rounded-[24px] md:rounded-[32px] mb-8 md:mb-10 text-left">
               <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Instance Includes:</p>
               <ul className="space-y-3 text-[12px] font-bold text-black uppercase tracking-tight">
                 <li className="flex items-center gap-3">✓ Verified Mobile</li>
@@ -68,13 +68,13 @@ const UnlockModal: React.FC<UnlockModalProps> = ({ vendor, userEmail, onClose, o
             </div>
 
             <div className="space-y-4">
-              <button 
+              <button
                 onClick={handlePay}
                 className="w-full btn-apple py-6 text-lg !font-extrabold"
               >
                 Pay ₦{amount.toLocaleString()}
               </button>
-              <button 
+              <button
                 onClick={onClose}
                 className="w-full text-[#86868b] hover:text-black transition-colors font-bold text-[11px] uppercase tracking-widest pt-4"
               >

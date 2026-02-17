@@ -33,13 +33,13 @@ const Home: React.FC<HomeProps> = ({
 }) => {
   return (
     <div className="animate-in fade-in duration-700">
-      <section className="text-center pt-12 md:pt-20 mb-20 md:mb-40">
-        <h1 className="text-5xl md:text-9xl font-extrabold mb-8 md:mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
+      <section className="text-center pt-8 md:pt-20 mb-16 md:mb-40 px-4">
+        <h1 className="text-4xl sm:text-5xl md:text-9xl font-extrabold mb-6 md:mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
           Find. Unlock. <br />
           <span className="text-[#86868b]">Connect.</span>
         </h1>
-        <p className="text-black text-lg md:text-2xl max-w-2xl mx-auto mb-12 md:mb-20 font-medium leading-relaxed px-4">
-          The fastest way to access verified event experts in Nigeria. <br />
+        <p className="text-base md:text-2xl max-w-2xl mx-auto mb-10 md:mb-20 font-medium leading-relaxed px-2 text-black">
+          The fastest way to access verified event experts in Nigeria. <br className="hidden md:block" />
           <span className="opacity-40">Direct contact. Zero middleman. Instant relief.</span>
         </p>
 
@@ -83,8 +83,8 @@ const Home: React.FC<HomeProps> = ({
               key={cat}
               onClick={() => setSelectedCategory(cat as Category | 'All')}
               className={`px-6 py-3 text-[14px] font-bold rounded-full transition-all ${selectedCategory === cat
-                  ? 'bg-black text-white shadow-xl'
-                  : 'bg-[#f5f5f7] text-black hover:bg-[#ebebe7]'
+                ? 'bg-black text-white shadow-xl'
+                : 'bg-[#f5f5f7] text-black hover:bg-[#ebebe7]'
                 }`}
             >
               {cat}
@@ -95,8 +95,8 @@ const Home: React.FC<HomeProps> = ({
         <button
           onClick={() => setIsUrgent(!isUrgent)}
           className={`px-8 py-3 rounded-full font-extrabold text-[14px] uppercase tracking-widest transition-all border-2 ${isUrgent
-              ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
-              : 'bg-white text-black border-black/10 hover:border-black'
+            ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
+            : 'bg-white text-black border-black/10 hover:border-black'
             }`}
         >
           {isUrgent ? 'Showing Active Today' : 'Show Available Now'}

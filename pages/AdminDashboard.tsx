@@ -102,10 +102,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
             <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
             <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-[0.4em]">Protocol Active // Secure Layer</p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-black uppercase leading-[0.9]">Control</h1>
-          <p className="text-[#86868b] font-bold uppercase text-[10px] md:text-[11px] tracking-widest opacity-50">Global Oversight & Expert Node Management</p>
+          <h1 className="text-4xl md:text-8xl font-black tracking-tighter text-black uppercase leading-[0.9]">Control</h1>
+          <p className="text-[#86868b] font-bold uppercase text-[9px] md:text-[11px] tracking-widest opacity-50">Global Oversight & Expert Node Management</p>
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
+        <div className="flex gap-4 w-full md:w-auto mt-4 md:mt-0">
           <button onClick={() => setIsAuthenticated(false)} className="flex-1 md:flex-none px-6 md:px-8 py-3.5 md:py-4 bg-[#f5f5f7] rounded-full text-[10px] md:text-[11px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Lock Protocol</button>
           <button onClick={onExit} className="flex-1 md:flex-none px-6 md:px-8 py-3.5 md:py-4 bg-white border border-black/10 rounded-full text-[10px] md:text-[11px] font-black uppercase tracking-widest hover:bg-[#f5f5f7] transition-all">Exit</button>
         </div>
