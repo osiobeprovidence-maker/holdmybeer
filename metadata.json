@@ -1,0 +1,8 @@
+{
+  "name": "holdmybeer - Infrastructure Protocol v2",
+  "description": "The elite layer for event discovery and connection in Nigeria. Plan secure, execute sharp. Nigeria Wide protocol.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
