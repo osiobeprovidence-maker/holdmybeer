@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Category, User, ServiceRequest, Location } from './types';
 import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
+import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
 import MyConnections from './pages/MyConnections';
@@ -18,7 +19,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
-  
+
   // Protocol Access ID (PAID) for Guests
   const [protocolId] = useState<string>(() => {
     const saved = localStorage.getItem('hmb_protocol_id');
@@ -32,7 +33,7 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('hmb_unlocks');
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(() => {
     const saved = localStorage.getItem('hmb_requests');
     return saved ? JSON.parse(saved) : [];
@@ -51,6 +52,54 @@ const App: React.FC = () => {
     localStorage.setItem('hmb_unlocks', JSON.stringify(unlockedUserIds));
     localStorage.setItem('hmb_requests', JSON.stringify(serviceRequests));
   }, [unlockedUserIds, serviceRequests]);
+
+  // Load from Supabase on mount
+  useEffect(() => {
+    const initData = async () => {
+      if (!supabase) return;
+
+      const { data: profiles } = await supabase.from('profiles').select('*');
+      if (profiles && profiles.length > 0) {
+        // Map snake_case from DB to camelCase for frontend
+        const mappedUsers = profiles.map(p => ({
+          ...p,
+          isCreator: p.is_creator,
+          kycVerified: p.kyc_verified,
+          kycStatus: p.kyc_status,
+          businessName: p.business_name,
+          infrastructuralRank: p.infrastructural_rank,
+          availableToday: p.available_today,
+          reliabilityScore: p.reliability_score,
+          totalUnlocks: p.total_unlocks,
+          ratingAvg: p.rating_avg,
+          isSuspended: p.is_suspended,
+          trialStartDate: p.trial_start_date,
+          completedJobs: p.completed_jobs,
+          avgDeliveryTime: p.avg_delivery_time,
+          topSkills: p.top_skills,
+          socialLinks: p.social_links
+        }));
+        setUsers(mappedUsers as unknown as User[]);
+      }
+
+      const { data: requests } = await supabase.from('service_requests').select('*');
+      if (requests && requests.length > 0) {
+        setServiceRequests(requests.map(r => ({
+          id: r.id,
+          clientId: r.client_id,
+          creatorId: r.creator_id,
+          status: r.status,
+          amount: r.amount,
+          paymentType: r.payment_type,
+          timestamp: r.timestamp
+        })));
+
+        // Compute unlocks for guest nodes or current id just from requests
+        // Wait, for simplistic upgrade we keep localStorage unlocks
+      }
+    };
+    initData();
+  }, []);
 
   useEffect(() => {
     let result = users.filter(u => u.isCreator && !u.isSuspended);
@@ -76,18 +125,37 @@ const App: React.FC = () => {
       }
       setCurrentUser(existing);
     } else {
-      const newUser: User = { 
-        ...user, 
-        kycStatus: 'unverified', 
-        kycVerified: false, 
+      const newUser: User = {
+        ...user,
+        kycStatus: 'unverified',
+        kycVerified: false,
         reliabilityScore: 70,
         totalUnlocks: 0,
         isSuspended: false
       };
+
+      if (supabase) {
+        // We do a simple insert to profiles for the mocked auth.
+        // It bypasses auth.users since it's just a demo UI.
+        supabase.from('profiles').insert({
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          is_creator: newUser.isCreator,
+          location: newUser.location,
+          kyc_verified: newUser.kycVerified,
+          kyc_status: newUser.kycStatus,
+          avatar: newUser.avatar,
+          reliability_score: newUser.reliabilityScore,
+          total_unlocks: newUser.totalUnlocks,
+          is_suspended: newUser.isSuspended
+        }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
+      }
+
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
     }
-    setCurrentView('home'); 
+    setCurrentView('home');
   };
 
   const handleUnlockSuccess = (vendorId: string, amount: number, type: 'standard' | 'urgent') => {
@@ -106,13 +174,25 @@ const App: React.FC = () => {
       paymentType: type,
       timestamp: Date.now()
     };
-    
+
     setServiceRequests(prev => {
       const newRequests = [...prev, newRequest];
       localStorage.setItem('hmb_requests', JSON.stringify(newRequests));
       return newRequests;
     });
-    
+
+    if (supabase) {
+      supabase.from('service_requests').insert({
+        id: newRequest.id,
+        client_id: newRequest.clientId,
+        creator_id: newRequest.creatorId,
+        status: newRequest.status,
+        amount: newRequest.amount,
+        payment_type: newRequest.paymentType,
+        timestamp: newRequest.timestamp
+      }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
+    }
+
     setUsers(prev => prev.map(u => {
       if (u.id === vendorId) {
         return { ...u, totalUnlocks: (u.totalUnlocks || 0) + 1 };
@@ -125,7 +205,7 @@ const App: React.FC = () => {
 
   const initiatePayment = (vendor: User) => {
     if (!vendor) return;
-    
+
     const amount = vendor.availableToday ? 700 : 500;
     const type = vendor.availableToday ? 'urgent' : 'standard';
 
@@ -158,6 +238,28 @@ const App: React.FC = () => {
     if (activeUser && activeUser.id === updatedUser.id) {
       setActiveUser(updatedUser);
     }
+
+    if (supabase) {
+      supabase.from('profiles').update({
+        name: updatedUser.name,
+        business_name: updatedUser.businessName,
+        category: updatedUser.category,
+        bio: updatedUser.bio,
+        location: updatedUser.location,
+        available_today: updatedUser.availableToday,
+        price_range: updatedUser.priceRange,
+        top_skills: updatedUser.topSkills,
+        services: updatedUser.services,
+        experience: updatedUser.experience,
+        industries: updatedUser.industries,
+        social_links: updatedUser.socialLinks,
+        avatar: updatedUser.avatar,
+        portfolio: updatedUser.portfolio
+      }).eq('id', updatedUser.id).then(({ error }) => {
+        if (error) console.error("Supabase update error:", error);
+      });
+    }
+
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
   };
 
@@ -182,7 +284,7 @@ const App: React.FC = () => {
     switch (currentView) {
       case 'home':
         return (
-          <Home 
+          <Home
             vendors={users.filter(u => u.isCreator && !u.isSuspended)}
             filteredVendors={filteredVendors}
             selectedCategory={selectedCategory}
@@ -201,10 +303,10 @@ const App: React.FC = () => {
         );
       case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={setActiveUser} unlockedIds={unlockedUserIds} />;
       case 'pricing': return <Pricing />;
-      case 'dashboard': 
+      case 'dashboard':
         return currentUser ? (
-          <VendorDashboard 
-            user={currentUser} 
+          <VendorDashboard
+            user={currentUser}
             onUpdateUser={handleUpdateUser}
             serviceRequests={serviceRequests}
             unlockedVendors={users.filter(u => unlockedUserIds.includes(u.id))}
@@ -240,7 +342,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 md:p-6">
           <div className="absolute inset-0 bg-white/90 backdrop-blur-xl" onClick={() => setActiveUser(null)} />
           <div className="relative bg-white w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[48px] overflow-hidden flex flex-col apple-shadow-2xl animate-in zoom-in-95 duration-500 border border-black/5">
-            
+
             {/* Header Sticky Area */}
             <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-6 py-6 md:px-12 md:py-10 flex items-center justify-between">
               <div className="flex items-center gap-4 md:gap-6">
@@ -255,14 +357,14 @@ const App: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 {unlockedUserIds.includes(activeUser.id) ? (
-                  <button 
+                  <button
                     onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }}
                     className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
                   >
                     View Contact
                   </button>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => initiatePayment(activeUser)}
                     className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
                   >
@@ -277,7 +379,7 @@ const App: React.FC = () => {
 
             <div className="flex-grow overflow-y-auto scrollbar-hide">
               <div className="max-w-5xl mx-auto px-6 pt-16 pb-20 md:px-12 md:pt-24 md:pb-32">
-                
+
                 {/* 1. Bio & Highlights Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 mt-4">
                   <div className="lg:col-span-7">
@@ -285,13 +387,13 @@ const App: React.FC = () => {
                     <p className="text-xl md:text-2xl font-medium text-black leading-tight mb-8">
                       {activeUser.bio || "No bio provided."}
                     </p>
-                    
+
                     <div className="flex flex-wrap gap-3">
                       {activeUser.topSkills?.map(skill => (
                         <span key={skill} className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[10px] font-black uppercase tracking-widest text-black/60">{skill}</span>
                       )) || (
-                        <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[10px] font-black uppercase tracking-widest text-black/60">Verified Expert</span>
-                      )}
+                          <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[10px] font-black uppercase tracking-widest text-black/60">Verified Expert</span>
+                        )}
                     </div>
                   </div>
 
@@ -350,7 +452,7 @@ const App: React.FC = () => {
                       <span className="text-[9px] font-black text-[#86868b] uppercase tracking-widest">{activeUser.portfolio?.length || 0} Assets</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-4 md:gap-6 overflow-x-auto pb-8 snap-x scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
                     {activeUser.portfolio?.map((item, idx) => {
                       const isVideo = item?.toLowerCase().match(/\.(mp4|webm|ogg)$/) || item?.includes('video');
@@ -367,7 +469,7 @@ const App: React.FC = () => {
                           </div>
                           {isVideo && (
                             <div className="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-2 rounded-full">
-                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                             </div>
                           )}
                         </div>
@@ -395,7 +497,7 @@ const App: React.FC = () => {
                       </>
                     ) : (
                       <div className="flex items-center gap-2 opacity-30 cursor-not-allowed" title="Unlock contact to see social links">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                         <span className="text-[9px] font-black uppercase tracking-[0.2em]">Contact Signals Locked</span>
                       </div>
                     )}
@@ -404,7 +506,7 @@ const App: React.FC = () => {
                     {unlockedUserIds.includes(activeUser.id) ? (
                       <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => initiatePayment(activeUser)}
                         className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4"
                       >
