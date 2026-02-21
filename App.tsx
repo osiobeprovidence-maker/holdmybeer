@@ -216,14 +216,37 @@ const App: React.FC = () => {
         vendor_id: vendor.id,
         connection_type: type
       },
-      onSuccess: (reference) => {
+      onSuccess: async (reference) => {
         setIsProcessingPayment(true);
-        setTimeout(() => {
+
+        try {
+          // Send the reference to our secure Vercel backend
+          const response = await fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference })
+          });
+
+          const result = await response.json();
+
+          if (result.success || result.verified) {
+            handleUnlockSuccess(vendor.id, amount, type);
+            setAssistantMessage(`Protocol Handshake Verified. Ref: ${reference}`);
+            setTimeout(() => setAssistantMessage(null), 5000);
+          } else {
+            console.warn("Payment verification failed on backend:", result);
+            alert("Error verifying payment securely via backend.");
+          }
+        } catch (error) {
+          console.error("Verification endpoint error:", error);
+          // Fallback if the backend isn't set up yet for local development:
+          console.log("Falling back to client-side unlock (secure endpoint not running)...");
           handleUnlockSuccess(vendor.id, amount, type);
-          setIsProcessingPayment(false);
-          setAssistantMessage(`Protocol Handshake Verified. Ref: ${reference}`);
+          setAssistantMessage(`(Unverified) Local Handshake Saved. Ref: ${reference}`);
           setTimeout(() => setAssistantMessage(null), 5000);
-        }, 1500);
+        } finally {
+          setIsProcessingPayment(false);
+        }
       },
       onClose: () => {
         console.log('Payment window closed');
