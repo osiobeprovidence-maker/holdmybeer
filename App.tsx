@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Category, User, ServiceRequest, Location } from './types';
 import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
-import UnlockModal from './components/UnlockModal';
+import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
 import MyConnections from './pages/MyConnections';
 import VendorDashboard from './pages/VendorDashboard';
@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
-
+  
   // Protocol Access ID (PAID) for Guests
   const [protocolId] = useState<string>(() => {
     const saved = localStorage.getItem('hmb_protocol_id');
@@ -32,19 +32,20 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('hmb_unlocks');
     return saved ? JSON.parse(saved) : [];
   });
-
+  
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(() => {
     const saved = localStorage.getItem('hmb_requests');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
-  const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState<string | null>(null);
   const [filteredVendors, setFilteredVendors] = useState<User[]>(MOCK_USERS);
 
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
+  const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
   const [isUrgent, setIsUrgent] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('hmb_unlocks', JSON.stringify(unlockedUserIds));
@@ -54,6 +55,7 @@ const App: React.FC = () => {
   useEffect(() => {
     let result = users.filter(u => u.isCreator && !u.isSuspended);
     if (selectedCategory !== 'All') result = result.filter(v => v.category === selectedCategory);
+    if (selectedLocation !== 'All') result = result.filter(v => v.location === selectedLocation);
     if (isUrgent) result = result.filter(v => v.availableToday);
 
     result.sort((a, b) => {
@@ -74,10 +76,10 @@ const App: React.FC = () => {
       }
       setCurrentUser(existing);
     } else {
-      const newUser: User = {
-        ...user,
-        kycStatus: 'unverified',
-        kycVerified: false,
+      const newUser: User = { 
+        ...user, 
+        kycStatus: 'unverified', 
+        kycVerified: false, 
         reliabilityScore: 70,
         totalUnlocks: 0,
         isSuspended: false
@@ -85,22 +87,32 @@ const App: React.FC = () => {
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
     }
-    setCurrentView('home');
+    setCurrentView('home'); 
   };
 
   const handleUnlockSuccess = (vendorId: string, amount: number, type: 'standard' | 'urgent') => {
-    setUnlockedUserIds(prev => [...prev, vendorId]);
+    setUnlockedUserIds(prev => {
+      const newIds = [...prev, vendorId];
+      localStorage.setItem('hmb_unlocks', JSON.stringify(newIds));
+      return newIds;
+    });
+
     const newRequest: ServiceRequest = {
       id: Math.random().toString(36).substr(2, 9),
-      clientId: currentUser?.id || protocolId, // Identify guest by PAID
+      clientId: currentUser?.id || protocolId,
       creatorId: vendorId,
       status: 'unlocked',
       amount,
       paymentType: type,
       timestamp: Date.now()
     };
-    setServiceRequests(prev => [...prev, newRequest]);
-
+    
+    setServiceRequests(prev => {
+      const newRequests = [...prev, newRequest];
+      localStorage.setItem('hmb_requests', JSON.stringify(newRequests));
+      return newRequests;
+    });
+    
     setUsers(prev => prev.map(u => {
       if (u.id === vendorId) {
         return { ...u, totalUnlocks: (u.totalUnlocks || 0) + 1 };
@@ -108,26 +120,56 @@ const App: React.FC = () => {
       return u;
     }));
 
-    setShowUnlockModal(false);
     setCurrentView('my-connections');
+  };
+
+  const initiatePayment = (vendor: User) => {
+    if (!vendor) return;
+    
+    const amount = vendor.availableToday ? 700 : 500;
+    const type = vendor.availableToday ? 'urgent' : 'standard';
+
+    initializePaystack({
+      email: currentUser?.email || 'guest@holdmybeer.ng',
+      amount: amount,
+      metadata: {
+        vendor_id: vendor.id,
+        connection_type: type
+      },
+      onSuccess: (reference) => {
+        setIsProcessingPayment(true);
+        setTimeout(() => {
+          handleUnlockSuccess(vendor.id, amount, type);
+          setIsProcessingPayment(false);
+          setAssistantMessage(`Protocol Handshake Verified. Ref: ${reference}`);
+          setTimeout(() => setAssistantMessage(null), 5000);
+        }, 1500);
+      },
+      onClose: () => {
+        console.log('Payment window closed');
+      }
+    });
   };
 
   const handleUpdateUser = (updatedUser: User) => {
     if (currentUser && currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
     }
+    if (activeUser && activeUser.id === updatedUser.id) {
+      setActiveUser(updatedUser);
+    }
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
   };
 
   // Compute "Guest Nodes" for Admin visualization
   const guestNodes = useMemo(() => {
-    const uniqueGuestIds = new Set(serviceRequests.filter(r => r.clientId.startsWith('HMB-NODE-')).map(r => r.clientId));
-    return Array.from(uniqueGuestIds).map((id: string) => ({
+    const uniqueGuestIds = new Set<string>(serviceRequests.filter(r => r.clientId.startsWith('HMB-NODE-')).map(r => r.clientId));
+    return Array.from(uniqueGuestIds).map(id => ({
       id,
       name: `Guest Node: ${id.split('-').pop()}`,
       email: 'Anonymous Device',
       isCreator: false,
-      location: Location.LAGOS,
+      location: Location.LAGOS_ISLAND,
       kycVerified: false,
       kycStatus: 'unverified' as const,
       isSuspended: false
@@ -140,11 +182,13 @@ const App: React.FC = () => {
     switch (currentView) {
       case 'home':
         return (
-          <Home
+          <Home 
             vendors={users.filter(u => u.isCreator && !u.isSuspended)}
             filteredVendors={filteredVendors}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            selectedLocation={selectedLocation}
+            setSelectedLocation={setSelectedLocation}
             isUrgent={isUrgent}
             setIsUrgent={setIsUrgent}
             assistantMessage={assistantMessage}
@@ -152,14 +196,15 @@ const App: React.FC = () => {
             setFilteredVendors={setFilteredVendors}
             onVendorSelect={setActiveUser}
             unlockedVendorIds={unlockedUserIds}
+            isLoggedIn={!!currentUser}
           />
         );
       case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={setActiveUser} unlockedIds={unlockedUserIds} />;
       case 'pricing': return <Pricing />;
-      case 'dashboard':
+      case 'dashboard': 
         return currentUser ? (
-          <VendorDashboard
-            user={currentUser}
+          <VendorDashboard 
+            user={currentUser} 
             onUpdateUser={handleUpdateUser}
             serviceRequests={serviceRequests}
             unlockedVendors={users.filter(u => unlockedUserIds.includes(u.id))}
@@ -179,65 +224,205 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
       <Navbar currentView={currentView} onNavigate={setCurrentView} currentUser={currentUser} onLogout={() => { setCurrentUser(null); setCurrentView('home'); }} />
-      <main className="flex-grow max-w-7xl mx-auto px-6 py-12 w-full">{renderCurrentView()}</main>
+      <main className="flex-grow max-w-7xl mx-auto px-6 pt-24 pb-12 md:pt-40 w-full">{renderCurrentView()}</main>
+
+      {isProcessingPayment && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-white/90 backdrop-blur-3xl animate-in fade-in duration-500">
+          <div className="text-center">
+            <div className="w-16 h-16 border-[4px] border-[#f5f5f7] border-t-black rounded-full animate-spin mx-auto mb-8"></div>
+            <h2 className="text-2xl font-black uppercase tracking-tighter">Verifying Handshake...</h2>
+            <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em] mt-4">Securing Protocol Connection</p>
+          </div>
+        </div>
+      )}
 
       {activeUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-xl" onClick={() => setActiveUser(null)} />
-          <div className="relative bg-white rounded-[32px] md:rounded-[48px] w-full max-w-5xl h-[92vh] md:h-[80vh] overflow-hidden flex flex-col md:flex-row apple-shadow-lg animate-in zoom-in-95 duration-500 border border-black/5 mx-2">
-            <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-full bg-[#f5f5f7]">
-              <img src={activeUser.portfolio?.[0] || activeUser.avatar} className="w-full h-full object-cover" />
-            </div>
-            <div className="w-full md:w-1/2 p-6 md:p-16 lg:p-20 flex flex-col h-full overflow-y-auto">
-              <div className="flex justify-between items-start mb-6 md:mb-12">
-                <div className="flex-grow pr-4">
-                  <span className="text-[9px] md:text-[12px] font-bold text-[#86868b] uppercase tracking-[0.2em]">{activeUser.category}</span>
-                  <h2 className="text-2xl md:text-5xl font-extrabold text-black tracking-tighter mt-1 md:mt-2 leading-tight break-words">{activeUser.businessName || activeUser.name}</h2>
-                </div>
-                <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
-                <div className="bg-[#f5f5f7] p-6 md:p-8 rounded-[24px] md:rounded-[32px]">
-                  <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Reliability</p>
-                  <p className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">{activeUser.reliabilityScore}%</p>
-                </div>
-                <div className="bg-[#f5f5f7] p-6 md:p-8 rounded-[24px] md:rounded-[32px]">
-                  <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-2">Unlocks</p>
-                  <p className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">{activeUser.totalUnlocks}</p>
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 md:p-6">
+          <div className="absolute inset-0 bg-white/90 backdrop-blur-xl" onClick={() => setActiveUser(null)} />
+          <div className="relative bg-white w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[48px] overflow-hidden flex flex-col apple-shadow-2xl animate-in zoom-in-95 duration-500 border border-black/5">
+            
+            {/* Header Sticky Area */}
+            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-6 py-6 md:px-12 md:py-10 flex items-center justify-between">
+              <div className="flex items-center gap-4 md:gap-6">
+                <img src={activeUser.avatar} className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-black/5" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-black tracking-tighter text-black uppercase">{activeUser.businessName || activeUser.name}</h2>
+                    <div className={`w-2 h-2 rounded-full ${activeUser.availableToday ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  </div>
+                  <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-widest">{activeUser.category} • {activeUser.location}</p>
                 </div>
               </div>
-
-              <div className="mb-8 md:mb-12">
-                <h4 className="text-[10px] md:text-[11px] font-bold mb-4 uppercase text-[#86868b] tracking-widest">Expert Bio</h4>
-                <p className="text-black text-lg md:text-xl leading-relaxed font-medium">
-                  {activeUser.bio}
-                </p>
-              </div>
-
-              <div className="mt-auto pt-6 md:pt-10">
+              <div className="flex items-center gap-3">
                 {unlockedUserIds.includes(activeUser.id) ? (
-                  <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full btn-apple py-5 md:py-6 text-base md:text-lg">View Contact Details</button>
-                ) : (
-                  <button
-                    onClick={() => setShowUnlockModal(true)}
-                    className="w-full btn-apple py-5 md:py-6 text-base md:text-lg flex items-center justify-center gap-4 group"
+                  <button 
+                    onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }}
+                    className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
                   >
-                    <span>Unlock Contact</span>
-                    <span className="opacity-30 group-hover:opacity-100 transition-opacity">/</span>
-                    <span>₦{activeUser.availableToday ? '5,000' : '2,500'}</span>
+                    View Contact
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => initiatePayment(activeUser)}
+                    className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
+                  >
+                    Hire Expert (₦{activeUser.availableToday ? '700' : '500'})
                   </button>
                 )}
+                <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-grow overflow-y-auto scrollbar-hide">
+              <div className="max-w-5xl mx-auto px-6 pt-16 pb-20 md:px-12 md:pt-24 md:pb-32">
+                
+                {/* 1. Bio & Highlights Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 mt-4">
+                  <div className="lg:col-span-7">
+                    <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em] mb-4">Expert Bio</h4>
+                    <p className="text-xl md:text-2xl font-medium text-black leading-tight mb-8">
+                      {activeUser.bio || "No bio provided."}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-3">
+                      {activeUser.topSkills?.map(skill => (
+                        <span key={skill} className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[10px] font-black uppercase tracking-widest text-black/60">{skill}</span>
+                      )) || (
+                        <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[10px] font-black uppercase tracking-widest text-black/60">Verified Expert</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                    <div className="bg-[#f5f5f7] p-6 rounded-[32px] flex flex-col justify-center">
+                      <p className="text-[9px] font-black text-[#86868b] uppercase tracking-widest mb-1">Rating</p>
+                      <p className="text-2xl font-black text-black">★ {activeUser.ratingAvg || 'NEW'}</p>
+                    </div>
+                    <div className="bg-[#f5f5f7] p-6 rounded-[32px] flex flex-col justify-center">
+                      <p className="text-[9px] font-black text-[#86868b] uppercase tracking-widest mb-1">Completed</p>
+                      <p className="text-2xl font-black text-black">{activeUser.completedJobs || 0}+ Jobs</p>
+                    </div>
+                    <div className="bg-[#f5f5f7] p-6 rounded-[32px] flex flex-col justify-center">
+                      <p className="text-[9px] font-black text-[#86868b] uppercase tracking-widest mb-1">Avg Delivery</p>
+                      <p className="text-2xl font-black text-black">{activeUser.avgDeliveryTime || '24h'}</p>
+                    </div>
+                    <div className="bg-[#f5f5f7] p-6 rounded-[32px] flex flex-col justify-center">
+                      <p className="text-[9px] font-black text-[#86868b] uppercase tracking-widest mb-1">Reliability</p>
+                      <p className="text-2xl font-black text-black">{activeUser.reliabilityScore}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Experience & Services */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20 border-t border-black/5 pt-12">
+                  <div>
+                    <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em] mb-6">Services Offered</h4>
+                    <div className="space-y-3">
+                      {(activeUser.services || ['Professional Execution', 'Consultation', 'Delivery']).map(s => (
+                        <div key={s} className="flex items-center gap-3">
+                          <div className="w-1.5 h-1.5 bg-black rounded-full" />
+                          <span className="text-sm font-bold text-black uppercase tracking-tight">{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em] mb-6">Experience & Industries</h4>
+                    <p className="text-sm font-bold text-black uppercase tracking-tight mb-4">{activeUser.experience || '2+ Years of Industry Experience'}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(activeUser.industries || ['Events', 'Corporate', 'Private']).map(i => (
+                        <span key={i} className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">#{i}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Proof of Work Gallery (Shorts Style) */}
+                <div className="mb-20">
+                  <div className="flex justify-between items-end mb-8">
+                    <div>
+                      <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em] mb-2">Proof of Work</h4>
+                      <h3 className="text-2xl font-black tracking-tighter uppercase">Shorts Gallery</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[9px] font-black text-[#86868b] uppercase tracking-widest">{activeUser.portfolio?.length || 0} Assets</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4 md:gap-6 overflow-x-auto pb-8 snap-x scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
+                    {activeUser.portfolio?.map((item, idx) => {
+                      const isVideo = item?.toLowerCase().match(/\.(mp4|webm|ogg)$/) || item?.includes('video');
+                      return (
+                        <div key={idx} className="relative w-[240px] md:w-[280px] aspect-[3/4] shrink-0 rounded-[32px] overflow-hidden group bg-[#f5f5f7] apple-shadow border border-black/5 snap-center">
+                          {isVideo ? (
+                            <video src={item} className="w-full h-full object-cover" />
+                          ) : (
+                            <img src={item} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                            <p className="text-white text-[10px] font-black uppercase tracking-widest mb-1">Asset {idx + 1}</p>
+                            <p className="text-white/60 text-[8px] font-bold uppercase tracking-widest">Verified Proof</p>
+                          </div>
+                          {isVideo && (
+                            <div className="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-2 rounded-full">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {(!activeUser.portfolio || activeUser.portfolio.length === 0) && (
+                      <div className="w-full py-20 text-center bg-[#f5f5f7] rounded-[40px] border-2 border-dashed border-black/5">
+                        <p className="text-4xl mb-4">📸</p>
+                        <p className="text-[10px] font-black text-[#86868b] uppercase tracking-widest">No assets uploaded yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 4. Social Links & Contact */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-black/5">
+                  <div className="flex gap-6">
+                    {(unlockedUserIds.includes(activeUser.id) || currentUser?.id === activeUser.id) ? (
+                      <>
+                        {activeUser.socialLinks?.instagram && <a href={activeUser.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">Instagram</a>}
+                        {activeUser.socialLinks?.behance && <a href={activeUser.socialLinks.behance} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">Behance</a>}
+                        {activeUser.socialLinks?.youtube && <a href={activeUser.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">YouTube</a>}
+                        {activeUser.socialLinks?.tiktok && <a href={activeUser.socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">TikTok</a>}
+                        {activeUser.socialLinks?.portfolio && <a href={activeUser.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">Portfolio</a>}
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2 opacity-30 cursor-not-allowed" title="Unlock contact to see social links">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Contact Signals Locked</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 w-full md:w-auto">
+                    {unlockedUserIds.includes(activeUser.id) ? (
+                      <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
+                    ) : (
+                      <button 
+                        onClick={() => initiatePayment(activeUser)}
+                        className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4"
+                      >
+                        <span>Unlock Contact</span>
+                        <span className="opacity-20">/</span>
+                        <span>₦{activeUser.availableToday ? '700' : '500'}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {showUnlockModal && activeUser && <UnlockModal userEmail={currentUser?.email} vendor={activeUser} onClose={() => setShowUnlockModal(false)} onSuccess={handleUnlockSuccess} />}
-      <Footer onNavigate={setCurrentView} />
+      {!currentUser && <Footer onNavigate={setCurrentView} />}
     </div>
   );
 };

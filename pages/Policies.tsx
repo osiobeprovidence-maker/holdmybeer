@@ -2,11 +2,11 @@
 import React from 'react';
 
 export const PrivacyPolicy: React.FC = () => (
-  <div className="py-12 md:py-24 max-w-3xl mx-auto px-4 md:px-6 animate-in fade-in duration-700">
-    <h1 className="text-4xl md:text-6xl font-extrabold mb-8 md:mb-12 uppercase tracking-tighter text-black leading-none">Privacy Policy</h1>
-    <div className="space-y-8 md:space-y-12">
-      <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed">Your privacy is core to the holdmybeer experience. We operate with zero friction and maximum security across Nigeria.</p>
-
+  <div className="py-24 max-w-3xl mx-auto px-6 animate-in fade-in duration-700">
+    <h1 className="text-6xl font-extrabold mb-12 uppercase tracking-tighter text-black leading-none">Privacy Policy</h1>
+    <div className="prose prose-invert space-y-12">
+      <p className="text-xl text-[#86868b] font-medium leading-relaxed">Your privacy is core to the HoldMyBeer experience. We operate with zero friction and maximum security across Nigeria.</p>
+      
       <section>
         <h3 className="text-black font-extrabold text-2xl mb-4 tracking-tight uppercase">1. Expert & User Data</h3>
         <p className="text-[#86868b] leading-relaxed">We store only essential data required to bridge connections. Experts provide business details and portfolio samples, while users provide contact information necessary for authentication.</p>
@@ -19,18 +19,18 @@ export const PrivacyPolicy: React.FC = () => (
 
       <section>
         <h3 className="text-black font-extrabold text-2xl mb-4 tracking-tight uppercase">3. Direct Communication</h3>
-        <p className="text-[#86868b] leading-relaxed">holdmybeer is a connection layer. Once access is granted, communication happens directly between the parties involved. We do not track private chats or negotiations.</p>
+        <p className="text-[#86868b] leading-relaxed">HoldMyBeer is a connection layer. Once access is granted, communication happens directly between the parties involved. We do not track private chats or negotiations.</p>
       </section>
     </div>
   </div>
 );
 
 export const RefundPolicy: React.FC = () => (
-  <div className="py-12 md:py-24 max-w-3xl mx-auto px-4 md:px-6 animate-in fade-in duration-700">
-    <h1 className="text-4xl md:text-6xl font-extrabold mb-8 md:mb-12 uppercase tracking-tighter text-black leading-none">Refund Policy</h1>
-    <div className="space-y-8 md:space-y-12">
-      <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed">holdmybeer provides instant access to expert connections. Because our service delivers digital access immediately, we follow a strict refund criteria.</p>
-
+  <div className="py-24 max-w-3xl mx-auto px-6 animate-in fade-in duration-700">
+    <h1 className="text-6xl font-extrabold mb-12 uppercase tracking-tighter text-black leading-none">Refund Policy</h1>
+    <div className="prose prose-invert space-y-12">
+      <p className="text-xl text-[#86868b] font-medium leading-relaxed">HoldMyBeer provides instant access to expert connections. Because our service delivers digital access immediately, we follow a strict refund criteria.</p>
+      
       <h3 className="text-black font-extrabold text-2xl tracking-tight uppercase">Valid Refund Scenarios</h3>
       <ul className="list-none space-y-6 text-[#86868b] font-medium">
         <li className="flex gap-4">

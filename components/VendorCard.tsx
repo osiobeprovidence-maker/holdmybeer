@@ -39,15 +39,26 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onSelect, isUnlocked })
             <span className="text-black font-bold text-[11px]">★ {rating}</span>
           </div>
         </div>
-        <p className="text-[#86868b] text-sm font-medium leading-relaxed mb-10 line-clamp-2 opacity-80 group-hover:opacity-100 transition-opacity">
+        <p className="text-[#86868b] text-sm font-medium leading-relaxed mb-4 line-clamp-2 opacity-80 group-hover:opacity-100 transition-opacity">
           {vendor.bio}
         </p>
+        <div className="mb-6">
+          <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest block mb-1">Price Range</span>
+          <span className="text-black font-bold text-sm">
+            ₦{priceRange[0].toLocaleString()} - ₦{priceRange[1].toLocaleString()}
+          </span>
+        </div>
         
         <div className="mt-auto flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Starting From</span>
-            <span className="text-black font-bold text-[14px]">₦{priceRange[0].toLocaleString()}</span>
-          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(vendor); // We'll use onSelect but maybe with a flag or just let the parent handle it
+            }}
+            className="text-[10px] font-black uppercase tracking-widest border-b-2 border-black pb-0.5 hover:opacity-50 transition-all"
+          >
+            View Short
+          </button>
           <div className="flex flex-col text-right">
             <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Location</span>
             <span className="text-black font-bold text-[14px]">{vendor.location}</span>

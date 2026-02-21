@@ -11,15 +11,23 @@ export enum Category {
 }
 
 export enum Location {
-  LAGOS = 'Lagos',
-  ABUJA = 'Abuja',
-  PORT_HARCOURT = 'Port Harcourt',
-  IBADAN = 'Ibadan',
- Kano = 'Kano',
-  BENIN_CITY = 'Benin City',
-  ENUGU = 'Enugu',
-  WARRI = 'Warri',
-  CALABAR = 'Calabar'
+  LAGOS_ISLAND = 'Lagos Island',
+  VICTORIA_ISLAND = 'Victoria Island',
+  IKOYI = 'Ikoyi',
+  LEKKI = 'Lekki',
+  AJAH = 'Ajah',
+  IKEJA = 'Ikeja',
+  MARYLAND = 'Maryland',
+  SURULERE = 'Surulere',
+  YABA = 'Yaba',
+  FESTAC = 'Festac',
+  AMUWO_ODOFIN = 'Amuwo Odofin',
+  IKORODU = 'Ikorodu',
+  AGEGE = 'Agege',
+  OJOTA = 'Ojota',
+  KETU = 'Ketu',
+  AJEGUNLE = 'Ajegunle',
+  APAPA = 'Apapa'
 }
 
 export type IDType = 'NIN' | 'Driver License' | 'PVC' | 'International Passport' | 'BVN';
@@ -60,6 +68,22 @@ export interface User {
   infrastructuralRank?: number;
   ratingAvg?: number;
   isSuspended?: boolean;
+  trialStartDate?: number;
+  isPaid?: boolean;
+  // New Work Page fields
+  completedJobs?: number;
+  avgDeliveryTime?: string;
+  topSkills?: string[];
+  services?: string[];
+  experience?: string;
+  industries?: string[];
+  socialLinks?: {
+    instagram?: string;
+    behance?: string;
+    youtube?: string;
+    tiktok?: string;
+    portfolio?: string;
+  };
 }
 
 export type Vendor = User;

@@ -7,7 +7,7 @@ export const MOCK_USERS: User[] = [
     name: 'Tunde Spinny',
     email: 'djspinny@example.com',
     isCreator: true,
-    location: Location.LAGOS,
+    location: Location.VICTORIA_ISLAND,
     kycVerified: true,
     kycStatus: 'verified',
     businessName: 'Spinny Entertainment',
@@ -15,7 +15,6 @@ export const MOCK_USERS: User[] = [
     priceRange: [150000, 500000],
     bio: 'High-energy DJ for weddings and corporate events. I specialize in keeping the dance floor packed all night.',
     portfolio: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1200&auto=format'],
-    // Fix: Removed non-existent property availableNow
     availableToday: true,
     isVerified: true,
     phone: '+234 801 234 5678',
@@ -23,14 +22,26 @@ export const MOCK_USERS: User[] = [
     reliabilityScore: 98,
     totalUnlocks: 142,
     infrastructuralRank: 95,
-    ratingAvg: 4.8
+    ratingAvg: 4.8,
+    isPaid: true,
+    trialStartDate: Date.now() - (10 * 24 * 60 * 60 * 1000), // 10 days ago
+    completedJobs: 156,
+    avgDeliveryTime: '24h',
+    topSkills: ['Mixing', 'Lighting', 'Crowd Control'],
+    services: ['Wedding DJ', 'Corporate Events', 'Sound Rental'],
+    experience: '8 years, 500+ events',
+    industries: ['Entertainment', 'Corporate', 'Weddings'],
+    socialLinks: {
+      instagram: '@djspinny',
+      portfolio: 'https://djspinny.com'
+    }
   },
   {
     id: '2',
     name: 'Amaka Chef',
     email: 'amaka@example.com',
     isCreator: true,
-    location: Location.ABUJA,
+    location: Location.IKEJA,
     kycVerified: true,
     kycStatus: 'verified',
     businessName: "Amaka's Culinary",
@@ -38,7 +49,6 @@ export const MOCK_USERS: User[] = [
     priceRange: [3000, 8000],
     bio: 'Professional catering for last-minute office lunches or private dinners. Quality guaranteed.',
     portfolio: ['https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1200&auto=format'],
-    // Fix: Removed non-existent property availableNow
     availableToday: false,
     isVerified: true,
     phone: '+234 703 111 2222',
@@ -46,14 +56,25 @@ export const MOCK_USERS: User[] = [
     reliabilityScore: 95,
     totalUnlocks: 89,
     infrastructuralRank: 92,
-    ratingAvg: 4.7
+    ratingAvg: 4.7,
+    isPaid: true,
+    trialStartDate: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
+    completedJobs: 89,
+    avgDeliveryTime: '4h',
+    topSkills: ['Jollof Rice', 'Pastries', 'Plating'],
+    services: ['Office Lunch', 'Private Dinner', 'Event Catering'],
+    experience: '5 years, 200+ clients',
+    industries: ['Food', 'Corporate', 'Private'],
+    socialLinks: {
+      instagram: '@amakachef'
+    }
   },
   {
     id: '3',
     name: 'Obi Lense',
     email: 'obi@example.com',
     isCreator: true,
-    location: Location.PORT_HARCOURT,
+    location: Location.LEKKI,
     kycVerified: false,
     kycStatus: 'unverified',
     businessName: 'Obi Lense Studio',
@@ -61,7 +82,6 @@ export const MOCK_USERS: User[] = [
     priceRange: [80000, 300000],
     bio: 'Capturing events as they happen. Quick turnaround time for photos.',
     portfolio: ['https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1200&auto=format'],
-    // Fix: Removed non-existent property availableNow
     availableToday: true,
     isVerified: false,
     phone: '+234 902 444 5555',
@@ -69,6 +89,56 @@ export const MOCK_USERS: User[] = [
     reliabilityScore: 82,
     totalUnlocks: 45,
     infrastructuralRank: 78,
-    ratingAvg: 4.2
+    ratingAvg: 4.2,
+    isPaid: false,
+    trialStartDate: Date.now() - (2 * 24 * 60 * 60 * 1000) // 2 days ago
+  },
+  {
+    id: '4',
+    name: 'Segun MC',
+    email: 'segun@example.com',
+    isCreator: true,
+    location: Location.SURULERE,
+    kycVerified: true,
+    kycStatus: 'verified',
+    businessName: 'Segun the Hype',
+    category: Category.MC,
+    priceRange: [50000, 150000],
+    bio: 'The most energetic MC in Surulere. I bring the life to every party.',
+    portfolio: ['https://images.unsplash.com/photo-1472653431158-6364773b2a56?q=80&w=1200&auto=format'],
+    availableToday: true,
+    isVerified: true,
+    phone: '+234 805 555 6666',
+    avatar: 'https://i.pravatar.cc/150?u=4',
+    reliabilityScore: 90,
+    totalUnlocks: 67,
+    infrastructuralRank: 88,
+    ratingAvg: 4.5,
+    isPaid: true,
+    trialStartDate: Date.now() - (15 * 24 * 60 * 60 * 1000) // 15 days ago
+  },
+  {
+    id: '5',
+    name: 'Yemi Decor',
+    email: 'yemi@example.com',
+    isCreator: true,
+    location: Location.YABA,
+    kycVerified: true,
+    kycStatus: 'verified',
+    businessName: 'Yemi Events & Decor',
+    category: Category.DECORATOR,
+    priceRange: [200000, 1000000],
+    bio: 'Transforming spaces into dreams. We handle everything from small birthdays to large weddings.',
+    portfolio: ['https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200&auto=format'],
+    availableToday: false,
+    isVerified: true,
+    phone: '+234 809 777 8888',
+    avatar: 'https://i.pravatar.cc/150?u=5',
+    reliabilityScore: 96,
+    totalUnlocks: 112,
+    infrastructuralRank: 94,
+    ratingAvg: 4.9,
+    isPaid: true,
+    trialStartDate: Date.now() - (1 * 24 * 60 * 60 * 1000) // 1 day ago
   }
 ];
