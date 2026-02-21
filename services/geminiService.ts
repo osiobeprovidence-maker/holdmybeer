@@ -2,8 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Vendor } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
   const vendorContext = vendors.map(v => ({
     id: v.id,
@@ -20,9 +18,17 @@ export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
     rating: v.ratingAvg
   }));
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `
+  try {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      throw new Error("Missing Gemini API Key in environment variables.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `
       User Search Intent: "${query}"
       
       Database of Experts:
@@ -44,29 +50,29 @@ export const getSmartMatches = async (query: string, vendors: Vendor[]) => {
       
       Output Schema: JSON with "message" (the guiding text) and "recommendedIds" (array of strings).
     `,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          message: { type: Type.STRING, description: 'Warm, guiding message explaining the matches.' },
-          recommendedIds: { 
-            type: Type.ARRAY, 
-            items: { type: Type.STRING },
-            description: 'The IDs of the experts that fit the query best.'
-          }
-        },
-        required: ["message", "recommendedIds"]
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            message: { type: Type.STRING, description: 'Warm, guiding message explaining the matches.' },
+            recommendedIds: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: 'The IDs of the experts that fit the query best.'
+            }
+          },
+          required: ["message", "recommendedIds"]
+        }
       }
-    }
-  });
+    });
 
-  try {
     return JSON.parse(response.text || '{}');
   } catch (e) {
-    return { 
-      message: "I've picked out some sharp experts who can handle your request easily. Take a look at these connections!", 
-      recommendedIds: vendors.slice(0, 3).map(v => v.id) 
+    console.error("Gemini Match error:", e);
+    return {
+      message: "I've picked out some sharp experts who can handle your request easily. Take a look at these connections!",
+      recommendedIds: vendors.slice(0, 3).map(v => v.id)
     };
   }
 };
