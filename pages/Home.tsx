@@ -42,7 +42,7 @@ const Home: React.FC<HomeProps> = ({
       {!isLoggedIn ? (
         <>
           <section className="text-center pt-20 mb-40">
-            <h1 className="text-4xl md:text-7xl lg:text-8xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
+            <h1 className="text-5xl md:text-8xl lg:text-9xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
               Find. Connect. <span className="text-[#86868b]">Book.</span>
             </h1>
             <p className="text-black text-xl md:text-2xl max-w-2xl mx-auto mb-16 font-medium leading-relaxed">
