@@ -96,58 +96,12 @@ const App: React.FC = () => {
           paymentType: r.payment_type,
           timestamp: r.timestamp
         })));
-      }
 
-      // Check current session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) {
-          setCurrentUser({
-            id: profile.id,
-            name: profile.name,
-            email: profile.email,
-            isCreator: profile.is_creator,
-            location: profile.location,
-            kycVerified: profile.kyc_verified,
-            kycStatus: profile.kyc_status,
-            avatar: profile.avatar,
-            totalUnlocks: profile.total_unlocks,
-            isSuspended: profile.is_suspended,
-            reliabilityScore: profile.reliability_score || 70,
-            coins: profile.coins || 0
-          } as User);
-        }
+        // Compute unlocks for guest nodes or current id just from requests
+        // Wait, for simplistic upgrade we keep localStorage unlocks
       }
     };
     initData();
-
-    // Listen for auth changes (OAuth redirects etc)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) {
-          setCurrentUser({
-            id: profile.id,
-            name: profile.name,
-            email: profile.email,
-            isCreator: profile.is_creator,
-            location: profile.location,
-            kycVerified: profile.kyc_verified,
-            kycStatus: profile.kyc_status,
-            avatar: profile.avatar,
-            totalUnlocks: profile.total_unlocks,
-            isSuspended: profile.is_suspended,
-            reliabilityScore: profile.reliability_score || 70,
-            coins: profile.coins || 0
-          } as User);
-        }
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
