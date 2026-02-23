@@ -246,7 +246,9 @@ export interface User {
   isSuspended?: boolean;
   trialStartDate?: number;
   isPaid?: boolean;
+  isPreLaunch?: boolean;
   coins: number;
+  preferredLocation?: Location;
   // New Work Page fields
   completedJobs?: number;
   avgDeliveryTime?: string;

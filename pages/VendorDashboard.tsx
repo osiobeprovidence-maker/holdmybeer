@@ -182,26 +182,28 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     setKycStep('success');
   };
 
+  const yearlyPrice = user.isPreLaunch ? 7000 : 10000;
+  const trialPeriodDays = user.isPreLaunch ? 30 : 7;
+  const trialDaysLeft = Math.max(0, Math.ceil(((user.trialStartDate || Date.now()) + (trialPeriodDays * 24 * 60 * 60 * 1000) - Date.now()) / (24 * 60 * 60 * 1000)));
+  const needsPayment = !user.isPaid && trialDaysLeft <= 0;
+
   const handlePayment = () => {
     initializePaystack({
       email: user.email,
-      amount: 7000,
+      amount: yearlyPrice,
       metadata: {
         user_id: user.id,
-        payment_type: 'vendor_activation'
+        payment_type: 'yearly_subscription'
       },
       onSuccess: (reference) => {
         onUpdateUser({ ...user, isPaid: true });
-        alert(`Payment successful! Ref: ${reference}. Your profile is now permanently active.`);
+        alert(`Payment successful! Ref: ${reference}. Your profile is now active for 1 year.`);
       },
       onClose: () => {
         console.log('Payment window closed');
       }
     });
   };
-
-  const trialDaysLeft = Math.max(0, Math.ceil(((user.trialStartDate || Date.now()) + (7 * 24 * 60 * 60 * 1000) - Date.now()) / (24 * 60 * 60 * 1000)));
-  const needsPayment = !user.isPaid && trialDaysLeft <= 0;
 
   return (
     <div className="pb-12 animate-in fade-in duration-700 max-w-5xl mx-auto px-6">
@@ -210,19 +212,19 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
         <div className={`mb-12 p-8 rounded-[40px] flex flex-col md:flex-row items-center justify-between gap-6 ${needsPayment ? 'bg-red-500 text-white' : 'bg-black text-white'}`}>
           <div>
             <h3 className="text-xl font-black uppercase tracking-tight mb-2">
-              {needsPayment ? 'Trial Expired' : 'Expert Protocol Trial'}
+              {user.isPreLaunch ? 'Pre-Launch Specialist Protocol' : (needsPayment ? 'Trial Expired' : 'Expert Protocol Trial')}
             </h3>
             <p className="text-sm font-bold opacity-70 uppercase tracking-widest">
               {needsPayment
-                ? 'Your 7-day trial has ended. Pay ₦7,000 to keep your profile active.'
-                : `You have ${trialDaysLeft} days left in your trial. One-time fee of ₦7,000 for permanent access.`}
+                ? `Your ${trialPeriodDays}-day trial has ended. Activate yearly subscription for ₦${yearlyPrice.toLocaleString()}.`
+                : `You have ${trialDaysLeft} days left in your trial. Early access rate: ₦${yearlyPrice.toLocaleString()} / year.`}
             </p>
           </div>
           <button
             onClick={handlePayment}
             className="bg-white text-black px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl"
           >
-            Pay ₦7,000 Now
+            Pay ₦{yearlyPrice.toLocaleString()} Now
           </button>
         </div>
       )}

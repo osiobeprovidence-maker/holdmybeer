@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Category, Vendor, Location, CATEGORY_GROUPS } from '../types';
+import { Category, Vendor, Location, CATEGORY_GROUPS, User } from '../types';
 import SearchAssistant from '../components/SearchAssistant';
 import VendorCard from '../components/VendorCard';
 
@@ -19,6 +19,8 @@ interface HomeProps {
   onVendorSelect: (vendor: Vendor) => void;
   unlockedVendorIds: string[];
   isLoggedIn: boolean;
+  currentUser?: User | null;
+  onUpdateUser?: (u: User) => void;
 }
 
 const Home: React.FC<HomeProps> = ({
@@ -35,7 +37,9 @@ const Home: React.FC<HomeProps> = ({
   setFilteredVendors,
   onVendorSelect,
   unlockedVendorIds,
-  isLoggedIn
+  isLoggedIn,
+  currentUser,
+  onUpdateUser
 }) => {
   return (
     <div className="animate-in fade-in duration-1000">
@@ -110,7 +114,7 @@ const Home: React.FC<HomeProps> = ({
           </div>
 
           <div className="bg-[#f5f5f7]/40 backdrop-blur-md rounded-[48px] p-10 md:p-16 border border-black/[0.02] mb-24">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
               <div className="space-y-6">
                 <label className="text-[11px] font-black text-[#86868b] uppercase tracking-[0.4em] ml-6">Service Category</label>
                 <div className="relative group">
@@ -150,6 +154,31 @@ const Home: React.FC<HomeProps> = ({
                     ))}
                   </select>
                   <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none text-black/20 group-hover:text-black transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <label className="text-[11px] font-black text-[#86868b] uppercase tracking-[0.4em] ml-6">Rec. Zone</label>
+                <div className="relative group">
+                  <select
+                    value={currentUser?.preferredLocation || 'All'}
+                    onChange={(e) => {
+                      if (currentUser && onUpdateUser) {
+                        onUpdateUser({ ...currentUser, preferredLocation: e.target.value as Location });
+                      }
+                    }}
+                    className="w-full bg-black text-white font-bold text-[16px] px-10 py-6 rounded-[32px] outline-none appearance-none cursor-pointer shadow-2xl hover:scale-[1.02] transition-all border border-white/10 focus:ring-8 focus:ring-black/[0.05]"
+                  >
+                    <option value="All">Set Your Zone</option>
+                    {Object.values(Location).map(loc => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none text-white/40 group-hover:text-white transition-colors">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                     </svg>

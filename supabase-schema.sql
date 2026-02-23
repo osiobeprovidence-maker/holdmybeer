@@ -56,7 +56,10 @@ create table if not exists public.profiles (
 
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  coins integer not null default 0
+  coins integer not null default 0,
+  is_paid boolean not null default false,
+  is_pre_launch boolean not null default false,
+  preferred_location text
 );
 
 alter table public.profiles enable row level security;

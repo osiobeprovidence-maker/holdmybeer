@@ -55,28 +55,54 @@ const Pricing: React.FC = () => {
         </div>
       </div>
 
-      <div className="apple-card p-8 md:p-16 apple-shadow bg-black text-white flex flex-col md:scale-[1.03]">
-        <div className="bg-white/10 text-white text-[10px] md:text-[11px] font-bold uppercase px-4 py-1.5 self-start mb-10 rounded-full tracking-[0.3em]">For Experts</div>
-        <h3 className="text-2xl md:text-3xl font-extrabold mb-8 tracking-tight uppercase">Priority Hub</h3>
-        <p className="text-white/60 mb-12 text-base md:text-lg font-bold uppercase tracking-widest leading-relaxed">Secure your positioning in the expert retrieval list.</p>
-        <div className="mt-auto">
-          <p className="text-5xl md:text-7xl font-extrabold text-white mb-2 tracking-tighter">₦7,000</p>
-          <p className="text-[12px] md:text-[13px] text-white/40 font-bold uppercase tracking-[0.3em] mb-12">One-time Activation Fee (After 7-day Trial)</p>
-          <ul className="space-y-6 text-[14px] text-white/80 font-black uppercase tracking-widest">
-            <li className="flex items-center gap-4">
-              <div className="w-5 h-5 bg-white text-black flex items-center justify-center rounded-full text-[10px]">✓</div>
-              7-Day Free Trial
-            </li>
-            <li className="flex items-center gap-4">
-              <div className="w-5 h-5 bg-white text-black flex items-center justify-center rounded-full text-[10px]">✓</div>
-              Verified Badge
-            </li>
-            <li className="flex items-center gap-4">
-              <div className="w-5 h-5 bg-white text-black flex items-center justify-center rounded-full text-[10px]">✓</div>
-              Top Tier Search
-            </li>
-          </ul>
-          <button className="w-full bg-white text-black font-black py-6 rounded-full mt-12 transition-all hover:scale-105 shadow-xl text-lg uppercase tracking-[0.3em]">Join List</button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="apple-card p-10 md:p-16 apple-shadow bg-black text-white flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 scale-150">🏷️</div>
+          <div className="bg-white/10 text-white text-[10px] md:text-[11px] font-black uppercase px-4 py-1.5 self-start mb-10 rounded-full tracking-[0.3em]">Phase 1: Early Bird</div>
+          <h3 className="text-2xl md:text-3xl font-extrabold mb-8 tracking-tight uppercase">Pre-Launch Pro</h3>
+          <p className="text-white/60 mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">Reserve your spot among the founding 200 specialists.</p>
+          <div className="mt-auto">
+            <p className="text-5xl md:text-6xl font-extrabold text-white mb-2 tracking-tighter">₦7,000</p>
+            <p className="text-[11px] text-white/40 font-bold uppercase tracking-[0.2em] mb-12">Yearly Sub (30-Day Free Trial)</p>
+            <ul className="space-y-6 text-[11px] text-white/80 font-black uppercase tracking-widest">
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-white text-black flex items-center justify-center rounded-full text-[8px]">✓</div>
+                First 200 Users Only
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-white text-black flex items-center justify-center rounded-full text-[8px]">✓</div>
+                Extended 30-Day Access
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-white text-black flex items-center justify-center rounded-full text-[8px]">✓</div>
+                Verified Founding Status
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="apple-card p-10 md:p-16 apple-shadow bg-[#f5f5f7] flex flex-col">
+          <div className="bg-black/5 text-black/40 text-[10px] md:text-[11px] font-black uppercase px-4 py-1.5 self-start mb-10 rounded-full tracking-[0.3em]">Phase 2: Main Stage</div>
+          <h3 className="text-2xl md:text-3xl font-extrabold mb-8 tracking-tight uppercase text-black">Standard Pro</h3>
+          <p className="text-black/40 mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">Full access for established event professionals.</p>
+          <div className="mt-auto">
+            <p className="text-5xl md:text-6xl font-extrabold text-black mb-2 tracking-tighter">₦10,000</p>
+            <p className="text-[11px] text-black/20 font-bold uppercase tracking-[0.2em] mb-12">Yearly Sub (7-Day Trial)</p>
+            <ul className="space-y-6 text-[11px] text-black/60 font-black uppercase tracking-widest">
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-black text-white flex items-center justify-center rounded-full text-[8px]">✓</div>
+                Priority Search Result
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-black text-white flex items-center justify-center rounded-full text-[8px]">✓</div>
+                Full Analytics Dashboard
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="w-4 h-4 bg-black text-white flex items-center justify-center rounded-full text-[8px]">✓</div>
+                Verified Badge Support
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

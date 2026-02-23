@@ -80,7 +80,10 @@ const App: React.FC = () => {
           avgDeliveryTime: p.avg_delivery_time,
           topSkills: p.top_skills,
           socialLinks: p.social_links,
-          coins: p.coins || 0
+          coins: p.coins || 0,
+          isPaid: p.is_paid,
+          isPreLaunch: p.is_pre_launch,
+          preferredLocation: p.preferred_location as Location
         }));
         setUsers(mappedUsers as unknown as User[]);
       }
@@ -111,8 +114,15 @@ const App: React.FC = () => {
     if (isUrgent) result = result.filter(v => v.availableToday);
 
     result.sort((a, b) => {
-      const rankA = (a.reliabilityScore || 0) + (a.isVerified ? 20 : 0);
-      const rankB = (b.reliabilityScore || 0) + (b.isVerified ? 20 : 0);
+      let rankA = (a.reliabilityScore || 0) + (a.isVerified ? 20 : 0);
+      let rankB = (b.reliabilityScore || 0) + (b.isVerified ? 20 : 0);
+
+      // Location boost
+      if (currentUser?.preferredLocation) {
+        if (a.location === currentUser.preferredLocation) rankA += 50;
+        if (b.location === currentUser.preferredLocation) rankB += 50;
+      }
+
       return rankB - rankA;
     });
 
@@ -128,6 +138,9 @@ const App: React.FC = () => {
       }
       setCurrentUser(existing);
     } else {
+      const vendorCount = users.filter(u => u.isCreator).length;
+      const isPreLaunch = vendorCount < 200;
+
       const newUser: User = {
         ...user,
         kycStatus: 'unverified',
@@ -135,12 +148,13 @@ const App: React.FC = () => {
         reliabilityScore: 70,
         totalUnlocks: 0,
         isSuspended: false,
-        coins: 0
+        coins: 0,
+        isPreLaunch,
+        isPaid: false,
+        trialStartDate: Date.now()
       };
 
       if (supabase) {
-        // We do a simple insert to profiles for the mocked auth.
-        // It bypasses auth.users since it's just a demo UI.
         supabase.from('profiles').insert({
           id: newUser.id,
           name: newUser.name,
@@ -153,7 +167,10 @@ const App: React.FC = () => {
           reliability_score: newUser.reliabilityScore,
           total_unlocks: newUser.totalUnlocks,
           is_suspended: newUser.isSuspended,
-          coins: 0
+          coins: 0,
+          is_pre_launch: newUser.isPreLaunch,
+          is_paid: false,
+          trial_start_date: newUser.trialStartDate
         }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
       }
 
@@ -283,6 +300,7 @@ const App: React.FC = () => {
         category: updatedUser.category,
         bio: updatedUser.bio,
         location: updatedUser.location,
+        preferred_location: updatedUser.preferredLocation,
         available_today: updatedUser.availableToday,
         price_range: updatedUser.priceRange,
         top_skills: updatedUser.topSkills,
@@ -336,6 +354,8 @@ const App: React.FC = () => {
             onVendorSelect={setActiveUser}
             unlockedVendorIds={unlockedUserIds}
             isLoggedIn={!!currentUser}
+            currentUser={currentUser}
+            onUpdateUser={handleUpdateUser}
           />
         );
       case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={setActiveUser} unlockedIds={unlockedUserIds} />;
