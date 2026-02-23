@@ -42,7 +42,7 @@ const Home: React.FC<HomeProps> = ({
       {!isLoggedIn ? (
         <>
           <section className="text-center pt-20 mb-40">
-            <h1 className="text-5xl md:text-8xl lg:text-9xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
               Find. Connect. <span className="text-[#86868b]">Book.</span>
             </h1>
             <p className="text-black text-xl md:text-2xl max-w-2xl mx-auto mb-16 font-medium leading-relaxed">
@@ -92,8 +92,8 @@ const Home: React.FC<HomeProps> = ({
             <button
               onClick={() => setIsUrgent(!isUrgent)}
               className={`px-12 py-5 rounded-full font-black text-[11px] md:text-[12px] uppercase tracking-[0.4em] transition-all border-2 ${isUrgent
-                  ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
-                  : 'bg-white text-black border-black/[0.05] hover:border-black hover:shadow-2xl'
+                ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
+                : 'bg-white text-black border-black/[0.05] hover:border-black hover:shadow-2xl'
                 }`}
             >
               {isUrgent ? 'Panic Mode Active' : 'Available Now'}
