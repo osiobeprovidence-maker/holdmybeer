@@ -18,7 +18,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'Wolf-Rider') {
+    if (password === 'RiderEzzy') {
       setIsAuthenticated(true);
       setError('');
     } else {
@@ -58,8 +58,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
   const verifiedExperts = users.filter(u => u.isCreator && u.kycVerified).length;
 
   const filteredNodes = useMemo(() => {
-    return users.filter(u => 
-      u.name.toLowerCase().includes(nodeSearch.toLowerCase()) || 
+    return users.filter(u =>
+      u.name.toLowerCase().includes(nodeSearch.toLowerCase()) ||
       (u.businessName && u.businessName.toLowerCase().includes(nodeSearch.toLowerCase())) ||
       u.email.toLowerCase().includes(nodeSearch.toLowerCase()) ||
       u.id.toLowerCase().includes(nodeSearch.toLowerCase())
@@ -75,10 +75,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           </div>
           <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">Admin Protocol</h1>
           <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em] mb-12">Authorized Infrastructure Access Only</p>
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
-            <input 
-              type="password" 
+            <input
+              type="password"
               value={password}
               autoFocus
               onChange={(e) => setPassword(e.target.value)}
@@ -99,8 +99,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-16 border-b border-black/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-             <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
-             <p className="text-[11px] font-bold text-[#86868b] uppercase tracking-[0.4em]">Protocol Active // Secure Layer</p>
+            <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+            <p className="text-[11px] font-bold text-[#86868b] uppercase tracking-[0.4em]">Protocol Active // Secure Layer</p>
           </div>
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-black uppercase leading-none">Control</h1>
           <p className="text-[#86868b] font-bold uppercase text-[11px] tracking-widest opacity-50">Global Oversight & Expert Node Management</p>
@@ -135,7 +135,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
             <h3 className="text-3xl font-black uppercase tracking-tighter">Network Nodes</h3>
             <div className="relative w-full md:w-64">
-              <input 
+              <input
                 type="text"
                 placeholder="Search Node/ID..."
                 value={nodeSearch}
@@ -144,7 +144,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
               />
             </div>
           </div>
-          
+
           <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2 scrollbar-hide">
             {filteredNodes.length > 0 ? filteredNodes.map(u => {
               const isGuest = u.id.startsWith('HMB-NODE-');
@@ -159,9 +159,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                     </div>
                     <div className="max-w-[150px] md:max-w-[200px]">
                       <div className="flex items-center gap-2 flex-wrap">
-                         <p className="text-sm md:text-base font-black text-black uppercase tracking-tight truncate">{u.name}</p>
-                         {u.isSuspended && <span className="bg-red-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Suspended</span>}
-                         {isGuest && <span className="bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Guest Node</span>}
+                        <p className="text-sm md:text-base font-black text-black uppercase tracking-tight truncate">{u.name}</p>
+                        {u.isSuspended && <span className="bg-red-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Suspended</span>}
+                        {isGuest && <span className="bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Guest Node</span>}
                       </div>
                       <p className="text-[10px] text-[#86868b] font-bold uppercase truncate">{u.isCreator ? (u.businessName || u.category) : (isGuest ? 'Hardware Identification' : 'Platform Member')}</p>
                       <p className="text-[8px] text-[#86868b] font-bold uppercase opacity-50 mt-1 font-mono">{u.email}</p>
@@ -172,7 +172,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                     <div className="flex flex-col gap-2 items-end">
                       <div className="flex gap-2">
                         {u.isCreator && !u.kycVerified && !u.isSuspended && (
-                          <button 
+                          <button
                             onClick={() => handleManualVerify(u)}
                             disabled={!!actionLoading}
                             className="bg-black text-white px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
@@ -180,9 +180,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                             Verify
                           </button>
                         )}
-                        
+
                         {!isGuest && (
-                          <button 
+                          <button
                             onClick={() => handleToggleSuspension(u)}
                             disabled={!!actionLoading}
                             className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${u.isSuspended ? 'bg-black text-white' : 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white'}`}
@@ -191,7 +191,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                           </button>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <span className={`text-[8px] font-black uppercase px-3 py-1 rounded-full ${u.kycVerified ? 'bg-black text-white' : 'bg-gray-100 text-[#86868b]'}`}>
                           {isGuest ? 'Anonymized' : `KYC: ${u.kycStatus}`}
@@ -219,7 +219,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           </div>
 
           <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2 scrollbar-hide">
-            {serviceRequests.length > 0 ? serviceRequests.sort((a,b) => b.timestamp - a.timestamp).map(req => {
+            {serviceRequests.length > 0 ? serviceRequests.sort((a, b) => b.timestamp - a.timestamp).map(req => {
               const creator = users.find(u => u.id === req.creatorId);
               return (
                 <div key={req.id} className="bg-white border border-black/5 p-6 md:p-8 rounded-[32px] group hover:bg-[#f5f5f7] transition-all">
@@ -235,7 +235,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4 border-t border-black/[0.03] flex justify-between items-end">
                     <div>
                       <p className="text-[9px] text-[#86868b] font-bold uppercase tracking-widest mb-1">Source Node</p>
