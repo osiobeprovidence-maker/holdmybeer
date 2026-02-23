@@ -70,6 +70,7 @@ export interface User {
   isSuspended?: boolean;
   trialStartDate?: number;
   isPaid?: boolean;
+  coins: number;
   // New Work Page fields
   completedJobs?: number;
   avgDeliveryTime?: string;

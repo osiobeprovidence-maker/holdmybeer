@@ -13,12 +13,14 @@ import Discovery from './pages/Discovery';
 import Pricing from './pages/Pricing';
 import Auth from './pages/Auth';
 import AdminDashboard from './pages/AdminDashboard';
+import CoinMarket from './pages/CoinMarket';
 import { PrivacyPolicy, RefundPolicy } from './pages/Policies';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [showCoinMarket, setShowCoinMarket] = useState(false);
 
   // Protocol Access ID (PAID) for Guests
   const [protocolId] = useState<string>(() => {
@@ -77,7 +79,8 @@ const App: React.FC = () => {
           completedJobs: p.completed_jobs,
           avgDeliveryTime: p.avg_delivery_time,
           topSkills: p.top_skills,
-          socialLinks: p.social_links
+          socialLinks: p.social_links,
+          coins: p.coins || 0
         }));
         setUsers(mappedUsers as unknown as User[]);
       }
@@ -131,7 +134,8 @@ const App: React.FC = () => {
         kycVerified: false,
         reliabilityScore: 70,
         totalUnlocks: 0,
-        isSuspended: false
+        isSuspended: false,
+        coins: 0
       };
 
       if (supabase) {
@@ -148,7 +152,8 @@ const App: React.FC = () => {
           avatar: newUser.avatar,
           reliability_score: newUser.reliabilityScore,
           total_unlocks: newUser.totalUnlocks,
-          is_suspended: newUser.isSuspended
+          is_suspended: newUser.isSuspended,
+          coins: 0
         }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
       }
 
@@ -203,55 +208,64 @@ const App: React.FC = () => {
     setCurrentView('my-connections');
   };
 
-  const initiatePayment = (vendor: User) => {
-    if (!vendor) return;
+  const handlePurchaseCoins = async (coinsToAdd: number) => {
+    if (!currentUser) return;
 
-    const amount = vendor.availableToday ? 700 : 500;
-    const type = vendor.availableToday ? 'urgent' : 'standard';
+    const newBalance = (currentUser.coins || 0) + coinsToAdd;
+    const updatedUser = { ...currentUser, coins: newBalance };
 
-    initializePaystack({
-      email: currentUser?.email || 'guest@holdmybeer.ng',
-      amount: amount,
-      metadata: {
-        vendor_id: vendor.id,
-        connection_type: type
-      },
-      onSuccess: async (reference) => {
-        setIsProcessingPayment(true);
+    setCurrentUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
-        try {
-          // Send the reference to our secure Vercel backend
-          const response = await fetch('/api/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference })
-          });
+    if (supabase) {
+      await supabase
+        .from('profiles')
+        .update({ coins: newBalance })
+        .eq('id', currentUser.id);
+    }
 
-          const result = await response.json();
+    setShowCoinMarket(false);
+  };
 
-          if (result.success || result.verified) {
-            handleUnlockSuccess(vendor.id, amount, type);
-            setAssistantMessage(`Protocol Handshake Verified. Ref: ${reference}`);
-            setTimeout(() => setAssistantMessage(null), 5000);
-          } else {
-            console.warn("Payment verification failed on backend:", result);
-            alert("Error verifying payment securely via backend.");
-          }
-        } catch (error) {
-          console.error("Verification endpoint error:", error);
-          // Fallback if the backend isn't set up yet for local development:
-          console.log("Falling back to client-side unlock (secure endpoint not running)...");
-          handleUnlockSuccess(vendor.id, amount, type);
-          setAssistantMessage(`(Unverified) Local Handshake Saved. Ref: ${reference}`);
-          setTimeout(() => setAssistantMessage(null), 5000);
-        } finally {
-          setIsProcessingPayment(false);
-        }
-      },
-      onClose: () => {
-        console.log('Payment window closed');
+  const handleUnlockWithCoins = async (vendor: User) => {
+    if (!currentUser) {
+      setCurrentView('auth');
+      return;
+    }
+
+    const requiredCoins = vendor.availableToday ? 2 : 1;
+
+    if ((currentUser.coins || 0) < requiredCoins) {
+      setShowCoinMarket(true);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      const newBalance = currentUser.coins - requiredCoins;
+      const updatedUser = { ...currentUser, coins: newBalance };
+
+      if (supabase) {
+        await supabase
+          .from('profiles')
+          .update({ coins: newBalance })
+          .eq('id', currentUser.id);
       }
-    });
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+      handleUnlockSuccess(vendor.id, 0, vendor.availableToday ? 'urgent' : 'standard');
+
+      setAssistantMessage(`Protocol Handshake Verified via Coins. Balance: ${newBalance}`);
+      setTimeout(() => setAssistantMessage(null), 5000);
+    } catch (error) {
+      console.error("Coin unlock error:", error);
+      alert("Error processing protocol unlock.");
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const handleUpdateUser = (updatedUser: User) => {
@@ -348,8 +362,22 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
-      <Navbar currentView={currentView} onNavigate={setCurrentView} currentUser={currentUser} onLogout={() => { setCurrentUser(null); setCurrentView('home'); }} />
+      <Navbar
+        currentView={currentView}
+        onNavigate={setCurrentView}
+        currentUser={currentUser}
+        onLogout={() => { setCurrentUser(null); setCurrentView('home'); }}
+        onShowCoinMarket={() => setShowCoinMarket(true)}
+      />
       <main className="flex-grow max-w-7xl mx-auto px-6 pt-24 pb-12 md:pt-40 w-full">{renderCurrentView()}</main>
+
+      {showCoinMarket && (
+        <CoinMarket
+          currentUser={currentUser}
+          onPurchaseSuccess={handlePurchaseCoins}
+          onClose={() => setShowCoinMarket(false)}
+        />
+      )}
 
       {isProcessingPayment && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-white/90 backdrop-blur-3xl animate-in fade-in duration-500">
@@ -388,10 +416,10 @@ const App: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => initiatePayment(activeUser)}
+                    onClick={() => handleUnlockWithCoins(activeUser)}
                     className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
                   >
-                    Hire Expert (₦{activeUser.availableToday ? '700' : '500'})
+                    Hire Expert ({activeUser.availableToday ? '2 Coins' : '1 Coin'})
                   </button>
                 )}
                 <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
@@ -530,12 +558,12 @@ const App: React.FC = () => {
                       <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
                     ) : (
                       <button
-                        onClick={() => initiatePayment(activeUser)}
+                        onClick={() => handleUnlockWithCoins(activeUser)}
                         className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4"
                       >
                         <span>Unlock Contact</span>
                         <span className="opacity-20">/</span>
-                        <span>₦{activeUser.availableToday ? '700' : '500'}</span>
+                        <span>{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
                       </button>
                     )}
                   </div>

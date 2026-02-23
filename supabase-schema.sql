@@ -45,7 +45,8 @@ create table if not exists public.profiles (
   kyc_number text,
 
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  coins integer not null default 0
 );
 
 alter table public.profiles enable row level security;
