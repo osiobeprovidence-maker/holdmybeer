@@ -42,21 +42,23 @@ const Home: React.FC<HomeProps> = ({
       {!isLoggedIn ? (
         <>
           <section className="text-center pt-20 mb-40">
-            <h1 className="text-6xl md:text-9xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
-              Find. Connect. <br />
-              <span className="text-[#86868b]">Book.</span>
+            <h1 className="text-5xl md:text-8xl lg:text-9xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
+              Find. Connect. <span className="text-[#86868b]">Book.</span>
             </h1>
-            <p className="text-black text-xl md:text-2xl max-w-2xl mx-auto mb-20 font-medium leading-relaxed">
-              The fastest way to reach verified event experts across Nigeria. <br />
-              <span className="opacity-40">Direct messaging. Zero friction. Real results.</span>
+            <p className="text-black text-xl md:text-2xl max-w-2xl mx-auto mb-16 font-medium leading-relaxed">
+              The fastest way to reach verified event experts across Nigeria.
             </p>
-            
+
             <SearchAssistant vendors={vendors} onMatchesFound={(msg, ids) => {
               setAssistantMessage(msg);
               if (ids.length > 0) {
                 setFilteredVendors(vendors.filter(v => ids.includes(v.id)));
               }
             }} />
+
+            <div className="mt-12 opacity-40 text-black text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em]">
+              Direct messaging. Zero friction. Real results.
+            </div>
           </section>
 
           {/* The Core Logic Grid */}
@@ -87,13 +89,12 @@ const Home: React.FC<HomeProps> = ({
       ) : (
         <section className="pt-8 md:pt-16 mb-24">
           <div className="flex justify-center mb-16">
-            <button 
+            <button
               onClick={() => setIsUrgent(!isUrgent)}
-              className={`px-12 py-5 rounded-full font-black text-[11px] md:text-[12px] uppercase tracking-[0.4em] transition-all border-2 ${
-                isUrgent 
-                ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse' 
-                : 'bg-white text-black border-black/[0.05] hover:border-black hover:shadow-2xl'
-              }`}
+              className={`px-12 py-5 rounded-full font-black text-[11px] md:text-[12px] uppercase tracking-[0.4em] transition-all border-2 ${isUrgent
+                  ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
+                  : 'bg-white text-black border-black/[0.05] hover:border-black hover:shadow-2xl'
+                }`}
             >
               {isUrgent ? 'Panic Mode Active' : 'Available Now'}
             </button>
@@ -163,7 +164,7 @@ const Home: React.FC<HomeProps> = ({
             <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] mb-2 md:mb-3 uppercase tracking-[0.3em] md:tracking-[0.4em]">Expert Retrieval Agent</p>
             <p className="text-black text-xl md:text-3xl font-extrabold leading-tight tracking-tight">"{assistantMessage}"</p>
           </div>
-          <button 
+          <button
             onClick={() => { setAssistantMessage(null); setFilteredVendors(vendors); }}
             className="absolute top-6 right-6 md:relative md:top-0 md:right-0 p-3 md:p-4 bg-white rounded-full hover:bg-black hover:text-white transition-all shadow-sm"
           >
@@ -174,10 +175,10 @@ const Home: React.FC<HomeProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
         {filteredVendors.map(v => (
-          <VendorCard 
-            key={v.id} 
-            vendor={v} 
-            onSelect={onVendorSelect} 
+          <VendorCard
+            key={v.id}
+            vendor={v}
+            onSelect={onVendorSelect}
             isUnlocked={unlockedVendorIds.includes(v.id)}
           />
         ))}
