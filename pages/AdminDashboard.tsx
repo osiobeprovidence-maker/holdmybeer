@@ -52,8 +52,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
     }, 600);
   };
 
-  const totalRevenue = serviceRequests.reduce((acc, curr) => acc + curr.amount, 0);
+  const handshakeRevenue = serviceRequests.reduce((acc, curr) => acc + curr.amount, 0);
+  const subscriptionRevenue = users.filter(u => u.isCreator && u.isPaid).reduce((acc, u) => acc + (u.isPreLaunch ? 7000 : 10000), 0);
+  const totalRevenue = handshakeRevenue + subscriptionRevenue;
+
   const totalExperts = users.filter(u => u.isCreator).length;
+  const preLaunchVendors = users.filter(u => u.isCreator && u.isPreLaunch).length;
   const totalHandshakes = serviceRequests.length;
   const verifiedExperts = users.filter(u => u.isCreator && u.kycVerified).length;
 
@@ -116,17 +120,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Total Handshakes</p>
           <p className="text-3xl md:text-5xl font-black">{totalHandshakes}</p>
         </div>
-        <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
-          <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Throughput (NGN)</p>
+        <div className="bg-black text-white p-6 md:p-10 rounded-[40px] md:rounded-[48px] shadow-2xl scale-105">
+          <p className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">Total Turnover (NGN)</p>
           <p className="text-3xl md:text-5xl font-black">₦{totalRevenue.toLocaleString()}</p>
+          <div className="mt-4 pt-4 border-t border-white/10 flex justify-between">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Subs: ₦{subscriptionRevenue.toLocaleString()}</span>
+            <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Cues: ₦{handshakeRevenue.toLocaleString()}</span>
+          </div>
+        </div>
+        <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
+          <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Pre-Launch Slots</p>
+          <p className="text-3xl md:text-5xl font-black">{preLaunchVendors}<span className="text-sm opacity-20">/200</span></p>
+          <div className="w-full h-1 bg-black/5 mt-6 rounded-full overflow-hidden">
+            <div className="h-full bg-black transition-all duration-1000" style={{ width: `${(preLaunchVendors / 200) * 100}%` }} />
+          </div>
         </div>
         <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
           <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Expert Nodes</p>
           <p className="text-3xl md:text-5xl font-black">{totalExperts}</p>
-        </div>
-        <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
-          <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Verified Nodes</p>
-          <p className="text-3xl md:text-5xl font-black">{verifiedExperts}</p>
         </div>
       </div>
 
@@ -162,6 +173,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                         <p className="text-sm md:text-base font-black text-black uppercase tracking-tight truncate">{u.name}</p>
                         {u.isSuspended && <span className="bg-red-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Suspended</span>}
                         {isGuest && <span className="bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Guest Node</span>}
+                        {u.isPaid && <span className="bg-black text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Sub Paid</span>}
+                        {u.isPreLaunch && <span className="bg-orange-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Founding 200</span>}
                       </div>
                       <p className="text-[10px] text-[#86868b] font-bold uppercase truncate">{u.isCreator ? (u.businessName || u.category) : (isGuest ? 'Hardware Identification' : 'Platform Member')}</p>
                       <p className="text-[8px] text-[#86868b] font-bold uppercase opacity-50 mt-1 font-mono">{u.email}</p>
@@ -196,6 +209,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                         <span className={`text-[8px] font-black uppercase px-3 py-1 rounded-full ${u.kycVerified ? 'bg-black text-white' : 'bg-gray-100 text-[#86868b]'}`}>
                           {isGuest ? 'Anonymized' : `KYC: ${u.kycStatus}`}
                         </span>
+                        {!u.isPaid && !isGuest && u.isCreator && (
+                          <span className="text-[8px] font-black uppercase px-3 py-1 rounded-full bg-red-50 text-red-500">
+                            Trial Mode
+                          </span>
+                        )}
                         <span className="text-[8px] font-black uppercase px-3 py-1 rounded-full bg-blue-50 text-blue-500 font-mono">
                           ID: {u.id.substr(0, 8)}...
                         </span>
