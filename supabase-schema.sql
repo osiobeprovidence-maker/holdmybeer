@@ -13,7 +13,17 @@ end $$;
 
 do $$ begin
   create type public.vendor_category as enum (
-    'dj','photographer','caterer','mc','decorator','makeup_artist'
+    'MC (Master of Ceremony)', 'DJs', 'Live Bands', 'Saxophonists', 'Hype Men', 'Ushers', 'Comedians', 'Cultural Dancers', 'Choreographers', 'Kids Entertainers', 'Face Painters', 'Magicians', 'Spoken Word Artists', 'Celebrity Appearances',
+    'Bouncers', 'Event Security Teams', 'VIP Bodyguards', 'Crowd Control Officers', 'Access Control Personnel', 'Ticket Checkers', 'Armed Escort',
+    'Event Decorators', 'Balloon Artists', 'Floral Designers', 'Stage Designers', 'Lighting Designers', 'Backdrop Designers', 'Table Styling Experts', 'Throne Chair Rentals', 'Carpet & Rug Rentals', 'Themed Party Designers',
+    'Tent Rentals', 'Chairs & Tables', 'Sound Systems', 'Public Address Systems', 'LED Screens', 'Projectors', 'Generators', 'Stage Platforms', 'Dance Floors', 'Cooling Fans', 'Air Conditioning Units', 'Extension & Cabling Services',
+    'Ice Suppliers', 'Ice Trucks', 'Cooling Vans', 'Mobile Toilets', 'Mobile Bar Trucks', 'Equipment Delivery Vans', 'Movers & Setup Crew', 'Power Backup Services',
+    'Caterers', 'Small Chops Vendors', 'Cocktail Mixologists', 'Bartenders', 'BBQ / Grill Vendors', 'Shawarma Stands', 'Food Trucks', 'Cake Vendors', 'Palm Wine Suppliers', 'Champagne Service', 'Mocktail Specialists',
+    'Photographers', 'Videographers', 'Drone Operators', '360 Booth Rentals', 'Instant Photo Print Booths', 'Live Streaming Services', 'Event Content Creators', 'Red Carpet Interview Setup',
+    'Makeup Artists', 'Bridal Makeup Specialists', 'Hairstylists', 'Barbers', 'Gele Tiers', 'Nail Technicians', 'Stylists', 'Fashion Rentals', 'Wardrobe Assistants', 'Groom Styling Experts',
+    'Chauffeur Services', 'Luxury Car Rentals', 'Party Buses', 'Dispatch Riders', 'Valet Services',
+    'Event Halls', 'Outdoor Spaces', 'Rooftop Venues', 'Beach Venues', 'Private Party Apartments', 'Conference Centers', 'Pop-up Event Spaces',
+    'Event Planners', 'Proposal Planners', 'Surprise Setup Teams', 'Event Clean-up Crew', 'Waiters / Service Staff', 'Ticketing Services', 'Event Insurance', 'Stage Managers', 'Hostesses'
   );
 exception when duplicate_object then null;
 end $$;

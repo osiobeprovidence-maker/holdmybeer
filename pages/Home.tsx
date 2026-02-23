@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Category, Vendor, Location } from '../types';
+import { Category, Vendor, Location, CATEGORY_GROUPS } from '../types';
 import SearchAssistant from '../components/SearchAssistant';
 import VendorCard from '../components/VendorCard';
 
@@ -120,8 +120,12 @@ const Home: React.FC<HomeProps> = ({
                     className="w-full bg-white text-black font-bold text-[16px] px-10 py-6 rounded-[32px] outline-none appearance-none cursor-pointer shadow-sm hover:shadow-xl transition-all border border-black/[0.03] focus:ring-8 focus:ring-black/[0.01]"
                   >
                     <option value="All">All Services</option>
-                    {Object.values(Category).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {Object.entries(CATEGORY_GROUPS as Record<string, Category[]>).map(([group, categories]) => (
+                      <optgroup key={group} label={group}>
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                   <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none text-black/20 group-hover:text-black transition-colors">

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { User, Category, Location } from '../types';
+import { User, Category, Location, CATEGORY_GROUPS } from '../types';
 import VendorCard from '../components/VendorCard';
 
 interface DiscoveryProps {
@@ -51,8 +51,8 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
         <button
           onClick={() => setIsUrgent(!isUrgent)}
           className={`w-full md:w-auto px-6 md:px-10 py-4 text-[11px] md:text-[12px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all border-2 rounded-full break-words whitespace-normal ${isUrgent
-              ? 'bg-red-500 border-red-500 text-white animate-pulse shadow-lg shadow-red-200'
-              : 'bg-[#f5f5f7] border-transparent text-[#86868b] hover:text-black hover:bg-[#ebebe7]'
+            ? 'bg-red-500 border-red-500 text-white animate-pulse shadow-lg shadow-red-200'
+            : 'bg-[#f5f5f7] border-transparent text-[#86868b] hover:text-black hover:bg-[#ebebe7]'
             }`}
         >
           {isUrgent ? 'Active Emergency' : 'Show Available Now'}
@@ -113,8 +113,12 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
                   className="w-full bg-[#f5f5f7] text-black font-bold text-[14px] px-6 py-4 rounded-3xl outline-none appearance-none cursor-pointer hover:bg-[#ebebe7] transition-all border border-black/5 focus:ring-2 focus:ring-black/5"
                 >
                   <option value="All">All Categories</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {Object.entries(CATEGORY_GROUPS as Record<string, Category[]>).map(([group, categories]) => (
+                    <optgroup key={group} label={group}>
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#86868b]">
