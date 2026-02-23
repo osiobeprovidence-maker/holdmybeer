@@ -74,6 +74,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           totalUnlocks: profile.total_unlocks,
           isSuspended: profile.is_suspended,
           reliabilityScore: profile.reliability_score || 70,
+          coins: profile.coins || 0
         } : {
           id: data.user.id,
           name: name || data.user.user_metadata?.name || 'Expert Client',
@@ -82,7 +83,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           location: Location.LAGOS_ISLAND,
           kycVerified: false,
           kycStatus: 'unverified',
-          avatar: `https://ui-avatars.com/api/?name=${name || 'Expert'}&background=000&color=fff`
+          avatar: `https://ui-avatars.com/api/?name=${name || 'Expert'}&background=000&color=fff`,
+          coins: 0
         };
 
         onLogin(loggedInUser);
@@ -97,7 +99,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           location: Location.LAGOS_ISLAND,
           kycVerified: false,
           kycStatus: 'unverified',
-          avatar: `https://ui-avatars.com/api/?name=${name || 'Expert'}&background=000&color=fff`
+          avatar: `https://ui-avatars.com/api/?name=${name || 'Expert'}&background=000&color=fff`,
+          coins: 0
         };
         onLogin(mockUser);
       }, 1000);
