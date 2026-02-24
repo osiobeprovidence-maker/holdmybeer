@@ -45,11 +45,11 @@ const Home: React.FC<HomeProps> = ({
     <div className="animate-in fade-in duration-1000">
       {!isLoggedIn ? (
         <>
-          <section className="text-center pt-20 mb-40">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
+          <section id="home-hero" className="text-center pt-10 md:pt-20 mb-20 md:mb-40 px-4">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 md:mb-10 tracking-tight text-black max-w-5xl mx-auto leading-[0.95]">
               Find. Connect. <span className="text-[#86868b]">Book.</span>
             </h1>
-            <p className="text-black text-xl md:text-2xl max-w-2xl mx-auto mb-16 font-medium leading-relaxed">
+            <p className="text-black text-lg md:text-2xl max-w-2xl mx-auto mb-10 md:mb-16 font-medium leading-relaxed px-4">
               The fastest way to reach verified event experts across Nigeria.
             </p>
 
@@ -92,10 +92,10 @@ const Home: React.FC<HomeProps> = ({
         </>
       ) : (
         <section className="pt-8 md:pt-16 mb-24">
-          <div className="flex justify-center mb-16">
+          <div id="panic-toggle" className="flex justify-center mb-12 md:mb-16">
             <button
               onClick={() => setIsUrgent(!isUrgent)}
-              className={`px-12 py-5 rounded-full font-black text-[11px] md:text-[12px] uppercase tracking-[0.4em] transition-all border-2 ${isUrgent
+              className={`px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.4em] transition-all border-2 ${isUrgent
                 ? 'bg-red-500 border-red-500 text-white shadow-2xl animate-pulse'
                 : 'bg-white text-black border-black/[0.05] hover:border-black hover:shadow-2xl'
                 }`}
@@ -161,7 +161,7 @@ const Home: React.FC<HomeProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div id="rec-zone" className="space-y-6">
                 <label className="text-[11px] font-black text-[#86868b] uppercase tracking-[0.4em] ml-6">Rec. Zone</label>
                 <div className="relative group">
                   <select

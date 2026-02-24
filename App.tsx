@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Category, User, ServiceRequest, Location } from './types';
 import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
+import { Walkthrough } from './components/Walkthrough';
 import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
@@ -608,6 +609,7 @@ const App: React.FC = () => {
       )}
 
       {!currentUser && <Footer onNavigate={setCurrentView} />}
+      <Walkthrough />
     </div>
   );
 };

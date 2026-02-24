@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="flex items-center gap-4">
         {currentUser ? (
           <div className="hidden md:flex items-center gap-6">
-            <div className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer" onClick={onShowCoinMarket}>
+            <div id="coin-balance" className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer" onClick={onShowCoinMarket}>
               <span className="text-[10px] font-black tracking-widest uppercase">₿ {currentUser.coins || 0}</span>
               <span className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center text-[10px]">+</span>
             </div>
