@@ -104,7 +104,7 @@ const Home: React.FC<HomeProps> = ({
             </button>
           </div>
 
-          <div className="mb-24">
+          <div id="home-hero" className="mb-24">
             <SearchAssistant vendors={vendors} isLoggedIn={isLoggedIn} onMatchesFound={(msg, ids) => {
               setAssistantMessage(msg);
               if (ids.length > 0) {

@@ -35,7 +35,11 @@ const steps: Step[] = [
     }
 ];
 
-export const Walkthrough: React.FC = () => {
+interface WalkthroughProps {
+    isLoggedIn: boolean;
+}
+
+export const Walkthrough: React.FC<WalkthroughProps> = ({ isLoggedIn }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -81,12 +85,14 @@ export const Walkthrough: React.FC = () => {
     };
 
     useEffect(() => {
-        const hasSeenWalkthrough = localStorage.getItem('hmb_walkthrough_seen');
-        if (!hasSeenWalkthrough) {
-            const timer = setTimeout(() => setIsVisible(true), 1500);
-            return () => clearTimeout(timer);
+        if (isLoggedIn) {
+            const hasSeenWalkthrough = localStorage.getItem('hmb_walkthrough_seen');
+            if (!hasSeenWalkthrough) {
+                const timer = setTimeout(() => setIsVisible(true), 1500);
+                return () => clearTimeout(timer);
+            }
         }
-    }, []);
+    }, [isLoggedIn]);
 
     useEffect(() => {
         if (isVisible) {

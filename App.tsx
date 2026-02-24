@@ -609,7 +609,7 @@ const App: React.FC = () => {
       )}
 
       {!currentUser && <Footer onNavigate={setCurrentView} />}
-      <Walkthrough />
+      <Walkthrough isLoggedIn={!!currentUser} />
     </div>
   );
 };
