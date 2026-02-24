@@ -9,14 +9,17 @@ interface CoinMarketProps {
     onClose: () => void;
 }
 
-const packages = [
-    { coins: 5, price: 5000, label: 'Starter Pack', description: 'Perfect for quick contacts' },
-    { coins: 10, price: 9000, label: 'Value Pack', description: 'Most popular among planners', popular: true },
-    { coins: 20, price: 16000, label: 'Pro Pack', description: 'Best value for frequent users' },
-];
-
 const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess, onClose }) => {
-    const handlePurchase = (pkg: typeof packages[0]) => {
+    const regularPackages = [
+        { coins: 5, price: 5000, label: 'Starter Pack', description: 'Perfect for quick contacts' },
+        { coins: 10, price: 9000, label: 'Value Pack', description: 'Most popular among planners', popular: true },
+        { coins: 20, price: 16000, label: 'Pro Pack', description: 'Best value for frequent users' },
+    ];
+
+    const showSignUpPack = currentUser && !currentUser.hasPurchasedSignUpPack;
+    const signUpPack = { coins: 3, price: 2500, label: 'Welcome Pack', description: 'One-time signup offer', special: true };
+
+    const handlePurchase = (pkg: any) => {
         if (!currentUser) {
             alert("Please login to purchase coins.");
             return;
@@ -89,7 +92,32 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
                     </div>
 
                     <div className="grid gap-6">
-                        {packages.map((pkg) => (
+                        {showSignUpPack && (
+                            <button
+                                onClick={() => handlePurchase(signUpPack)}
+                                className="group relative flex items-center justify-between p-8 rounded-[32px] border-2 border-orange-500 bg-orange-50 text-black hover:scale-[1.02] transition-all shadow-xl"
+                            >
+                                <div className="flex items-center gap-6 text-left">
+                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black bg-orange-500 text-white">
+                                        {signUpPack.coins}
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-lg uppercase tracking-tight">{signUpPack.label}</h4>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-orange-600 opacity-60">
+                                            {signUpPack.description}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-2xl font-black tracking-tighter text-orange-600">₦{signUpPack.price.toLocaleString()}</p>
+                                </div>
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[8px] font-black uppercase tracking-[0.3em] px-4 py-1.5 rounded-full shadow-lg">
+                                    New User Deal
+                                </div>
+                            </button>
+                        )}
+
+                        {regularPackages.map((pkg) => (
                             <button
                                 key={pkg.coins}
                                 onClick={() => handlePurchase(pkg)}

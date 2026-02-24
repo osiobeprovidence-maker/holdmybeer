@@ -83,6 +83,7 @@ const App: React.FC = () => {
           coins: p.coins || 0,
           isPaid: p.is_paid,
           isPreLaunch: p.is_pre_launch,
+          hasPurchasedSignUpPack: p.has_purchased_sign_up_pack,
           preferredLocation: p.preferred_location as Location
         }));
         setUsers(mappedUsers as unknown as User[]);
@@ -148,9 +149,10 @@ const App: React.FC = () => {
         reliabilityScore: 70,
         totalUnlocks: 0,
         isSuspended: false,
-        coins: 0,
+        coins: 2, // New User Onboarding: 2 Free Coins
         isPreLaunch,
         isPaid: false,
+        hasPurchasedSignUpPack: false,
         trialStartDate: Date.now()
       };
 
@@ -167,9 +169,10 @@ const App: React.FC = () => {
           reliability_score: newUser.reliabilityScore,
           total_unlocks: newUser.totalUnlocks,
           is_suspended: newUser.isSuspended,
-          coins: 0,
+          coins: 2, // Grant 2 free coins in DB
           is_pre_launch: newUser.isPreLaunch,
           is_paid: false,
+          has_purchased_sign_up_pack: false,
           trial_start_date: newUser.trialStartDate
         }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
       }
@@ -228,8 +231,13 @@ const App: React.FC = () => {
   const handlePurchaseCoins = async (coinsToAdd: number) => {
     if (!currentUser) return;
 
+    const isSignUpPack = coinsToAdd === 3 && !currentUser.hasPurchasedSignUpPack;
     const newBalance = (currentUser.coins || 0) + coinsToAdd;
-    const updatedUser = { ...currentUser, coins: newBalance };
+    const updatedUser = {
+      ...currentUser,
+      coins: newBalance,
+      hasPurchasedSignUpPack: isSignUpPack ? true : currentUser.hasPurchasedSignUpPack
+    };
 
     setCurrentUser(updatedUser);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
@@ -237,7 +245,10 @@ const App: React.FC = () => {
     if (supabase) {
       await supabase
         .from('profiles')
-        .update({ coins: newBalance })
+        .update({
+          coins: newBalance,
+          has_purchased_sign_up_pack: updatedUser.hasPurchasedSignUpPack
+        })
         .eq('id', currentUser.id);
     }
 
@@ -300,6 +311,7 @@ const App: React.FC = () => {
         category: updatedUser.category,
         bio: updatedUser.bio,
         location: updatedUser.location,
+        has_purchased_sign_up_pack: updatedUser.hasPurchasedSignUpPack,
         preferred_location: updatedUser.preferredLocation,
         available_today: updatedUser.availableToday,
         price_range: updatedUser.priceRange,

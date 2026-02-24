@@ -59,6 +59,7 @@ create table if not exists public.profiles (
   coins integer not null default 0,
   is_paid boolean not null default false,
   is_pre_launch boolean not null default false,
+  has_purchased_sign_up_pack boolean not null default false,
   preferred_location text
 );
 

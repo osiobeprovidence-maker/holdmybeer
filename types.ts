@@ -248,6 +248,7 @@ export interface User {
   isPaid?: boolean;
   isPreLaunch?: boolean;
   coins: number;
+  hasPurchasedSignUpPack?: boolean;
   preferredLocation?: Location;
   // New Work Page fields
   completedJobs?: number;
