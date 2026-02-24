@@ -53,13 +53,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         <NavButton view="how-it-works" label="Guide" />
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
+        {currentUser && (
+          <div id="coin-balance" className="flex items-center gap-2 bg-black text-white px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer" onClick={onShowCoinMarket}>
+            <span className="text-[10px] font-black tracking-widest uppercase truncate max-w-[60px] md:max-w-none">₿ {currentUser.coins || 0}</span>
+            <span className="w-3.5 h-3.5 md:w-4 md:h-4 bg-white/20 rounded-full flex items-center justify-center text-[9px] md:text-[10px]">+</span>
+          </div>
+        )}
+
         {currentUser ? (
           <div className="hidden md:flex items-center gap-6">
-            <div id="coin-balance" className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer" onClick={onShowCoinMarket}>
-              <span className="text-[10px] font-black tracking-widest uppercase">₿ {currentUser.coins || 0}</span>
-              <span className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center text-[10px]">+</span>
-            </div>
             <button
               onClick={() => onNavigate('dashboard')}
               className="flex items-center gap-2 bg-[#f5f5f7] px-4 py-2 rounded-full hover:bg-[#ebebe7] transition-colors"
@@ -135,6 +138,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <p className="text-[10px] font-black uppercase tracking-widest text-[#86868b] mb-1">Authenticated Hub</p>
                       <p className="text-lg font-black uppercase text-black">{currentUser.name}</p>
                     </div>
+                  </div>
+                  <div className="flex justify-between items-center bg-black text-white p-6 rounded-[32px] shadow-xl" onClick={() => { onShowCoinMarket(); setIsMenuOpen(false); }}>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Protocol Balance</p>
+                      <p className="text-2xl font-black uppercase tracking-tighter text-white">₿ {currentUser.coins || 0}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl font-black">+</div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <button onClick={() => { onNavigate('dashboard'); setIsMenuOpen(false); }} className="btn-apple py-5">Profile</button>
