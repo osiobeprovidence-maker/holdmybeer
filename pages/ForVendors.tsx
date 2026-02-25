@@ -7,10 +7,10 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
             {/* Hero Section */}
             <section className="text-center mb-32 md:mb-48 pt-10 relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-black/5 rounded-full blur-3xl -z-10 animate-pulse" />
-                <h1 className="text-4xl md:text-9xl font-black mb-10 tracking-tighter text-black leading-none uppercase italic">
+                <h1 className="text-3xl md:text-9xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">
                     Join the <br /><span className="text-[#86868b]">Protocol.</span>
                 </h1>
-                <p className="text-lg md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-12 uppercase italic tracking-tighter">
+                <p className="text-base md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-10 uppercase italic tracking-tighter">
                     We don’t control your business. <br />We increase your visibility.
                 </p>
                 <div className="flex flex-col md:flex-row justify-center gap-6">
@@ -27,24 +27,24 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
             <section className="mb-40">
                 <p className="text-[11px] font-black uppercase tracking-[0.5em] mb-12 text-center text-[#86868b]">Why Join HoldMyBeer?</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="bg-[#f5f5f7] p-12 rounded-[56px] border border-black/5 hover:scale-[1.02] transition-transform duration-500 group">
-                        <div className="text-5xl mb-8 group-hover:rotate-12 transition-transform">📱</div>
-                        <h3 className="text-xl md:text-2xl font-black mb-6 tracking-tighter uppercase italic">Direct Access.</h3>
-                        <p className="text-sm font-bold text-[#86868b] uppercase leading-relaxed">
+                    <div className="bg-[#f5f5f7] p-8 md:p-12 rounded-[32px] md:rounded-[56px] border border-black/5 hover:scale-[1.02] transition-transform duration-500 group overflow-hidden">
+                        <div className="text-4xl mb-6 group-hover:rotate-12 transition-transform">📱</div>
+                        <h3 className="text-xl md:text-2xl font-black mb-4 tracking-tighter uppercase italic">Direct Access.</h3>
+                        <p className="text-xs md:text-sm font-bold text-[#86868b] uppercase leading-relaxed">
                             No platform negotiation. No interference. Clients get your direct Phone and WhatsApp signals immediately.
                         </p>
                     </div>
-                    <div className="bg-black text-white p-12 rounded-[56px] border border-white/5 shadow-2xl hover:scale-[1.02] transition-transform duration-500 group">
-                        <div className="text-5xl mb-8 group-hover:scale-110 transition-transform text-white">₦</div>
-                        <h3 className="text-xl md:text-2xl font-black mb-6 tracking-tighter uppercase italic">100% Yours.</h3>
-                        <p className="text-sm font-bold text-white/40 uppercase leading-relaxed text-white/60">
+                    <div className="bg-black text-white p-8 md:p-12 rounded-[32px] md:rounded-[56px] border border-white/5 shadow-2xl hover:scale-[1.02] transition-transform duration-500 group overflow-hidden">
+                        <div className="text-4xl mb-6 group-hover:scale-110 transition-transform text-white">₦</div>
+                        <h3 className="text-xl md:text-2xl font-black mb-4 tracking-tighter uppercase italic">100% Yours.</h3>
+                        <p className="text-xs md:text-sm font-bold text-white/40 uppercase leading-relaxed text-white/60">
                             Zero commission. If you close a ₦500,000 job, you keep every single Naira. We take nothing from your deal.
                         </p>
                     </div>
-                    <div className="bg-[#f5f5f7] p-12 rounded-[56px] border border-black/5 hover:scale-[1.02] transition-transform duration-500 group">
-                        <div className="text-5xl mb-8 group-hover:-translate-y-2 transition-transform">🎯</div>
-                        <h3 className="text-xl md:text-2xl font-black mb-6 tracking-tighter uppercase italic text-right">High Intent.</h3>
-                        <p className="text-sm font-bold text-[#86868b] uppercase leading-relaxed text-right">
+                    <div className="bg-[#f5f5f7] p-8 md:p-12 rounded-[32px] md:rounded-[56px] border border-black/5 hover:scale-[1.02] transition-transform duration-500 group overflow-hidden">
+                        <div className="text-4xl mb-6 group-hover:-translate-y-2 transition-transform">🎯</div>
+                        <h3 className="text-xl md:text-2xl font-black mb-4 tracking-tighter uppercase italic text-right">High Intent.</h3>
+                        <p className="text-xs md:text-sm font-bold text-[#86868b] uppercase leading-relaxed text-right">
                             Clients must use coins to unlock you. No time-wasters. No window shoppers. Only serious leads ready to book.
                         </p>
                     </div>
@@ -111,8 +111,8 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                 <div className="absolute -top-10 right-0 p-12 text-[200px] opacity-10 rotate-12 group-hover:scale-110 transition-transform">⚡️</div>
                 <div className="relative z-10 max-w-3xl">
                     <p className="font-black uppercase tracking-[0.4em] text-[12px] mb-6 opacity-60">Optional Edge</p>
-                    <h2 className="text-4xl md:text-8xl font-black mb-10 tracking-tighter leading-none uppercase italic">Boost <br />The Signal.</h2>
-                    <p className="text-lg md:text-2xl font-black mb-12 leading-tight uppercase tracking-tight italic">
+                    <h2 className="text-3xl md:text-8xl font-black mb-8 md:mb-10 tracking-tighter leading-none uppercase italic">Boost <br />The Signal.</h2>
+                    <p className="text-base md:text-2xl font-black mb-10 md:mb-12 leading-tight uppercase tracking-tight italic">
                         Want more eyes? Boosting is completely optional but designed to prioritize your profile across the network.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -11,7 +11,7 @@ const HowItWorks: React.FC = () => {
         <h1 className="text-4xl md:text-8xl lg:text-9xl font-black mb-10 tracking-tighter text-black leading-none">
           How it <span className="text-[#86868b]">works.</span>
         </h1>
-        <p className="text-lg md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-bold leading-tight mb-8">
+        <p className="text-base md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-bold leading-tight mb-8">
           HoldMyBeer connects event planners directly to verified professionals using a simple coin-based access system.
         </p>
         <div className="flex flex-wrap justify-center gap-4 md:gap-8 opacity-60">
@@ -62,8 +62,8 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Step 01</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Search & Discover.</h2>
-              <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed mb-8">
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Search & Discover.</h2>
+              <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8">
                 Browse our curated pool of elite Nigerians experts. From legendary DJs to master caterers, every professional is vetted for quality.
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -87,8 +87,8 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Step 02</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Unlock with Coins.</h2>
-              <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed mb-8">
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Unlock with Coins.</h2>
+              <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8">
                 Access verified phone numbers and direct WhatsApp signals using our transparent coin layer. No messy subscriptions.
               </p>
               <div className="space-y-4">
@@ -105,12 +105,12 @@ const HowItWorks: React.FC = () => {
           </div>
 
           {/* Panic Mode Section */}
-          <div className="bg-red-500 rounded-[64px] p-12 md:p-24 text-white relative overflow-hidden group">
+          <div className="bg-red-500 rounded-[32px] md:rounded-[64px] p-8 md:p-24 text-white relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-12 text-[200px] opacity-10 rotate-12 transition-transform duration-1000 group-hover:rotate-45 group-hover:scale-110">🚨</div>
             <div className="relative z-10 max-w-2xl">
               <p className="font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6 opacity-60">High Priority</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-6 md:mb-10 tracking-tighter leading-none uppercase italic">Panic Mode.</h2>
-              <p className="text-lg md:text-2xl font-medium mb-12 leading-relaxed opacity-90">
+              <h2 className="text-2xl md:text-7xl font-black mb-6 md:mb-10 tracking-tighter leading-none uppercase italic">Panic Mode.</h2>
+              <p className="text-base md:text-2xl font-medium mb-12 leading-relaxed opacity-90">
                 Need a vendor urgently for a last-minute event or emergency replacement? Activate Panic Mode for maximum priority.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -152,8 +152,8 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Phase 01</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Build Your Brand.</h2>
-              <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-right">
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Build Your Brand.</h2>
+              <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-right">
                 Set up your professional listing with high-quality portfolio images and clear pricing. Only approved listings enter the protocol.
               </p>
               <div className="flex flex-wrap gap-3 justify-end leading-none">
@@ -174,8 +174,8 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Phase 02</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">30-Day Launch.</h2>
-              <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-left">
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">30-Day Launch.</h2>
+              <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-left">
                 Every vendor starts with a 30-day free trial. Direct client leads, maximum visibility, and zero risk while you build your pipeline.
               </p>
               <div className="border border-black/5 p-8 rounded-[40px] bg-white inline-block">
@@ -191,8 +191,8 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Phase 03</p>
-              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic text-right leading-none">Activate & Earn.</h2>
-              <p className="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-right">
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic text-right leading-none">Activate & Earn.</h2>
+              <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-right">
                 Once trial ends, activate to remain visible. You keep 100% of your earnings—always. We take zero commission from your hard-earned booking fees.
               </p>
               <div className="flex justify-end italic font-black text-sm uppercase opacity-40">
