@@ -7,10 +7,10 @@ const About: React.FC = () => {
             {/* Hero Section */}
             <section className="text-center mb-32 md:mb-48 pt-10 relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-black/5 rounded-full blur-3xl -z-10 animate-pulse" />
-                <h1 className="text-6xl md:text-9xl font-black mb-10 tracking-tighter text-black leading-none uppercase italic">
+                <h1 className="text-4xl md:text-9xl font-black mb-10 tracking-tighter text-black leading-none uppercase italic">
                     Removing <br /><span className="text-[#86868b]">Friction.</span>
                 </h1>
-                <p className="text-xl md:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-12 uppercase italic tracking-tighter">
+                <p className="text-lg md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-12 uppercase italic tracking-tighter">
                     HoldMyBeer is Nigeria's elite expert retrieval layer. <br />We built it because planning events was too hard.
                 </p>
             </section>
@@ -19,7 +19,7 @@ const About: React.FC = () => {
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-40 items-center">
                 <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.5em] mb-6 text-[#86868b]">The Problem We Saw</p>
-                    <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Exciting. <br />Until it isn't.</h2>
+                    <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Exciting. <br />Until it isn't.</h2>
                     <p className="text-xl text-[#86868b] font-medium leading-relaxed italic mb-8">
                         You call one vendor — no response. You check Instagram — price changes. You hear "I know someone" — but that someone knows someone else.
                     </p>
@@ -51,7 +51,7 @@ const About: React.FC = () => {
                 <div className="absolute top-0 right-0 p-12 text-[300px] opacity-5 -rotate-12 translate-x-1/2 translate-y-1/2">🍺</div>
                 <div className="relative z-10">
                     <p className="font-black uppercase tracking-[0.4em] text-[12px] mb-8 opacity-40">The Mission</p>
-                    <h2 className="text-5xl md:text-8xl font-black mb-12 tracking-tighter leading-none uppercase italic">We Fixed <br />One Thing. <br /><span className="text-white/40">Access.</span></h2>
+                    <h2 className="text-3xl md:text-8xl font-black mb-12 tracking-tighter leading-none uppercase italic">We Fixed <br />One Thing. <br /><span className="text-white/40">Access.</span></h2>
                     <p className="text-xl md:text-2xl font-medium mb-16 max-w-2xl leading-relaxed text-white/60 italic">
                         HoldMyBeer was created to remove the noise. Not booking management, not commission-based control, not interference. Just clean, direct access.
                     </p>
@@ -66,7 +66,7 @@ const About: React.FC = () => {
                             </ul>
                         </div>
                         <div className="flex flex-col justify-center">
-                            <p className="text-3xl font-black italic uppercase leading-none text-white/20 underline decoration-white/10">ZERO PLATFORM INTERFERENCE.</p>
+                            <p className="text-xl md:text-3xl font-black italic uppercase leading-none text-white/20 underline decoration-white/10">ZERO PLATFORM INTERFERENCE.</p>
                         </div>
                     </div>
                 </div>
@@ -99,8 +99,8 @@ const About: React.FC = () => {
                         Weddings, Birthdays, Corporate events, Concerts, Private parties. We understand how events work here. Last-minute happens. Budgets shift. Urgency is real.
                     </p>
                     <div className="flex flex-wrap gap-4 opacity-40">
-                        <span className="text-[10px] font-black uppercase tracking-widest border border-black px-4 py-2 rounded-full">Panic Mode Active</span>
-                        <span className="text-[10px] font-black uppercase tracking-widest border border-black px-4 py-2 rounded-full">Real-Time Access</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest border border-black px-4 py-2 rounded-full">Panic Mode</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest border border-black px-4 py-2 rounded-full">Real-Time</span>
                     </div>
                 </div>
 
@@ -121,10 +121,10 @@ const About: React.FC = () => {
             <section className="text-center py-24 relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
                 <p className="text-[11px] font-black uppercase tracking-[0.5em] mb-10 text-[#86868b]">Our Vision</p>
-                <h2 className="text-5xl md:text-8xl font-black mb-12 tracking-tighter uppercase italic leading-none max-w-4xl mx-auto">
+                <h2 className="text-3xl md:text-8xl font-black mb-12 tracking-tighter uppercase italic leading-none max-w-4xl mx-auto">
                     The most <span className="text-[#86868b]">trusted</span> retrieval layer in Nigeria.
                 </h2>
-                <p className="text-xl md:text-2xl text-black font-medium max-w-2xl mx-auto italic mb-16 opacity-60">
+                <p className="text-lg md:text-2xl text-black font-medium max-w-2xl mx-auto italic mb-16 opacity-60">
                     Not the loudest. Not the flashiest. The most reliable.
                 </p>
                 <div className="flex flex-col md:flex-row justify-center gap-4">

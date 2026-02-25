@@ -8,26 +8,26 @@ const Pricing: React.FC = () => {
     <div className="pb-24 max-w-6xl mx-auto px-6 animate-in fade-in duration-700">
       {/* Header */}
       <section className="text-center mb-16 md:mb-32 pt-10">
-        <h1 className="text-6xl md:text-9xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">
+        <h1 className="text-4xl md:text-9xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">
           Pricing.
         </h1>
-        <p className="text-xl md:text-3xl text-[#86868b] max-w-2xl mx-auto font-bold leading-tight uppercase tracking-tighter">
+        <p className="text-lg md:text-2xl lg:text-3xl text-[#86868b] max-w-2xl mx-auto font-bold leading-tight uppercase tracking-tighter">
           Simple. Transparent. <br /><span className="text-black">No Subscriptions.</span>
         </p>
       </section>
 
       {/* Pricing Switcher */}
       <div className="flex justify-center mb-20">
-        <div className="bg-[#f5f5f7] p-2 rounded-[40px] flex gap-2 shadow-sm border border-black/5">
+        <div className="bg-[#f5f5f7] p-2 rounded-[24px] md:rounded-[40px] flex gap-2 shadow-sm border border-black/5">
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-8 md:px-16 py-5 rounded-[32px] text-[11px] md:text-[14px] font-black uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-black text-white shadow-2xl scale-105' : 'text-[#86868b] hover:text-black'}`}
+            className={`px-6 md:px-16 py-3 md:py-5 rounded-[20px] md:rounded-[32px] text-[10px] md:text-[14px] font-black uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-black text-white shadow-2xl scale-105' : 'text-[#86868b] hover:text-black'}`}
           >
             For Planners
           </button>
           <button
             onClick={() => setActiveTab('vendors')}
-            className={`px-8 md:px-16 py-5 rounded-[32px] text-[11px] md:text-[14px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendors' ? 'bg-black text-white shadow-2xl scale-105' : 'text-[#86868b] hover:text-black'}`}
+            className={`px-6 md:px-16 py-3 md:py-5 rounded-[20px] md:rounded-[32px] text-[10px] md:text-[14px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendors' ? 'bg-black text-white shadow-2xl scale-105' : 'text-[#86868b] hover:text-black'}`}
           >
             For Professionals
           </button>
@@ -41,7 +41,7 @@ const Pricing: React.FC = () => {
             <div className="lg:col-span-4 bg-[#f5f5f7] p-12 rounded-[56px] flex flex-col justify-center border border-black/5 relative overflow-hidden group">
               <div className="absolute -top-10 -right-10 text-[180px] opacity-5 group-hover:rotate-12 transition-transform duration-1000">🎁</div>
               <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-4 text-[#86868b]">The Protocol Entry</p>
-              <h3 className="text-4xl font-black mb-8 tracking-tighter uppercase italic leading-none">Free <br />Starter.</h3>
+              <h3 className="text-3xl md:text-4xl font-black mb-8 tracking-tighter uppercase italic leading-none">Free <br />Starter.</h3>
               <p className="text-sm font-bold uppercase mb-8 opacity-60">Every new user gets a boosted start on the protocol.</p>
               <div className="bg-white p-6 rounded-[32px] border border-black/5">
                 <p className="text-3xl font-black text-black">2 COINS</p>
@@ -108,7 +108,7 @@ const Pricing: React.FC = () => {
           <div className="bg-red-500 rounded-[56px] p-12 md:p-24 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 p-12 text-[200px] opacity-10 animate-pulse">🚨</div>
             <div className="relative z-10 max-w-2xl">
-              <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter uppercase italic leading-none">Panic Mode.</h2>
+              <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter uppercase italic leading-none">Panic Mode.</h2>
               <p className="text-xl md:text-2xl font-medium mb-12 leading-relaxed opacity-90 uppercase tracking-tight">
                 Need a vendor urgently for same-day chaos or emergency replacement? Panic mode signals the network you are ready to book NOW.
               </p>
@@ -125,7 +125,7 @@ const Pricing: React.FC = () => {
             <div className="bg-zinc-900 p-12 md:p-20 rounded-[56px] text-white flex flex-col relative overflow-hidden group">
               <div className="absolute -bottom-10 -right-10 text-[200px] opacity-10 group-hover:scale-110 transition-transform duration-1000">🎉</div>
               <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-6 text-white/40">The Professional Start</p>
-              <h3 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter uppercase italic leading-none">30-Day <br />Free Trial.</h3>
+              <h3 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter uppercase italic leading-none">30-Day <br />Free Trial.</h3>
               <p className="text-lg font-medium text-white/60 mb-12 uppercase tracking-tight italic">
                 Full visibility. Access to all leads. Direct connects. Zero payment required to start your journey.
               </p>
@@ -139,7 +139,7 @@ const Pricing: React.FC = () => {
             <div className="bg-[#f5f5f7] p-12 md:p-20 rounded-[56px] border border-black/5 flex flex-col relative overflow-hidden shadow-2xl">
               <div className="absolute top-0 right-0 p-12 text-[150px] opacity-5">🔓</div>
               <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-6 text-[#86868b]">Post-Trial Protocol</p>
-              <h3 className="text-4xl md:text-5xl font-black mb-10 tracking-tighter uppercase italic leading-none">Activate <br />Your Spot.</h3>
+              <h3 className="text-3xl md:text-5xl font-black mb-10 tracking-tighter uppercase italic leading-none">Activate <br />Your Spot.</h3>
               <p className="text-lg font-medium text-black/60 mb-12 uppercase tracking-tight italic">
                 To remain visible and accessible to event planners after 30 days, maintain an active listing.
               </p>
@@ -221,7 +221,7 @@ const Pricing: React.FC = () => {
 
       {/* Footer CTA */}
       <div className="mt-40 text-center">
-        <h2 className="text-4xl font-black mb-8 tracking-tighter uppercase italic">Simple Access. <span className="opacity-20">No mess.</span></h2>
+        <h2 className="text-3xl md:text-4xl font-black mb-8 tracking-tighter uppercase italic">Simple Access. <span className="opacity-20">No mess.</span></h2>
         <button
           onClick={() => window.location.hash = 'discovery'}
           className="btn-apple px-20 py-8 text-2xl uppercase tracking-tighter italic"
