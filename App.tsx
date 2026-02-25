@@ -12,6 +12,7 @@ import VendorDashboard from './pages/VendorDashboard';
 import HowItWorks from './pages/HowItWorks';
 import Discovery from './pages/Discovery';
 import Pricing from './pages/Pricing';
+import About from './pages/About';
 import Auth from './pages/Auth';
 import AdminDashboard from './pages/AdminDashboard';
 import CoinMarket from './pages/CoinMarket';
@@ -382,7 +383,7 @@ const App: React.FC = () => {
         ) : <Auth onLogin={handleLogin} />;
       case 'my-connections': return <MyConnections vendors={users.filter(u => u.isCreator)} unlockedVendorIds={unlockedUserIds} serviceRequests={serviceRequests} currentUser={currentUser} onVendorSelect={setActiveUser} protocolId={protocolId} />;
       case 'how-it-works': return <HowItWorks />;
-      case 'about': return <div className="py-24 text-center"><h1 className="text-6xl font-black mb-8">About HoldMyBeer</h1><p className="text-xl text-[#86868b] max-w-2xl mx-auto">We are Nigeria's premier expert retrieval layer, connecting elite event professionals with the projects that need them. Zero friction, total transparency.</p></div>;
+      case 'about': return <About />;
       case 'for-vendors': return <ForVendors onNavigate={setCurrentView} />;
       case 'policies': return <PrivacyPolicy />;
       case 'refund-policy': return <RefundPolicy />;
