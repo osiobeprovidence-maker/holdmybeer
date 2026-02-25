@@ -15,6 +15,7 @@ import Pricing from './pages/Pricing';
 import Auth from './pages/Auth';
 import AdminDashboard from './pages/AdminDashboard';
 import CoinMarket from './pages/CoinMarket';
+import ForVendors from './pages/ForVendors';
 import { PrivacyPolicy, RefundPolicy } from './pages/Policies';
 
 const App: React.FC = () => {
@@ -382,7 +383,7 @@ const App: React.FC = () => {
       case 'my-connections': return <MyConnections vendors={users.filter(u => u.isCreator)} unlockedVendorIds={unlockedUserIds} serviceRequests={serviceRequests} currentUser={currentUser} onVendorSelect={setActiveUser} protocolId={protocolId} />;
       case 'how-it-works': return <HowItWorks />;
       case 'about': return <div className="py-24 text-center"><h1 className="text-6xl font-black mb-8">About HoldMyBeer</h1><p className="text-xl text-[#86868b] max-w-2xl mx-auto">We are Nigeria's premier expert retrieval layer, connecting elite event professionals with the projects that need them. Zero friction, total transparency.</p></div>;
-      case 'for-vendors': return <div className="py-24 text-center"><h1 className="text-6xl font-black mb-8">For Elite Vendors</h1><p className="text-xl text-[#86868b] max-w-2xl mx-auto">Join the protocol and reach customers who value quality. Our platform ensures you're discovered by the right clients at the right time.</p><button onClick={() => setCurrentView('auth')} className="mt-12 btn-apple px-12 py-5 uppercase tracking-widest">Join Protocol</button></div>;
+      case 'for-vendors': return <ForVendors onNavigate={setCurrentView} />;
       case 'policies': return <PrivacyPolicy />;
       case 'refund-policy': return <RefundPolicy />;
       case 'auth': return <Auth onLogin={handleLogin} />;
