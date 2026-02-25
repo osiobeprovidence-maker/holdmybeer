@@ -47,10 +47,12 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center gap-8">
-        <NavButton view="discovery" label="Discovered" />
-        <NavButton view="my-connections" label="Connections" />
-        <NavButton view="how-it-works" label="Guide" />
+      <div className="hidden lg:flex items-center gap-6">
+        <NavButton view="discovery" label="Find Vendors" />
+        <NavButton view="how-it-works" label="How It Works" />
+        <NavButton view="pricing" label="Pricing" />
+        <NavButton view="for-vendors" label="For Vendors" />
+        <NavButton view="about" label="About" />
       </div>
 
       <div className="flex items-center gap-3 md:gap-4">
@@ -62,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {currentUser ? (
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6">
             <button
               onClick={() => onNavigate('dashboard')}
               className="flex items-center gap-2 bg-[#f5f5f7] px-4 py-2 rounded-full hover:bg-[#ebebe7] transition-colors"
@@ -73,17 +75,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button onClick={onLogout} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Exit</button>
           </div>
         ) : (
-          <button
-            onClick={() => onNavigate('auth')}
-            className="hidden md:block btn-apple text-[12px] px-8 py-2.5 uppercase tracking-widest"
-          >
-            Start
-          </button>
+          <div className="hidden lg:flex items-center gap-6">
+            <button onClick={() => onNavigate('auth')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Login</button>
+            <button onClick={() => onNavigate('auth')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Sign Up</button>
+            <button
+              onClick={() => onNavigate('discovery')}
+              className="btn-apple text-[12px] px-8 py-2.5 uppercase tracking-widest"
+            >
+              Start Searching
+            </button>
+          </div>
         )}
 
         {/* Hamburger Toggle */}
         <button
-          className="md:hidden p-2 text-black z-[210] relative"
+          className="lg:hidden p-2 text-black z-[210] relative"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? (
@@ -99,33 +105,54 @@ export const Navbar: React.FC<NavbarProps> = ({
         <>
           {/* Dense Backdrop Overlay */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-2xl z-[150] animate-in fade-in duration-300 md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-2xl z-[150] animate-in fade-in duration-300 lg:hidden"
             onClick={() => setIsMenuOpen(false)}
           />
 
           {/* Solid Menu Panel */}
-          <div className="fixed inset-x-0 top-0 bg-white z-[160] flex flex-col p-8 pt-24 md:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl">
-            <div className="flex flex-col gap-8 mb-16">
+          <div className="fixed inset-x-0 top-0 bg-white z-[160] flex flex-col p-8 pt-24 lg:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div className="flex flex-col gap-6 mb-12">
+              <button
+                onClick={() => { onNavigate('home'); setIsMenuOpen(false); }}
+                className="group flex items-center justify-between"
+              >
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">Home</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+              </button>
               <button
                 onClick={() => { onNavigate('discovery'); setIsMenuOpen(false); }}
                 className="group flex items-center justify-between"
               >
-                <span className="text-4xl font-black tracking-tighter uppercase text-black">Discovered</span>
-                <span className="w-12 h-12 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
-              </button>
-              <button
-                onClick={() => { onNavigate('my-connections'); setIsMenuOpen(false); }}
-                className="group flex items-center justify-between"
-              >
-                <span className="text-4xl font-black tracking-tighter uppercase text-black">Connections</span>
-                <span className="w-12 h-12 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">Find Vendors</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
               </button>
               <button
                 onClick={() => { onNavigate('how-it-works'); setIsMenuOpen(false); }}
                 className="group flex items-center justify-between"
               >
-                <span className="text-4xl font-black tracking-tighter uppercase text-black">Guide</span>
-                <span className="w-12 h-12 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">How It Works</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('pricing'); setIsMenuOpen(false); }}
+                className="group flex items-center justify-between"
+              >
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">Pricing</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('for-vendors'); setIsMenuOpen(false); }}
+                className="group flex items-center justify-between"
+              >
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">For Vendors</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('about'); setIsMenuOpen(false); }}
+                className="group flex items-center justify-between"
+              >
+                <span className="text-3xl font-black tracking-tighter uppercase text-black">About</span>
+                <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
               </button>
             </div>
 
@@ -139,13 +166,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <p className="text-lg font-black uppercase text-black">{currentUser.name}</p>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center bg-black text-white p-6 rounded-[32px] shadow-xl" onClick={() => { onShowCoinMarket(); setIsMenuOpen(false); }}>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Protocol Balance</p>
-                      <p className="text-2xl font-black uppercase tracking-tighter text-white">₿ {currentUser.coins || 0}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl font-black">+</div>
-                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <button onClick={() => { onNavigate('dashboard'); setIsMenuOpen(false); }} className="btn-apple py-5">Profile</button>
                     <button onClick={() => { onLogout(); setIsMenuOpen(false); }} className="px-6 py-5 rounded-full border border-black/10 text-[11px] font-black uppercase tracking-widest text-red-500">Exit</button>
@@ -154,7 +174,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               ) : (
                 <div className="space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] text-center mb-6">Join the Protocol</p>
-                  <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="w-full btn-apple py-7 text-xl uppercase tracking-widest shadow-xl">Get Started</button>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Login</button>
+                    <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign Up</button>
+                  </div>
+                  <button onClick={() => { onNavigate('discovery'); setIsMenuOpen(false); }} className="w-full btn-apple py-7 text-xl uppercase tracking-widest shadow-xl">Start Searching</button>
                 </div>
               )}
             </div>
@@ -186,9 +210,11 @@ export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNav
           <div>
             <h4 className="text-black font-bold mb-6 text-[11px] uppercase tracking-[0.3em] opacity-40">Navigate</h4>
             <ul className="space-y-4 text-sm font-bold text-[#86868b]">
-              <li><button onClick={() => onNavigate('discovery')} className="hover:text-black uppercase">Discovered</button></li>
+              <li><button onClick={() => onNavigate('discovery')} className="hover:text-black uppercase">Find Vendors</button></li>
+              <li><button onClick={() => onNavigate('how-it-works')} className="hover:text-black uppercase">How It Works</button></li>
               <li><button onClick={() => onNavigate('pricing')} className="hover:text-black uppercase">Pricing</button></li>
-              <li><button onClick={() => onNavigate('how-it-works')} className="hover:text-black uppercase">Guide</button></li>
+              <li><button onClick={() => onNavigate('for-vendors')} className="hover:text-black uppercase">For Vendors</button></li>
+              <li><button onClick={() => onNavigate('about')} className="hover:text-black uppercase">About</button></li>
             </ul>
           </div>
           <div>
@@ -206,7 +232,7 @@ export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNav
           onClick={() => onNavigate('admin')}
           className="hover:text-black transition-colors"
         >
-          Expert Retrieval Nigeria. v2.0.4
+          Expert Retrieval Nigeria. v2.0.5
         </button>
       </div>
     </footer>
