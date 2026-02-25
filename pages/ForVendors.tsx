@@ -160,7 +160,18 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                 <div className="bg-[#f5f5f7] p-12 md:p-20 rounded-[64px] border border-black/5">
                     <h3 className="text-4xl font-black mb-12 tracking-tighter uppercase italic leading-none">Who Should <br />Join?</h3>
                     <div className="grid grid-cols-2 gap-y-8 gap-x-4">
-                        {['DJs', 'Caterers', 'Decorators', 'Makeup Artists', 'Ushers', 'MCs', 'Ice Truck Owners', 'Rental Services'].map((cat) => (
+                        {[
+                            'Entertainment',
+                            'Catering & Food Services',
+                            'Decor & Event Styling',
+                            'Beauty & Grooming',
+                            'Media & Event Coverage',
+                            'Logistics & Equipment Rental',
+                            'Security & Event Support',
+                            'Event Planning & Coordination',
+                            'Rentals & Event Infrastructure',
+                            'Specialty & Corporate Services'
+                        ].map((cat) => (
                             <div key={cat} className="flex items-center gap-3">
                                 <div className="w-1.5 h-1.5 bg-black rounded-full" />
                                 <span className="text-sm font-black uppercase italic">{cat}</span>
