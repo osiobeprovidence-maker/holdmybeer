@@ -16,13 +16,19 @@
             --apple-text: #1d1d1f;
             --apple-secondary: #86868b;
         }
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+        }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
             color: var(--apple-text);
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             letter-spacing: -0.011em;
+            margin: 0;
+            padding: 0;
         }
         h1, h2, h3, h4, .font-heading {
             font-family: 'Plus Jakarta Sans', sans-serif;
