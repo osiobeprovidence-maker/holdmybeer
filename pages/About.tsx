@@ -5,43 +5,61 @@ const About: React.FC = () => {
     return (
         <div className="pb-24 max-w-6xl mx-auto px-6 animate-in fade-in duration-700">
             {/* Hero Section */}
-            <section className="text-center mb-32 md:mb-48 pt-10 relative">
+            <section className="text-center mb-32 md:mb-48 pt-10 relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-black/5 rounded-full blur-3xl -z-10 animate-pulse" />
                 <h1 className="text-4xl md:text-9xl font-black mb-10 tracking-tighter text-black leading-none uppercase italic">
                     Removing <br /><span className="text-[#86868b]">Friction.</span>
                 </h1>
-                <p className="text-lg md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-12 uppercase italic tracking-tighter">
+                <p className="text-base md:text-2xl lg:text-3xl text-black max-w-3xl mx-auto font-black leading-tight mb-12 uppercase italic tracking-tighter">
                     HoldMyBeer is Nigeria's elite expert retrieval layer. <br />We built it because planning events was too hard.
                 </p>
             </section>
 
-            {/* The Problem Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-40 items-center">
-                <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.5em] mb-6 text-[#86868b]">The Problem We Saw</p>
-                    <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Exciting. <br />Until it isn't.</h2>
-                    <p className="text-xl text-[#86868b] font-medium leading-relaxed italic mb-8">
-                        You call one vendor — no response. You check Instagram — price changes. You hear "I know someone" — but that someone knows someone else.
-                    </p>
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4 bg-red-50 p-6 rounded-[32px] border border-red-100">
-                            <span className="text-2xl">🛑</span>
-                            <p className="text-sm font-bold uppercase tracking-tight text-red-900">Too many middlemen</p>
+            {/* The Problem Section - Refactored to Talk and Respond */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-40 items-center overflow-hidden">
+                <div className="order-2 lg:order-1">
+                    <p className="text-[11px] font-black uppercase tracking-[0.5em] mb-10 text-[#86868b] text-center lg:text-left">The Reality Layer</p>
+
+                    <div className="space-y-6">
+                        {/* Chat Bubbles */}
+                        <div className="flex flex-col items-start animate-in slide-in-from-left duration-500">
+                            <div className="bg-[#f5f5f7] p-6 rounded-[32px] rounded-tl-none max-w-[85%] border border-black/5 shadow-sm">
+                                <p className="text-sm md:text-base font-bold text-black/80 leading-relaxed italic">
+                                    "You call one vendor — no response."
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-red-50 p-6 rounded-[32px] border border-red-100">
-                            <span className="text-2xl">🛑</span>
-                            <p className="text-sm font-bold uppercase tracking-tight text-red-900">Too much uncertainty</p>
+
+                        <div className="flex flex-col items-end animate-in slide-in-from-right duration-700 delay-200">
+                            <div className="bg-black p-6 rounded-[32px] rounded-tr-none max-w-[85%] shadow-xl">
+                                <p className="text-sm md:text-base font-bold text-white leading-relaxed italic">
+                                    "You check Instagram — and the price has changed again."
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-red-50 p-6 rounded-[32px] border border-red-100">
-                            <span className="text-2xl">🛑</span>
-                            <p className="text-sm font-bold uppercase tracking-tight text-red-900">Too much stress</p>
+
+                        <div className="flex flex-col items-start animate-in slide-in-from-left duration-1000 delay-500">
+                            <div className="bg-[#f5f5f7] p-6 rounded-[32px] rounded-tl-none max-w-[85%] border border-black/5 shadow-sm">
+                                <p className="text-sm md:text-base font-bold text-black/80 leading-relaxed italic">
+                                    "You hear 'I know someone' — but that someone knows someone else."
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="pt-8 flex justify-center lg:justify-start">
+                            <div className="bg-red-50 px-8 py-4 rounded-full border border-red-100 flex items-center gap-3">
+                                <span className="animate-pulse">🛑</span>
+                                <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-900">The Middleman Loop</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="bg-[#f5f5f7] aspect-square rounded-[64px] flex items-center justify-center text-[150px] md:text-[200px] apple-shadow relative group overflow-hidden">
-                    🤯
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-sm font-black uppercase tracking-widest text-black/40">The Stress Layer</p>
+
+                <div className="bg-[#f5f5f7] aspect-square rounded-[48px] md:rounded-[64px] flex flex-col items-center justify-center p-12 apple-shadow relative group overflow-hidden order-1 lg:order-2">
+                    <span className="text-[100px] md:text-[180px] group-hover:scale-110 transition-transform duration-700">🤯</span>
+                    <div className="mt-8 text-center">
+                        <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase italic leading-none mb-4">Too much <br />Noise.</h2>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-black/30">Built to remove the stress</p>
                     </div>
                 </div>
             </section>

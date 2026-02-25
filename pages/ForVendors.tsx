@@ -3,9 +3,9 @@ import React from 'react';
 
 const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
     return (
-        <div className="pb-24 max-w-6xl mx-auto px-6 animate-in fade-in duration-700">
+        <div className="pb-24 max-w-6xl mx-auto px-6 animate-in fade-in duration-700 overflow-hidden">
             {/* Hero Section */}
-            <section className="text-center mb-32 md:mb-48 pt-10 relative">
+            <section className="text-center mb-32 md:mb-48 pt-10 relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-black/5 rounded-full blur-3xl -z-10 animate-pulse" />
                 <h1 className="text-3xl md:text-9xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">
                     Join the <br /><span className="text-[#86868b]">Protocol.</span>

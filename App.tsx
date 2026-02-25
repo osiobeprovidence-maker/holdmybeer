@@ -14,6 +14,7 @@ import Discovery from './pages/Discovery';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Auth from './pages/Auth';
+import SignUp from './pages/SignUp';
 import AdminDashboard from './pages/AdminDashboard';
 import CoinMarket from './pages/CoinMarket';
 import ForVendors from './pages/ForVendors';
@@ -24,6 +25,11 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [showCoinMarket, setShowCoinMarket] = useState(false);
+
+  // Scroll to Top on View Change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentView]);
 
   // Protocol Access ID (PAID) for Guests
   const [protocolId] = useState<string>(() => {
@@ -388,6 +394,7 @@ const App: React.FC = () => {
       case 'policies': return <PrivacyPolicy />;
       case 'refund-policy': return <RefundPolicy />;
       case 'auth': return <Auth onLogin={handleLogin} />;
+      case 'signup': return <SignUp onLogin={handleLogin} onNavigate={setCurrentView} />;
       case 'admin': return <AdminDashboard users={adminUsersList} serviceRequests={serviceRequests} onExit={() => setCurrentView('home')} onUpdateUser={handleUpdateUser} />;
       default: return null;
     }

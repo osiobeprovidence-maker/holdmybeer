@@ -76,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         ) : (
           <div className="hidden lg:flex items-center gap-6">
             <button onClick={() => onNavigate('auth')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Login</button>
-            <button onClick={() => onNavigate('auth')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Sign Up</button>
+            <button onClick={() => onNavigate('signup')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Sign Up</button>
           </div>
         )}
 
@@ -162,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] text-center mb-6">Join the Protocol</p>
                   <div className="grid grid-cols-2 gap-4">
                     <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Login</button>
-                    <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign Up</button>
+                    <button onClick={() => { onNavigate('signup'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign Up</button>
                   </div>
                 </div>
               )}
@@ -194,7 +194,7 @@ export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNav
         <div className="grid grid-cols-2 gap-24">
           <div>
             <h4 className="text-black font-bold mb-6 text-[11px] uppercase tracking-[0.3em] opacity-40">Navigate</h4>
-            <ul className="space-y-4 text-sm font-bold text-[#86868b]">
+            <ul className="space-y-4 text-[13px] md:text-sm font-bold text-[#86868b]">
               <li><button onClick={() => onNavigate('how-it-works')} className="hover:text-black uppercase">How It Works</button></li>
               <li><button onClick={() => onNavigate('pricing')} className="hover:text-black uppercase">Pricing</button></li>
               <li><button onClick={() => onNavigate('for-vendors')} className="hover:text-black uppercase">For Vendors</button></li>
