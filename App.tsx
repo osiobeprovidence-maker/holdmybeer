@@ -4,6 +4,7 @@ import { Category, User, ServiceRequest, Location } from './types';
 import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
 import { ProductTour } from './components/ProductTour';
+import CalendarModal from './components/CalendarModal';
 import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
@@ -58,6 +59,8 @@ const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
   const [isUrgent, setIsUrgent] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const [calendarVendor, setCalendarVendor] = useState<User | null>(null);
 
   useEffect(() => {
     localStorage.setItem('hmb_unlocks', JSON.stringify(unlockedUserIds));
@@ -319,6 +322,51 @@ const App: React.FC = () => {
     }
   };
 
+  const handleCalendarUnlock = async (vendor: User, isUrgentUnlock: boolean, selectedDate: Date) => {
+    // similar logic to handleUnlockWithCoins but driven by the calendar
+    if (!currentUser) {
+      setCalendarVendor(null);
+      setCurrentView('auth');
+      return;
+    }
+
+    const requiredCoins = isUrgentUnlock ? 2 : 1;
+
+    if ((currentUser.coins || 0) < requiredCoins) {
+      setCalendarVendor(null);
+      setShowCoinMarket(true);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      const newBalance = currentUser.coins - requiredCoins;
+      const updatedUser = { ...currentUser, coins: newBalance };
+
+      if (supabase) {
+        await supabase
+          .from('profiles')
+          .update({ coins: newBalance })
+          .eq('id', currentUser.id);
+      }
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+      const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
+      handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
+
+      setCalendarVendor(null);
+      // also close main profile modal if it was open behind it
+      setActiveUser(null);
+    } catch (error) {
+      console.error("Coin unlock error:", error);
+      alert("Error processing protocol unlock.");
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handleUpdateUser = (updatedUser: User) => {
     if (currentUser && currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
@@ -386,14 +434,20 @@ const App: React.FC = () => {
             assistantMessage={assistantMessage}
             setAssistantMessage={setAssistantMessage}
             setFilteredVendors={setFilteredVendors}
-            onVendorSelect={setActiveUser}
+            onVendorSelect={(vendor) => {
+              setActiveUser(vendor);
+              setCalendarVendor(vendor);
+            }}
             unlockedVendorIds={unlockedUserIds}
             isLoggedIn={!!currentUser}
             currentUser={currentUser}
             onUpdateUser={handleUpdateUser}
           />
         );
-      case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={setActiveUser} unlockedIds={unlockedUserIds} />;
+      case 'discovery': return <Discovery users={users.filter(u => !u.isSuspended)} onSelect={(vendor) => {
+        setActiveUser(vendor);
+        setCalendarVendor(vendor);
+      }} unlockedIds={unlockedUserIds} />;
       case 'pricing': return <Pricing />;
       case 'dashboard':
         return currentUser ? (
@@ -439,7 +493,7 @@ const App: React.FC = () => {
       )}
 
       {isProcessingPayment && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-white/90 backdrop-blur-3xl animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-[700] flex items-center justify-center bg-white/90 backdrop-blur-3xl animate-in fade-in duration-500">
           <div className="text-center">
             <div className="w-16 h-16 border-[4px] border-[#f5f5f7] border-t-black rounded-full animate-spin mx-auto mb-8"></div>
             <h2 className="text-2xl font-black uppercase tracking-tighter">Verifying Handshake...</h2>
@@ -636,6 +690,16 @@ const App: React.FC = () => {
 
       {!currentUser && <Footer onNavigate={setCurrentView} />}
       <ProductTour isLoggedIn={!!currentUser} />
+
+      {calendarVendor && (
+        <CalendarModal
+          vendor={calendarVendor}
+          isOpen={!!calendarVendor}
+          onClose={() => setCalendarVendor(null)}
+          onUnlock={handleCalendarUnlock}
+          isUnlocked={unlockedUserIds.includes(calendarVendor.id)}
+        />
+      )}
     </div>
   );
 };

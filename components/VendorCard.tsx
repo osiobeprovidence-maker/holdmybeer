@@ -59,11 +59,11 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onSelect, isUnlocked, i
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onSelect(vendor); // We'll use onSelect but maybe with a flag or just let the parent handle it
+              onSelect(vendor); // Using the parent handler for calendar access
             }}
-            className="text-[10px] font-black uppercase tracking-widest border-b-2 border-black pb-0.5 hover:opacity-50 transition-all"
+            className="text-[10px] font-black justify-center items-center py-3 px-6 bg-[#f5f5f7] rounded-full uppercase tracking-widest hover:bg-black hover:text-white transition-all"
           >
-            View Short
+            Check Calendar
           </button>
           <div className="flex flex-col text-right">
             <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Location</span>
