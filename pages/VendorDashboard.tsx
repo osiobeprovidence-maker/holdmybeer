@@ -20,6 +20,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
   const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'portfolio' | 'verification' | 'connections'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // Verification State
   const [kycStep, setKycStep] = useState<VerificationStep>(user.kycVerified ? 'success' : 'phone');
@@ -58,6 +59,32 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
       portfolio: ''
     }
   });
+
+  // Sync form data with user prop updates
+  React.useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      avatar: user.avatar || '',
+      businessName: user.businessName || '',
+      bio: user.bio || '',
+      category: user.category || Category.DJ,
+      location: user.location || Location.LAGOS_ISLAND,
+      minPrice: user.priceRange?.[0] || 0,
+      maxPrice: user.priceRange?.[1] || 0,
+      availableToday: user.availableToday || false,
+      availableDays: user.availableDays || ["Fri", "Sat", "Sun"],
+      portfolio: user.portfolio || [],
+      completedJobs: user.completedJobs || 0,
+      avgDeliveryTime: user.avgDeliveryTime || '24h',
+      topSkills: user.topSkills || [],
+      services: user.services || [],
+      experience: user.experience || '',
+      industries: user.industries || [],
+      panicModeOptIn: user.panicModeOptIn || false,
+      panicModePrice: user.panicModePrice || 0,
+      socialLinks: user.socialLinks || prev.socialLinks
+    }));
+  }, [user]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -257,7 +284,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             </button>
           ) : (
             <button
-              onClick={() => onUpdateUser({ ...user, isCreator: false })}
+              onClick={() => setShowExitConfirmation(true)}
               className="flex-grow md:flex-none px-12 py-5 rounded-full font-black text-[12px] bg-red-50 text-red-500 border border-red-100 uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
             >
               Exit Protocol
@@ -265,6 +292,41 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
           )}
         </div>
       </div>
+
+      {/* Exit Confirmation Overlay */}
+      {showExitConfirmation && (
+        <div className="fixed inset-0 z-[700] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowExitConfirmation(false)} />
+          <div className="relative bg-white w-full max-w-lg rounded-[48px] p-10 md:p-16 text-center shadow-2xl">
+            <div className="w-20 h-20 bg-red-500 text-white flex items-center justify-center rounded-[32px] mx-auto mb-10 text-4xl">⚠️</div>
+            <h3 className="text-3xl font-black uppercase tracking-tighter mb-6">Exit Protocol?</h3>
+            <div className="space-y-4 mb-10 text-left">
+              <p className="text-[11px] font-black text-[#86868b] uppercase tracking-widest">⚠️ WARNING: NO REFUNDS</p>
+              <p className="text-sm font-bold text-black/60 leading-relaxed italic">
+                If you have an active subscription, exiting the protocol now will NOT trigger a refund. You can reactivate later, but the current subscription period continues to run.
+              </p>
+              <p className="text-sm font-bold text-black/80">Are you sure you want to deactivate your professional node?</p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => {
+                  onUpdateUser({ ...user, isCreator: false });
+                  setShowExitConfirmation(false);
+                }}
+                className="w-full py-6 bg-red-500 text-white rounded-full font-black text-[12px] uppercase tracking-widest hover:bg-red-600 transition-all shadow-xl"
+              >
+                Confirm Deactivation
+              </button>
+              <button
+                onClick={() => setShowExitConfirmation(false)}
+                className="w-full py-6 bg-[#f5f5f7] text-black rounded-full font-black text-[12px] uppercase tracking-widest hover:bg-[#ebebe7] transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Onboarding Overlay */}
       {showOnboarding && (
@@ -475,12 +537,17 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
                   <div className="bg-[#f5f5f7] p-8 md:p-12 rounded-[40px] md:rounded-[56px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                     <div>
-                      <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">Emergency Status</h3>
-                      <p className="text-[#86868b] font-bold uppercase text-[10px] tracking-widest">Toggle "Active Now" for urgent requests.</p>
+                      <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">Live Availability</h3>
+                      <p className="text-[#86868b] font-bold uppercase text-[10px] tracking-widest">
+                        {user.availableToday ? 'You are visible to clients looking for immediate experts.' : 'Toggle to show up in "Available Now" searches.'}
+                      </p>
                     </div>
-                    <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl shadow-inner ${user.availableToday ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                    <button
+                      onClick={() => onUpdateUser({ ...user, availableToday: !user.availableToday })}
+                      className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-xl transition-all hover:scale-110 active:scale-95 ${user.availableToday ? 'bg-green-500 text-white animate-pulse' : 'bg-white text-gray-300 border border-black/5'}`}
+                    >
                       {user.availableToday ? '⚡️' : '💤'}
-                    </div>
+                    </button>
                   </div>
 
                   {/* Connections Signal Log */}
@@ -504,8 +571,11 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                                 <div className={`w-2.5 h-2.5 rounded-full ${req.paymentType === 'urgent' ? 'bg-red-500 animate-pulse' : 'bg-black/10'}`} />
                                 <div>
                                   <p className="text-xs font-black uppercase italic">{client?.name || 'Anonymous Protocol'}</p>
+                                  <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${req.paymentType === 'urgent' ? 'text-red-500' : 'text-black'}`}>
+                                    {req.paymentType === 'urgent' ? '🚨 EMERGENCY CONNECTION' : 'STANDARD CONNECTION'}
+                                  </p>
                                   <p className="text-[8px] font-bold text-[#86868b] uppercase tracking-widest">
-                                    {new Date(req.timestamp).toLocaleDateString()} — {req.paymentType === 'urgent' ? '🚨 Panic Mode Unlock' : 'Standard Connection'}
+                                    {new Date(req.timestamp).toLocaleDateString()}
                                   </p>
                                 </div>
                               </div>
@@ -573,15 +643,15 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                     </div>
 
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Rate Engine (₦)</label>
+                      <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Normal Mode Pricing (₦)</label>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black/20">₦</span>
-                          <input type="number" disabled={!isEditing} value={formData.minPrice} onChange={e => setFormData({ ...formData, minPrice: Number(e.target.value) })} placeholder="Base" className="w-full bg-[#f5f5f7] rounded-3xl p-6 pl-12 font-bold text-black outline-none disabled:opacity-40" />
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-black/20 uppercase">Min</span>
+                          <input type="number" disabled={!isEditing} value={formData.minPrice} onChange={e => setFormData({ ...formData, minPrice: Number(e.target.value) })} placeholder="Base" className="w-full bg-[#f5f5f7] rounded-3xl p-6 pl-14 font-bold text-black outline-none disabled:opacity-40" />
                         </div>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black/20">₦</span>
-                          <input type="number" disabled={!isEditing} value={formData.maxPrice} onChange={e => setFormData({ ...formData, maxPrice: Number(e.target.value) })} placeholder="Max" className="w-full bg-[#f5f5f7] rounded-3xl p-6 pl-12 font-bold text-black outline-none disabled:opacity-40" />
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-black/20 uppercase">Max</span>
+                          <input type="number" disabled={!isEditing} value={formData.maxPrice} onChange={e => setFormData({ ...formData, maxPrice: Number(e.target.value) })} placeholder="Max" className="w-full bg-[#f5f5f7] rounded-3xl p-6 pl-14 font-bold text-black outline-none disabled:opacity-40" />
                         </div>
                       </div>
                     </div>
