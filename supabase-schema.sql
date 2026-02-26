@@ -115,6 +115,9 @@ create table if not exists public.vendor_profiles (
   verification_status text not null default 'pending', -- pending/verified/rejected
   is_suspended boolean not null default false,
 
+  panic_mode_opt_in boolean not null default false,
+  panic_mode_price integer,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

@@ -13,7 +13,7 @@ export const initializePaystack = (options: {
   }
 
   const handler = PaystackPop.setup({
-    key: 'pk_test_11335bd6d0816667b81537e476583a56b9700721', // Test Key
+    key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
     email: options.email,
     amount: options.amount * 100, // Convert to Kobo
     currency: 'NGN',

@@ -93,7 +93,9 @@ const App: React.FC = () => {
           isPaid: p.is_paid,
           isPreLaunch: p.is_pre_launch,
           hasPurchasedSignUpPack: p.has_purchased_sign_up_pack,
-          preferredLocation: p.preferred_location as Location
+          preferredLocation: p.preferred_location as Location,
+          panicModeOptIn: p.panic_mode_opt_in,
+          panicModePrice: p.panic_mode_price
         }));
         setUsers(mappedUsers as unknown as User[]);
       }
@@ -168,6 +170,8 @@ const App: React.FC = () => {
           name: newUser.name,
           email: newUser.email,
           is_creator: newUser.isCreator,
+          panic_mode_opt_in: false,
+          panic_mode_price: 0,
           location: newUser.location,
           kyc_verified: newUser.kycVerified,
           kyc_status: newUser.kycStatus,

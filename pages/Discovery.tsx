@@ -44,7 +44,7 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
     <div className="pb-12 animate-in fade-in duration-700">
       <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-10">
         <div className="w-full">
-          <h1 className="text-4xl sm:text-5xl md:text-8xl font-extrabold mb-4 tracking-tighter text-black uppercase break-words max-w-full">Discovered</h1>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold mb-4 tracking-tighter text-black uppercase break-words max-w-full">Discovered</h1>
           <p className="text-[#86868b] font-bold uppercase text-[10px] md:text-[11px] tracking-[0.15em] md:tracking-[0.4em] opacity-50 break-words max-w-full">Verified professionals ready to execute.</p>
         </div>
 

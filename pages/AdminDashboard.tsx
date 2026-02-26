@@ -136,6 +136,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           </div>
         </div>
         <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
+          <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Emergency Signals</p>
+          <p className="text-3xl md:text-5xl font-black">{serviceRequests.filter(r => r.paymentType === 'urgent').length}</p>
+          <div className="mt-4 pt-4 border-t border-black/5 flex justify-between">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-[#86868b]">Panic Rate Active</span>
+          </div>
+        </div>
+        <div className="bg-[#f5f5f7] p-6 md:p-10 rounded-[40px] md:rounded-[48px] apple-shadow">
           <p className="text-[9px] md:text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-4">Expert Nodes</p>
           <p className="text-3xl md:text-5xl font-black">{totalExperts}</p>
         </div>
@@ -175,6 +182,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                         {isGuest && <span className="bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Guest Node</span>}
                         {u.isPaid && <span className="bg-black text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Sub Paid</span>}
                         {u.isPreLaunch && <span className="bg-orange-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase">Founding 200</span>}
+                        {u.panicModeOptIn && <span className="bg-red-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase flex items-center gap-1">🚨 Panic Ready</span>}
                       </div>
                       <p className="text-[10px] text-[#86868b] font-bold uppercase truncate">{u.isCreator ? (u.businessName || u.category) : (isGuest ? 'Hardware Identification' : 'Platform Member')}</p>
                       <p className="text-[8px] text-[#86868b] font-bold uppercase opacity-50 mt-1 font-mono">{u.email}</p>
@@ -212,6 +220,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                         {!u.isPaid && !isGuest && u.isCreator && (
                           <span className="text-[8px] font-black uppercase px-3 py-1 rounded-full bg-red-50 text-red-500">
                             Trial Mode
+                          </span>
+                        )}
+                        {u.panicModeOptIn && (
+                          <span className="text-[8px] font-black uppercase px-3 py-1 rounded-full bg-red-50 text-red-500">
+                            Rate: ₦{(u.panicModePrice || 0).toLocaleString()}
                           </span>
                         )}
                         <span className="text-[8px] font-black uppercase px-3 py-1 rounded-full bg-blue-50 text-blue-500 font-mono">
