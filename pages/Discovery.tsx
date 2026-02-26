@@ -17,10 +17,14 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
   const [maxPrice, setMaxPrice] = useState<number>(2000000);
   const [isUrgent, setIsUrgent] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   const experts = useMemo(() => users.filter(u => u.isCreator), [users]);
 
   const filtered = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const targetDate = isUrgent ? (selectedDate || todayStr) : selectedDate;
+
     return experts.filter(u => {
       const matchesCategory = categoryFilter === 'All' || u.category === categoryFilter;
       const matchesLocation = locationFilter === 'All' || u.location === locationFilter;
@@ -32,11 +36,27 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
       const price = u.priceRange ? u.priceRange[0] : 0;
       const matchesPrice = price >= minPrice && price <= maxPrice;
 
-      const matchesUrgency = !isUrgent || (u.availableToday && u.panicModeOptIn);
+      // Smart Calendar & Real Availability Logic
+      const isDateBlocked = targetDate ? (u.blockedDates?.includes(targetDate) || u.availabilityStatus === 'BOOKED') : false;
 
-      return matchesCategory && matchesLocation && matchesSearch && matchesPrice && matchesUrgency;
+      // If a date is explicitly selected (or defaulted safely in panic mode), it must not be blocked.
+      const matchesDate = targetDate ? !isDateBlocked : true;
+
+      // Intelligent Panic Mode: Opted-in + Actual Date Available + Not Fully Booked
+      const matchesUrgency = !isUrgent || (u.panicModeOptIn && !isDateBlocked && u.availabilityStatus !== 'BOOKED');
+
+      return matchesCategory && matchesLocation && matchesSearch && matchesPrice && matchesDate && matchesUrgency;
+    }).sort((a, b) => {
+      // Advanced Layer Ranking logic for Urgent Responses
+      // Rank by reliability, infrastructural score, and ratings
+      if (isUrgent) {
+        const scoreA = (a.reliabilityScore || 0) * 1.5 + (a.infrastructuralRank || 0) + (a.ratingAvg || 0) * 10;
+        const scoreB = (b.reliabilityScore || 0) * 1.5 + (b.infrastructuralRank || 0) + (b.ratingAvg || 0) * 10;
+        return scoreB - scoreA;
+      }
+      return 0; // keep default order
     });
-  }, [experts, categoryFilter, locationFilter, searchTerm, minPrice, maxPrice, isUrgent]);
+  }, [experts, categoryFilter, locationFilter, searchTerm, minPrice, maxPrice, isUrgent, selectedDate]);
 
   const categories = Object.values(Category);
 
@@ -147,6 +167,19 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="block text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] mb-6">Event Date</label>
+              <div className="max-w-xs">
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full bg-[#f5f5f7] text-black font-bold text-[14px] px-6 py-4 rounded-3xl outline-none transition-all border border-black/5 focus:ring-2 focus:ring-black/5"
+                />
               </div>
             </div>
           </div>

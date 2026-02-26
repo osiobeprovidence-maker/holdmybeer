@@ -874,36 +874,34 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                       )}
                     </div>
 
-                    {isVenueCategory && (
-                      <div>
-                        <div className="flex justify-between items-end mb-8 border-b border-black/5 pb-4">
-                          <h4 className="text-[14px] font-black uppercase tracking-widest">Calendar Interface</h4>
-                          <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">Block Booked Dates</span>
-                        </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-3 sm:gap-4">
-                          {getCalendarDays().map((date, idx) => {
-                            const dateStr = date.toISOString().split('T')[0];
-                            const isBlocked = formData.blockedDates.includes(dateStr);
-                            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                            const dayNum = date.getDate();
-                            const monthStr = date.toLocaleDateString('en-US', { month: 'short' });
-                            return (
-                              <button
-                                key={idx}
-                                disabled={!isEditing}
-                                onClick={() => toggleBlockedDate(dateStr)}
-                                className={`aspect-square rounded-[24px] flex flex-col items-center justify-center p-2 transition-all disabled:opacity-50 ${isBlocked ? 'bg-red-50 border border-red-200 text-red-500 scale-95' : 'bg-[#f5f5f7] hover:bg-black/5 text-black'}`}
-                                title={dateStr}
-                              >
-                                <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1">{dayName}</span>
-                                <span className={`text-xl font-black ${isBlocked ? 'text-red-500 line-through opacity-80' : ''}`}>{dayNum}</span>
-                                <span className="text-[9px] font-bold uppercase tracking-widest mt-1 opacity-60">{monthStr}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
+                    <div>
+                      <div className="flex justify-between items-end mb-8 border-b border-black/5 pb-4">
+                        <h4 className="text-[14px] font-black uppercase tracking-widest">Calendar Interface</h4>
+                        <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">Block Booked Dates</span>
                       </div>
-                    )}
+                      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-3 sm:gap-4">
+                        {getCalendarDays().map((date, idx) => {
+                          const dateStr = date.toISOString().split('T')[0];
+                          const isBlocked = formData.blockedDates.includes(dateStr);
+                          const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                          const dayNum = date.getDate();
+                          const monthStr = date.toLocaleDateString('en-US', { month: 'short' });
+                          return (
+                            <button
+                              key={idx}
+                              disabled={!isEditing}
+                              onClick={() => toggleBlockedDate(dateStr)}
+                              className={`aspect-square rounded-[24px] flex flex-col items-center justify-center p-2 transition-all disabled:opacity-50 ${isBlocked ? 'bg-red-50 border border-red-200 text-red-500 scale-95' : 'bg-[#f5f5f7] hover:bg-black/5 text-black'}`}
+                              title={dateStr}
+                            >
+                              <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1">{dayName}</span>
+                              <span className={`text-xl font-black ${isBlocked ? 'text-red-500 line-through opacity-80' : ''}`}>{dayNum}</span>
+                              <span className="text-[9px] font-bold uppercase tracking-widest mt-1 opacity-60">{monthStr}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
