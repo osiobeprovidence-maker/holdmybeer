@@ -9,13 +9,14 @@ interface DashboardProps {
   unlockedVendors: User[];
   serviceRequests: ServiceRequest[];
   allUsers: User[];
+  onNavigate: (view: string) => void;
 }
 
 type VerificationStep = 'phone' | 'otp' | 'name' | 'id_select' | 'id_number' | 'id_photo' | 'success';
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlockedVendors, serviceRequests, allUsers }) => {
+const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlockedVendors, serviceRequests, allUsers, onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'portfolio' | 'verification' | 'connections'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -210,8 +211,8 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
   return (
     <div className="pb-12 animate-in fade-in duration-700 max-w-5xl mx-auto px-6">
-      {/* Payment Banner */}
-      {!user.isPaid && (
+      {/* Payment Banner - Only for Professionals */}
+      {!user.isPaid && user.isCreator && (
         <div className={`mb-12 p-8 rounded-[40px] flex flex-col md:flex-row items-center justify-between gap-6 ${needsPayment ? 'bg-red-500 text-white' : 'bg-black text-white'}`}>
           <div>
             <h3 className="text-xl font-black uppercase tracking-tight mb-2">
@@ -360,7 +361,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
               <h3 className="text-4xl font-black tracking-tighter uppercase italic leading-none mb-8">Personal <br />Hub.</h3>
               <p className="text-sm font-bold text-black/40 uppercase mb-8">Access your unlocked connections and manage your global profile.</p>
               <button
-                onClick={() => setActiveTab('connections')}
+                onClick={() => onNavigate('my-connections')}
                 className="px-8 py-4 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all"
               >
                 View Connections
@@ -406,7 +407,19 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                   <div className="w-full bg-[#f5f5f7] h-1 rounded-full mb-8 overflow-hidden">
                     <div className="bg-black h-full" style={{ width: `${vendor.reliabilityScore}%` }} />
                   </div>
-                  <button className="w-full bg-[#f5f5f7] py-4 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Connect Now</button>
+                  <button
+                    onClick={() => {
+                      const phoneNumber = vendor.phone?.replace(/\D/g, '');
+                      if (phoneNumber) {
+                        window.open(`https://wa.me/${phoneNumber}?text=Hello, I connected with you on HoldMyBeer.`, '_blank');
+                      } else {
+                        alert('No contact signal found for this expert.');
+                      }
+                    }}
+                    className="w-full bg-[#f5f5f7] py-4 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                  >
+                    Connect Now
+                  </button>
                 </div>
               ))}
               {unlockedVendors.length === 0 && (

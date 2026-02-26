@@ -388,6 +388,7 @@ const App: React.FC = () => {
             serviceRequests={serviceRequests}
             unlockedVendors={users.filter(u => unlockedUserIds.includes(u.id))}
             allUsers={users}
+            onNavigate={setCurrentView}
           />
         ) : <Auth onLogin={handleLogin} />;
       case 'my-connections': return <MyConnections vendors={users.filter(u => u.isCreator)} unlockedVendorIds={unlockedUserIds} serviceRequests={serviceRequests} currentUser={currentUser} onVendorSelect={setActiveUser} protocolId={protocolId} />;
