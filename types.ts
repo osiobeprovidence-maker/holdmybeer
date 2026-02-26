@@ -266,6 +266,13 @@ export interface User {
   };
   panicModeOptIn?: boolean;
   panicModePrice?: number;
+  availabilityStatus?: 'AVAILABLE' | 'LIMITED' | 'BOOKED';
+  blockedDates?: string[]; // ISO Strings e.g. ["2024-03-01"]
+  lastAvailabilityUpdate?: number; // Timestamp for auto-expiry
+  // Venue specific
+  venueCapacity?: number;
+  venueType?: 'Indoor' | 'Outdoor' | 'Both';
+  hasParking?: boolean;
 }
 
 export type Vendor = User;

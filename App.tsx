@@ -94,8 +94,11 @@ const App: React.FC = () => {
           isPreLaunch: p.is_pre_launch,
           hasPurchasedSignUpPack: p.has_purchased_sign_up_pack,
           preferredLocation: p.preferred_location as Location,
-          panicModeOptIn: p.panic_mode_opt_in,
-          panicModePrice: p.panic_mode_price
+          panicModeOptIn: p.panic_mode_opt_in || false,
+          panicModePrice: p.panic_mode_price || 0,
+          availabilityStatus: p.availability_status || 'AVAILABLE',
+          blockedDates: p.blocked_dates || [],
+          lastAvailabilityUpdate: p.last_availability_update ? new Date(p.last_availability_update).getTime() : Date.now()
         }));
         setUsers(mappedUsers as unknown as User[]);
       }
@@ -161,7 +164,12 @@ const App: React.FC = () => {
         isPreLaunch,
         isPaid: false,
         hasPurchasedSignUpPack: false,
-        trialStartDate: Date.now()
+        trialStartDate: Date.now(),
+        panicModeOptIn: false,
+        panicModePrice: 0,
+        availabilityStatus: 'AVAILABLE',
+        blockedDates: [],
+        lastAvailabilityUpdate: Date.now()
       };
 
       if (supabase) {
@@ -170,8 +178,11 @@ const App: React.FC = () => {
           name: newUser.name,
           email: newUser.email,
           is_creator: newUser.isCreator,
-          panic_mode_opt_in: false,
-          panic_mode_price: 0,
+          panic_mode_opt_in: newUser.panicModeOptIn,
+          panic_mode_price: newUser.panicModePrice,
+          availability_status: newUser.availabilityStatus,
+          blocked_dates: newUser.blockedDates,
+          last_availability_update: new Date(newUser.lastAvailabilityUpdate).toISOString(),
           location: newUser.location,
           kyc_verified: newUser.kycVerified,
           kyc_status: newUser.kycStatus,

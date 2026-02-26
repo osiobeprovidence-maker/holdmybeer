@@ -16,8 +16,18 @@ type VerificationStep = 'phone' | 'otp' | 'name' | 'id_select' | 'id_number' | '
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const VENUE_CATEGORIES = [
+  Category.VENUE,
+  Category.OUTDOOR_SPACE,
+  Category.ROOFTOP_VENUE,
+  Category.BEACH_VENUE,
+  Category.PRIVATE_APARTMENT,
+  Category.CONFERENCE_CENTER,
+  Category.POPUP_SPACE
+];
+
 const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlockedVendors, serviceRequests, allUsers, onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'portfolio' | 'verification' | 'connections'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'portfolio' | 'availability' | 'verification' | 'connections'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
@@ -51,6 +61,12 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     industries: user.industries || [],
     panicModeOptIn: user.panicModeOptIn || false,
     panicModePrice: user.panicModePrice || 0,
+    availabilityStatus: user.availabilityStatus || 'AVAILABLE',
+    blockedDates: user.blockedDates || [],
+    lastAvailabilityUpdate: user.lastAvailabilityUpdate || 0,
+    venueCapacity: user.venueCapacity || 50,
+    venueType: user.venueType || 'Indoor',
+    hasParking: user.hasParking || false,
     socialLinks: user.socialLinks || {
       instagram: '',
       behance: '',
@@ -82,6 +98,12 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
       industries: user.industries || [],
       panicModeOptIn: user.panicModeOptIn || false,
       panicModePrice: user.panicModePrice || 0,
+      availabilityStatus: user.availabilityStatus || 'AVAILABLE',
+      blockedDates: user.blockedDates || [],
+      lastAvailabilityUpdate: user.lastAvailabilityUpdate || 0,
+      venueCapacity: user.venueCapacity || 50,
+      venueType: user.venueType || 'Indoor',
+      hasParking: user.hasParking || false,
       socialLinks: user.socialLinks || prev.socialLinks
     }));
   }, [user]);
@@ -144,6 +166,28 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
       ...prev,
       portfolio: prev.portfolio.filter((_, i) => i !== index)
     }));
+  };
+
+  const isVenueCategory = VENUE_CATEGORIES.includes(formData.category);
+
+  const toggleBlockedDate = (dateStr: string) => {
+    setFormData(prev => ({
+      ...prev,
+      blockedDates: prev.blockedDates.includes(dateStr)
+        ? prev.blockedDates.filter(d => d !== dateStr)
+        : [...prev.blockedDates, dateStr]
+    }));
+  };
+
+  const getCalendarDays = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
   };
 
   // Verification Logic Branching
@@ -501,6 +545,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             {[
               { id: 'overview', label: 'Analytics' },
               { id: 'spot', label: 'Configuration' },
+              { id: 'availability', label: 'Availability' },
               { id: 'portfolio', label: 'Work Gallery' },
               { id: 'verification', label: 'Identity' }
             ].map(t => (
@@ -642,7 +687,30 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    {isVenueCategory && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-8 border-t border-black/5">
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Capacity</label>
+                          <input type="number" disabled={!isEditing} value={formData.venueCapacity} onChange={e => setFormData({ ...formData, venueCapacity: Number(e.target.value) })} className="w-full bg-[#f5f5f7] border-none rounded-3xl p-6 font-bold text-black outline-none disabled:opacity-40" />
+                        </div>
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Venue Type</label>
+                          <select disabled={!isEditing} value={formData.venueType} onChange={e => setFormData({ ...formData, venueType: e.target.value as any })} className="w-full bg-[#f5f5f7] border-none rounded-3xl p-6 font-bold text-black outline-none appearance-none disabled:opacity-40">
+                            <option value="Indoor">Indoor</option>
+                            <option value="Outdoor">Outdoor</option>
+                            <option value="Both">Both</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center pt-8">
+                          <label className="flex items-center gap-4 cursor-pointer">
+                            <input type="checkbox" disabled={!isEditing} checked={formData.hasParking} onChange={e => setFormData({ ...formData, hasParking: e.target.checked })} className="w-6 h-6 rounded-md accent-black" />
+                            <span className="text-[11px] font-black uppercase tracking-widest text-[#86868b]">Has Parking</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-4 pt-8 border-t border-black/5">
                       <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Normal Mode Pricing (₦)</label>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="relative">
@@ -739,6 +807,102 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
                     {isEditing && (
                       <button onClick={handleSaveSpot} className="w-full btn-apple py-6 text-lg uppercase tracking-widest shadow-2xl mt-8">Apply Configuration</button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'availability' && (
+                <div className="space-y-12 animate-in fade-in duration-500">
+                  <div className="flex justify-between items-end mb-10">
+                    <div>
+                      <h3 className="text-3xl font-black uppercase tracking-tighter mb-2">Availability Protocol</h3>
+                      <p className="text-[#86868b] font-bold uppercase text-[10px] tracking-widest">Manage your booking schedule.</p>
+                    </div>
+                    {isEditing ? (
+                      <button onClick={handleSaveSpot} className="btn-apple px-10 py-4 uppercase tracking-widest shadow-xl">Save Changes</button>
+                    ) : (
+                      <button onClick={() => setIsEditing(true)} className="px-10 py-4 bg-[#f5f5f7] rounded-full text-[10px] font-black text-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Enable Editing</button>
+                    )}
+                  </div>
+
+                  <div className="bg-white border border-black/5 p-8 md:p-12 rounded-[40px] md:rounded-[56px] apple-shadow">
+                    <h4 className="text-[14px] font-black uppercase tracking-widest mb-8 border-b border-black/5 pb-4">Standard Status</h4>
+                    <div className="flex flex-col sm:flex-row gap-6 mb-12">
+                      {[
+                        { id: 'AVAILABLE', label: 'Available', color: 'bg-green-500' },
+                        { id: 'LIMITED', label: 'Limited', color: 'bg-yellow-500' },
+                        { id: 'BOOKED', label: 'Fully Booked', color: 'bg-red-500' }
+                      ].map(status => (
+                        <button
+                          key={status.id}
+                          disabled={!isEditing}
+                          onClick={() => setFormData({ ...formData, availabilityStatus: status.id as any })}
+                          className={`flex-1 p-6 rounded-[32px] flex items-center justify-center gap-4 transition-all ${formData.availabilityStatus === status.id ? 'bg-black text-white shadow-xl scale-105' : 'bg-[#f5f5f7] text-[#86868b] hover:bg-black/5'} disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-[#f5f5f7]`}
+                        >
+                          <div className={`w-3 h-3 rounded-full ${status.color} ${formData.availabilityStatus === status.id ? 'animate-pulse' : ''}`} />
+                          <span className="font-black text-[12px] uppercase tracking-widest">{status.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="mb-12">
+                      <h4 className="text-[14px] font-black uppercase tracking-widest mb-8 border-b border-black/5 pb-4">Urgent Booking Mode (Panic Mode)</h4>
+                      <div className="flex flex-col md:flex-row items-center justify-between bg-[#f5f5f7] p-8 rounded-[32px] gap-6">
+                        <div>
+                          <p className="font-black text-lg mb-2 uppercase">Accepting Urgent Bookings</p>
+                          <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">When enabled, you appear in Panic Mode results with priority placement.</p>
+                        </div>
+                        <button
+                          disabled={!isEditing}
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              availableToday: !formData.availableToday,
+                              lastAvailabilityUpdate: !formData.availableToday ? Date.now() : formData.lastAvailabilityUpdate
+                            })
+                          }}
+                          className={`flex-none w-20 h-10 rounded-full relative transition-colors duration-300 disabled:opacity-50 ${formData.availableToday ? 'bg-green-500' : 'bg-black/10'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-8 h-8 rounded-full bg-white transition-transform duration-300 shadow-sm ${formData.availableToday ? 'translate-x-10' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
+                      {formData.availableToday && (
+                        <p className="text-[9px] font-black text-red-500 uppercase tracking-widest mt-4 ml-4">
+                          ⚠️ Auto-Expires in 24 hours to prevent stale availability.
+                        </p>
+                      )}
+                    </div>
+
+                    {isVenueCategory && (
+                      <div>
+                        <div className="flex justify-between items-end mb-8 border-b border-black/5 pb-4">
+                          <h4 className="text-[14px] font-black uppercase tracking-widest">Calendar Interface</h4>
+                          <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">Block Booked Dates</span>
+                        </div>
+                        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-3 sm:gap-4">
+                          {getCalendarDays().map((date, idx) => {
+                            const dateStr = date.toISOString().split('T')[0];
+                            const isBlocked = formData.blockedDates.includes(dateStr);
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                            const dayNum = date.getDate();
+                            const monthStr = date.toLocaleDateString('en-US', { month: 'short' });
+                            return (
+                              <button
+                                key={idx}
+                                disabled={!isEditing}
+                                onClick={() => toggleBlockedDate(dateStr)}
+                                className={`aspect-square rounded-[24px] flex flex-col items-center justify-center p-2 transition-all disabled:opacity-50 ${isBlocked ? 'bg-red-50 border border-red-200 text-red-500 scale-95' : 'bg-[#f5f5f7] hover:bg-black/5 text-black'}`}
+                                title={dateStr}
+                              >
+                                <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1">{dayName}</span>
+                                <span className={`text-xl font-black ${isBlocked ? 'text-red-500 line-through opacity-80' : ''}`}>{dayNum}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-widest mt-1 opacity-60">{monthStr}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

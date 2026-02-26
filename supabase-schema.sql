@@ -117,6 +117,10 @@ create table if not exists public.vendor_profiles (
 
   panic_mode_opt_in boolean not null default false,
   panic_mode_price integer,
+  
+  availability_status text not null default 'AVAILABLE', -- AVAILABLE/LIMITED/BOOKED
+  blocked_dates jsonb default '[]'::jsonb,
+  last_availability_update timestamptz default now(),
 
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
