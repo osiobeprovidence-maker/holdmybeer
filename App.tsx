@@ -289,7 +289,10 @@ const App: React.FC = () => {
       setCurrentUser(updatedUser);
       setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
-      handleUnlockSuccess(vendor.id, 0, vendor.availableToday ? 'urgent' : 'standard');
+      const isUrgentUnlock = vendor.availableToday && vendor.panicModeOptIn;
+      const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
+
+      handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
       setAssistantMessage(`Protocol Handshake Verified via Coins. Balance: ${newBalance}`);
       setTimeout(() => setAssistantMessage(null), 5000);
@@ -457,9 +460,9 @@ const App: React.FC = () => {
                 ) : (
                   <button
                     onClick={() => handleUnlockWithCoins(activeUser)}
-                    className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
+                    className={`px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block rounded-full font-black shadow-xl transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
                   >
-                    Hire Expert ({activeUser.availableToday ? '2 Coins' : '1 Coin'})
+                    {activeUser.availableToday && activeUser.panicModeOptIn ? '⚠️ Panic Unlock' : 'Hire Expert'} ({activeUser.availableToday ? '2 Coins' : '1 Coin'})
                   </button>
                 )}
                 <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
@@ -599,9 +602,9 @@ const App: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => handleUnlockWithCoins(activeUser)}
-                        className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4"
+                        className={`w-full md:w-auto px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4 rounded-full font-black transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
                       >
-                        <span>Unlock Contact</span>
+                        <span>{activeUser.availableToday && activeUser.panicModeOptIn ? '🚨 PANIC UNLOCK' : 'Unlock Contact'}</span>
                         <span className="opacity-20">/</span>
                         <span>{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
                       </button>

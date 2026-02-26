@@ -264,6 +264,8 @@ export interface User {
     tiktok?: string;
     portfolio?: string;
   };
+  panicModeOptIn?: boolean;
+  panicModePrice?: number;
 }
 
 export type Vendor = User;

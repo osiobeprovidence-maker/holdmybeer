@@ -31,8 +31,8 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
 
       const price = u.priceRange ? u.priceRange[0] : 0;
       const matchesPrice = price >= minPrice && price <= maxPrice;
-      // Fix: Using availableToday as availableNow does not exist on the User interface
-      const matchesUrgency = !isUrgent || u.availableToday;
+
+      const matchesUrgency = !isUrgent || (u.availableToday && u.panicModeOptIn);
 
       return matchesCategory && matchesLocation && matchesSearch && matchesPrice && matchesUrgency;
     });
@@ -179,6 +179,7 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
                       vendor={u}
                       onSelect={onSelect}
                       isUnlocked={unlockedIds.includes(u.id)}
+                      isUrgent={isUrgent}
                     />
                   ))}
                 </div>
@@ -200,6 +201,7 @@ const Discovery: React.FC<DiscoveryProps> = ({ users, onSelect, unlockedIds }) =
                     vendor={u}
                     onSelect={onSelect}
                     isUnlocked={unlockedIds.includes(u.id)}
+                    isUrgent={isUrgent}
                   />
                 ))}
               </div>

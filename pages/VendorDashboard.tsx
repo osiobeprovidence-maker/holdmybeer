@@ -47,6 +47,8 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     services: user.services || [],
     experience: user.experience || '',
     industries: user.industries || [],
+    panicModeOptIn: user.panicModeOptIn || false,
+    panicModePrice: user.panicModePrice || 0,
     socialLinks: user.socialLinks || {
       instagram: '',
       behance: '',
@@ -467,6 +469,48 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                       {user.availableToday ? '⚡️' : '💤'}
                     </div>
                   </div>
+
+                  {/* Connections Signal Log */}
+                  <div className="pt-10">
+                    <div className="flex justify-between items-end mb-8">
+                      <div>
+                        <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.4em] mb-2">Live Connections</h4>
+                        <h2 className="text-3xl font-black tracking-tighter uppercase italic">Signal Log.</h2>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {serviceRequests
+                        .filter(req => req.creatorId === user.id)
+                        .sort((a, b) => b.timestamp - a.timestamp)
+                        .map(req => {
+                          const client = allUsers.find(u => u.id === req.clientId);
+                          return (
+                            <div key={req.id} className="bg-white border border-black/5 p-6 rounded-[32px] apple-shadow flex items-center justify-between group hover:scale-[1.01] transition-all">
+                              <div className="flex items-center gap-6">
+                                <div className={`w-2.5 h-2.5 rounded-full ${req.paymentType === 'urgent' ? 'bg-red-500 animate-pulse' : 'bg-black/10'}`} />
+                                <div>
+                                  <p className="text-xs font-black uppercase italic">{client?.name || 'Anonymous Protocol'}</p>
+                                  <p className="text-[8px] font-bold text-[#86868b] uppercase tracking-widest">
+                                    {new Date(req.timestamp).toLocaleDateString()} — {req.paymentType === 'urgent' ? '🚨 Panic Mode Unlock' : 'Standard Connection'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs font-black italic">₦{req.amount.toLocaleString()}</p>
+                                <p className="text-[8px] font-bold text-black/10 uppercase tracking-widest">{req.status}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      {serviceRequests.filter(req => req.creatorId === user.id).length === 0 && (
+                        <div className="py-20 text-center bg-[#f5f5f7] rounded-[48px] border border-black/5">
+                          <p className="text-3xl mb-4">📡</p>
+                          <p className="text-[9px] font-black text-[#86868b] uppercase tracking-widest">No active signals received on your spot yet.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -543,6 +587,40 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                           </button>
                         ))}
                       </div>
+                    </div>
+
+                    <div className="pt-12 border-t border-black/10 space-y-12">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                        <div>
+                          <h3 className="text-2xl font-black uppercase tracking-tighter">Emergency Protocol</h3>
+                          <p className="text-[#86868b] font-bold uppercase text-[10px] tracking-widest">Enable Panic Mode requests for extra fee.</p>
+                        </div>
+                        <button
+                          disabled={!isEditing}
+                          onClick={() => setFormData({ ...formData, panicModeOptIn: !formData.panicModeOptIn })}
+                          className={`px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-widest transition-all ${formData.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'bg-[#f5f5f7] text-[#86868b]'}`}
+                        >
+                          {formData.panicModeOptIn ? 'Panic Mode Active' : 'Enable Panic Mode'}
+                        </button>
+                      </div>
+
+                      {formData.panicModeOptIn && (
+                        <div className="space-y-4 animate-in slide-in-from-top-4">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-4">Panic Mode Flat Rate (₦)</label>
+                          <div className="relative">
+                            <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black/20">₦</span>
+                            <input
+                              type="number"
+                              disabled={!isEditing}
+                              value={formData.panicModePrice}
+                              onChange={e => setFormData({ ...formData, panicModePrice: Number(e.target.value) })}
+                              placeholder="Panic Rate"
+                              className="w-full bg-[#f5f5f7] rounded-3xl p-6 pl-12 font-bold text-black outline-none disabled:opacity-40"
+                            />
+                          </div>
+                          <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest ml-4">This rate will be applied to all emergency "Available Now" requests.</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* New Work Page Configuration Fields */}
