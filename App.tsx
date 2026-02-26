@@ -668,16 +668,22 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     {unlockedUserIds.includes(activeUser.id) ? (
-                      <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
+                      <>
+                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all">View Calendar</button>
+                        <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
+                      </>
                     ) : (
-                      <button
-                        onClick={() => handleUnlockWithCoins(activeUser)}
-                        className={`w-full md:w-auto px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4 rounded-full font-black transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
-                      >
-                        <span>{activeUser.availableToday && activeUser.panicModeOptIn ? '🚨 PANIC UNLOCK' : 'Unlock Contact'}</span>
-                        <span className="opacity-20">/</span>
-                        <span>{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
-                      </button>
+                      <>
+                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all">View Calendar</button>
+                        <button
+                          onClick={() => handleUnlockWithCoins(activeUser)}
+                          className={`w-full md:w-auto px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4 rounded-full font-black transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
+                        >
+                          <span>{activeUser.availableToday && activeUser.panicModeOptIn ? '🚨 PANIC UNLOCK' : 'Unlock Contact'}</span>
+                          <span className="opacity-20">/</span>
+                          <span>{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
