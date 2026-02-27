@@ -13,7 +13,7 @@ interface UnlockModalProps {
 
 const UnlockModal: React.FC<UnlockModalProps> = ({ vendor, userEmail, onClose, onSuccess }) => {
   const [step, setStep] = useState<'confirm' | 'paying' | 'success'>('confirm');
-  const amount = vendor.availableToday ? 5000 : 2500;
+  const amount = vendor.availableToday ? 400 : 200;
   const type = vendor.availableToday ? 'urgent' : 'standard';
 
   const handlePay = () => {

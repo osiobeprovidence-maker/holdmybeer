@@ -257,8 +257,8 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     setKycStep('success');
   };
 
-  const yearlyPrice = user.isPreLaunch ? 7000 : 10000;
-  const trialPeriodDays = user.isPreLaunch ? 30 : 7;
+  const yearlyPrice = 15000;
+  const trialPeriodDays = 14;
   const trialDaysLeft = Math.max(0, Math.ceil(((user.trialStartDate || Date.now()) + (trialPeriodDays * 24 * 60 * 60 * 1000) - Date.now()) / (24 * 60 * 60 * 1000)));
   const needsPayment = !user.isPaid && trialDaysLeft <= 0;
 

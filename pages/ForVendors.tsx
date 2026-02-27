@@ -18,7 +18,7 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                         onClick={() => onNavigate('auth')}
                         className="btn-apple px-12 py-6 text-xl uppercase italic tracking-tighter shadow-2xl scale-105 active:scale-95 transition-all"
                     >
-                        Start 30-Day Free Trial
+                        Start 14-Day Free Trial
                     </button>
                 </div>
             </section>
@@ -75,7 +75,7 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                 <div className="flex flex-col md:flex-row-reverse gap-12 md:gap-24 items-center">
                     <div className="w-full md:w-1/2">
                         <div className="bg-blue-600 aspect-square rounded-[64px] flex items-center justify-center text-[120px] md:text-[180px] text-white italic font-black apple-shadow relative overflow-hidden group">
-                            30
+                            14
                             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-700"></div>
                         </div>
                     </div>
@@ -83,7 +83,7 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                         <p className="text-black font-black uppercase tracking-[0.4em] text-[12px] mb-6 opacity-40">Step 02</p>
                         <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic leading-none">Free Trial <br />Launch.</h2>
                         <p className="text-xl text-[#86868b] font-medium leading-relaxed mb-6 italic">
-                            Every vendor gets 30 days of full protocol invisibility. Unlimited lead potential. Zero payment required while you scale.
+                            Every vendor gets 14 days of full protocol invisibility. Unlimited lead potential. Zero payment required while you scale.
                         </p>
                         <div className="inline-block bg-[#f5f5f7] px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest leading-none">0.00 NGN to start</div>
                     </div>
@@ -97,7 +97,7 @@ const ForVendors: React.FC<{ onNavigate: (view: string) => void }> = ({ onNaviga
                         <p className="text-black font-black uppercase tracking-[0.4em] text-[12px] mb-6 opacity-40">Step 03</p>
                         <h2 className="text-3xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">Activate & <br />Maintain.</h2>
                         <p className="text-xl text-[#86868b] font-medium leading-relaxed mb-6 italic">
-                            Activate your listing after 30 days to remain public. Secure your spot in the retrieval layer and access premium boost features.
+                            Activate your listing after 14 days to remain public. Secure your spot in the retrieval layer and access premium boost features.
                         </p>
                         <div className="flex items-center gap-3 text-black opacity-30 italic font-black text-sm uppercase">
                             <span className="w-8 h-[2px] bg-black"></span> Professional Longevity

@@ -174,9 +174,9 @@ const HowItWorks: React.FC = () => {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-black font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] mb-6">Phase 02</p>
-              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">30-Day Launch.</h2>
+              <h2 className="text-2xl md:text-7xl font-black mb-8 tracking-tighter text-black leading-none uppercase italic">14-Day Launch.</h2>
               <p className="text-base md:text-xl text-[#86868b] font-medium leading-relaxed mb-8 text-left">
-                Every vendor starts with a 30-day free trial. Direct client leads, maximum visibility, and zero risk while you build your pipeline.
+                Every vendor starts with a 14-day free trial. Direct client leads, maximum visibility, and zero risk while you build your pipeline.
               </p>
               <div className="border border-black/5 p-8 rounded-[40px] bg-white inline-block">
                 <p className="text-4xl font-black text-black">0.00 <span className="text-sm uppercase tracking-widest text-[#86868b] ml-2">NGN during trial</span></p>
@@ -221,7 +221,7 @@ const HowItWorks: React.FC = () => {
               <ul className="space-y-4 font-bold text-black uppercase text-sm italic">
                 <li className="flex items-center gap-3"><span className="w-2 h-2 bg-black rounded-full"></span> Business logo or pro image only</li>
                 <li className="flex items-center gap-3"><span className="w-2 h-2 bg-black rounded-full"></span> Fake listings are removed instantly</li>
-                <li className="flex items-center gap-3"><span className="w-2 h-2 bg-black rounded-full"></span> 30-day trial for new vendors</li>
+                <li className="flex items-center gap-3"><span className="w-2 h-2 bg-black rounded-full"></span> 14-day trial for new vendors</li>
               </ul>
             </div>
           </div>

@@ -22,13 +22,16 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
     }, []);
 
     const regularPackages = [
-        { coins: 5, price: 5000, label: 'Starter Pack', description: 'Perfect for quick contacts' },
-        { coins: 10, price: 9000, label: 'Value Pack', description: 'Most popular among planners', popular: true },
-        { coins: 20, price: 16000, label: 'Pro Pack', description: 'Best value for frequent users' },
+        { coins: 1, price: 200, label: 'Single Unlock', description: 'Perfect for a single contact' },
+        { coins: 5, price: 1000, label: 'Starter Pack', description: 'Perfect for quick contacts' },
+        { coins: 10, price: 2000, label: 'Value Pack', description: 'Most popular among planners', popular: true },
+        { coins: 23, price: 4000, label: 'Pro Pack - 20+3 Bonus', description: 'Best value for frequent users' },
+        { coins: 58, price: 10000, label: 'Elite Pack - 50+8 Bonus', description: 'Ultimate protocol power' },
     ];
 
-    const showSignUpPack = currentUser && !currentUser.hasPurchasedSignUpPack;
-    const signUpPack = { coins: 3, price: 2500, label: 'Welcome Pack', description: 'One-time signup offer', special: true };
+    const showSignUpPack = false;
+    const signUpPack = { coins: 1, price: 200, label: 'Welcome Pack', description: 'One-time signup offer', special: true };
+
 
     const handlePurchase = (pkg: any) => {
         if (!currentUser) {

@@ -78,28 +78,30 @@ const Pricing: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Starter Pack */}
               <div className="bg-white p-12 rounded-[48px] border border-black/5 apple-shadow hover:scale-[1.02] transition-all group">
-                <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-blue-600">New Users Only</p>
-                <h3 className="text-2xl font-black mb-8 tracking-tighter uppercase italic">Starter Pack</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-black/40">Base Package</p>
+                <h3 className="text-2xl font-black mb-8 tracking-tighter uppercase italic">Single Unlock</h3>
                 <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-3xl md:text-5xl font-black tracking-tighter text-black">₦2,500</span>
-                  <span className="text-[10px] md:text-sm font-bold text-[#86868b] uppercase">/ 3 Coins</span>
+                  <span className="text-3xl md:text-5xl font-black tracking-tighter text-black">₦200</span>
+                  <span className="text-[10px] md:text-sm font-bold text-[#86868b] uppercase">/ 1 Coin</span>
                 </div>
                 <div className="w-full h-[2px] bg-black/5 mb-8"></div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-black/40">Exclusive one-time purchase</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-black/40">Quick single contact</p>
               </div>
 
-              {/* Package 2 - Placeholder */}
-              <div className="bg-[#f5f5f7] p-12 rounded-[48px] border border-black/[0.02] flex flex-col justify-center items-center text-center opacity-60">
-                <p className="text-[10px] font-black uppercase tracking-widest mb-4">Standard Pack</p>
-                <p className="text-3xl font-black text-black italic">₦X,XXX</p>
-                <p className="text-sm font-bold uppercase tracking-tight text-[#86868b] mt-2">X COINS</p>
-              </div>
-
-              {/* Package 3 - Placeholder */}
-              <div className="bg-[#f5f5f7] p-12 rounded-[48px] border border-black/[0.02] flex flex-col justify-center items-center text-center opacity-60">
+              {/* Package 2 */}
+              <div className="bg-[#f5f5f7] p-12 rounded-[48px] border border-black/5 flex flex-col justify-center items-center text-center">
                 <p className="text-[10px] font-black uppercase tracking-widest mb-4">Value Pack</p>
-                <p className="text-3xl font-black text-black italic">₦X,XXX</p>
-                <p className="text-sm font-bold uppercase tracking-tight text-[#86868b] mt-2">X COINS</p>
+                <p className="text-3xl font-black text-black italic">₦2,000</p>
+                <p className="text-sm font-bold uppercase tracking-tight text-[#86868b] mt-2">10 COINS</p>
+              </div>
+
+              {/* Package 3 */}
+              <div className="bg-black p-12 rounded-[48px] border border-white/5 flex flex-col justify-center items-center text-center text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 text-[60px] opacity-10 rotate-12">🔥</div>
+                <p className="text-[10px] font-black uppercase tracking-widest mb-4 text-white/50">Pro Pack</p>
+                <p className="text-3xl font-black italic">₦4,000</p>
+                <p className="text-sm font-bold uppercase tracking-tight text-white/60 mt-2">23 COINS</p>
+                <span className="mt-4 px-4 py-1.5 bg-red-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest">+3 Bonus Coins</span>
               </div>
             </div>
           </div>
@@ -125,7 +127,7 @@ const Pricing: React.FC = () => {
             <div className="bg-zinc-900 p-6 md:p-20 rounded-[32px] md:rounded-[56px] text-white flex flex-col relative overflow-hidden group">
               <div className="absolute -bottom-6 -right-6 text-[80px] md:text-[200px] opacity-10 group-hover:scale-110 transition-transform duration-1000">🎉</div>
               <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-4 text-white/40">The Professional Start</p>
-              <h3 className="text-xl md:text-7xl font-black mb-6 tracking-tighter uppercase italic leading-none">30-Day <br />Free Trial.</h3>
+              <h3 className="text-xl md:text-7xl font-black mb-6 tracking-tighter uppercase italic leading-none">14-Day <br />Free Trial.</h3>
               <p className="text-sm md:text-lg font-medium text-white/60 mb-8 uppercase tracking-tight italic">
                 Full visibility. Access to all leads. Direct connects. Zero payment required to start your journey.
               </p>
@@ -141,23 +143,16 @@ const Pricing: React.FC = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-4 text-[#86868b]">Post-Trial Protocol</p>
               <h3 className="text-xl md:text-5xl font-black mb-8 tracking-tighter uppercase italic leading-none">Activate <br />Your Spot.</h3>
               <p className="text-sm md:text-lg font-medium text-black/60 mb-10 uppercase tracking-tight italic">
-                To remain visible and accessible to event planners after 30 days, maintain an active listing.
+                To remain visible and accessible to event planners after 14 days, maintain an active listing.
               </p>
 
               <div className="space-y-4 mb-12">
-                <div className="bg-white p-8 rounded-[40px] border border-black/5 flex justify-between items-center opacity-40">
+                <div className="bg-white p-8 rounded-[40px] border border-black/5 flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-black uppercase italic">Monthly Activation</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#86868b]">30 Days Access</p>
+                    <p className="text-sm font-black uppercase italic">Annual Activation</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#86868b]">365 Days Access</p>
                   </div>
-                  <p className="text-2xl font-black italic uppercase">₦X,XXX</p>
-                </div>
-                <div className="bg-white p-8 rounded-[40px] border border-black/5 flex justify-between items-center opacity-40">
-                  <div>
-                    <p className="text-sm font-black uppercase italic">Quarterly Activation</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#86868b]">90 Days Access</p>
-                  </div>
-                  <p className="text-2xl font-black italic uppercase">₦X,XXX</p>
+                  <p className="text-2xl font-black italic uppercase">₦15,000</p>
                 </div>
               </div>
 
