@@ -5,6 +5,7 @@ import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
 import { ProductTour } from './components/ProductTour';
 import CalendarModal from './components/CalendarModal';
+import { SuccessAnimation } from './components/SuccessAnimation';
 import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
@@ -59,6 +60,12 @@ const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | 'All'>('All');
   const [isUrgent, setIsUrgent] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [successAnim, setSuccessAnim] = useState<{
+    isVisible: boolean;
+    actionText: string;
+    deducted?: number;
+    onCompleteCallback?: () => void;
+  }>({ isVisible: false, actionText: '' });
 
   const [calendarVendor, setCalendarVendor] = useState<User | null>(null);
 
@@ -248,7 +255,8 @@ const App: React.FC = () => {
       return u;
     }));
 
-    setCurrentView('my-connections');
+    // Replaced direct view change here, rely on animation callback if applicable
+    // setCurrentView('my-connections');
   };
 
   const handlePurchaseCoins = async (coinsToAdd: number) => {
@@ -276,6 +284,11 @@ const App: React.FC = () => {
     }
 
     setShowCoinMarket(false);
+
+    setSuccessAnim({
+      isVisible: true,
+      actionText: `+${coinsToAdd} Coins Added`,
+    });
   };
 
   const handleUnlockWithCoins = async (vendor: User) => {
@@ -312,8 +325,13 @@ const App: React.FC = () => {
 
       handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
-      setAssistantMessage(`Protocol Handshake Verified via Coins. Balance: ${newBalance}`);
-      setTimeout(() => setAssistantMessage(null), 5000);
+      setSuccessAnim({
+        isVisible: true,
+        actionText: isUrgentUnlock ? 'Panic Mode Activated' : 'Contact Unlocked',
+        deducted: requiredCoins,
+        onCompleteCallback: () => setCurrentView('my-connections')
+      });
+
     } catch (error) {
       console.error("Coin unlock error:", error);
       alert("Error processing protocol unlock.");
@@ -357,8 +375,15 @@ const App: React.FC = () => {
       handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
       setCalendarVendor(null);
-      // also close main profile modal if it was open behind it
       setActiveUser(null);
+
+      setSuccessAnim({
+        isVisible: true,
+        actionText: isUrgentUnlock ? 'Panic Mode Activated' : 'Contact Unlocked',
+        deducted: requiredCoins,
+        onCompleteCallback: () => setCurrentView('my-connections')
+      });
+
     } catch (error) {
       console.error("Coin unlock error:", error);
       alert("Error processing protocol unlock.");
@@ -399,11 +424,18 @@ const App: React.FC = () => {
       setCalendarVendor(null);
       setActiveUser(null);
 
-      if (phoneNumber) {
-        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
-      } else {
-        alert('Vendor phone number not found.');
-      }
+      setSuccessAnim({
+        isVisible: true,
+        actionText: 'Date Request Sent',
+        deducted: 1,
+        onCompleteCallback: () => {
+          if (phoneNumber) {
+            window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+          } else {
+            alert('Vendor phone number not found.');
+          }
+        }
+      });
 
     } catch (error) {
       console.error("Keep date error:", error);
@@ -761,6 +793,19 @@ const App: React.FC = () => {
           isUnlocked={unlockedUserIds.includes(calendarVendor.id)}
         />
       )}
+
+      <SuccessAnimation
+        isVisible={successAnim.isVisible}
+        actionText={successAnim.actionText}
+        deducted={successAnim.deducted}
+        balance={currentUser?.coins || 0}
+        onComplete={() => {
+          setSuccessAnim(prev => ({ ...prev, isVisible: false }));
+          if (successAnim.onCompleteCallback) {
+            successAnim.onCompleteCallback();
+          }
+        }}
+      />
     </div>
   );
 };
