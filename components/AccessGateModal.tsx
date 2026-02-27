@@ -34,37 +34,24 @@ const AccessGateModal: React.FC<AccessGateModalProps> = ({ isOpen, onClose, onSi
                     </svg>
                 </button>
 
-                {/* Coin badge */}
-                <div className="w-16 h-16 bg-black rounded-[20px] flex items-center justify-center mb-8">
-                    <span className="text-3xl">🪙</span>
-                </div>
-
                 {/* Headline */}
-                <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#86868b] mb-3">Unlock Access</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#86868b] mb-3 mt-4">Unlock Access</p>
                 <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-black uppercase leading-none mb-6">
-                    Activate<br />Your Free Coins.
+                    Activate Your<br />Free Coins.
                 </h2>
 
                 {/* Body copy */}
-                <p className="text-[#86868b] font-medium text-sm leading-relaxed mb-3">
-                    You need an account to activate your free coins.
-                </p>
-                <p className="text-black font-black text-sm mb-10">
-                    New users receive{' '}
-                    <span className="inline-block bg-black text-white rounded-full px-3 py-0.5 text-[11px] font-black uppercase tracking-widest mx-1">
-                        2 Free Coins
-                    </span>
-                    {' '}instantly.
+                <p className="text-[#86868b] font-medium text-sm leading-relaxed mb-8">
+                    Create an account to activate your 2 free coins and unlock access to professionals directly.
                 </p>
 
                 {/* CTA Buttons */}
                 <div className="space-y-3">
                     <button
                         onClick={onSignUp}
-                        className="w-full bg-black text-white py-5 rounded-[28px] text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"
+                        className="w-full bg-black text-white py-5 rounded-[28px] text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"
                     >
-                        <span>🪙</span>
-                        Create Account & Activate 2 Free Coins
+                        Create Account
                     </button>
                     <button
                         onClick={onLogin}

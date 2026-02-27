@@ -695,41 +695,44 @@ const App: React.FC = () => {
           <div className="relative bg-white w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[48px] overflow-hidden flex flex-col apple-shadow-2xl animate-in zoom-in-95 duration-500 border border-black/5">
 
             {/* Header Sticky Area */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-6 py-6 md:px-12 md:py-10 flex items-center justify-between">
-              <div className="flex items-center gap-4 md:gap-6">
-                <img src={activeUser.avatar} className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-black/5" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl md:text-2xl font-black tracking-tighter text-black uppercase">{activeUser.businessName || activeUser.name}</h2>
-                    <div className={`w-2 h-2 rounded-full ${activeUser.availableToday ? 'bg-green-500' : 'bg-gray-300'}`} />
+            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-5 py-5 md:px-10 md:py-8 flex items-center justify-between overflow-hidden">
+              <div className="flex items-center gap-3 md:gap-5 min-w-0">
+                <img src={activeUser.avatar} className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black/5 shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <h2 className="text-lg md:text-2xl font-black tracking-tighter text-black uppercase truncate">{activeUser.businessName || activeUser.name}</h2>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${activeUser.availableToday ? 'bg-green-50 text-green-600' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${activeUser.availableToday ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      {activeUser.availableToday ? 'Available' : 'Offline'}
+                    </span>
                   </div>
-                  <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-widest">{activeUser.category} • {activeUser.location}</p>
+                  <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-widest truncate">{activeUser.category} • {activeUser.location}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3 ml-4 shrink-0">
                 {unlockedUserIds.includes(activeUser.id) ? (
                   <button
                     onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }}
-                    className="btn-apple px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block"
+                    className="btn-apple px-4 py-2.5 text-[10px] uppercase tracking-widest hidden sm:block"
                   >
                     View Contact
                   </button>
                 ) : (
                   <button
                     onClick={() => handleUnlockWithCoins(activeUser)}
-                    className={`px-6 py-3 text-[11px] uppercase tracking-widest hidden sm:block rounded-full font-black shadow-xl transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
+                    className={`px-4 py-2.5 text-[10px] uppercase tracking-widest hidden sm:block rounded-full font-black shadow-xl transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
                   >
-                    {activeUser.availableToday && activeUser.panicModeOptIn ? '⚠️ Panic Unlock' : 'Hire Expert'} ({activeUser.availableToday ? '2 Coins' : '1 Coin'})
+                    {activeUser.availableToday && activeUser.panicModeOptIn ? '⚠️ Panic' : 'Hire Expert'}
                   </button>
                 )}
-                <button onClick={() => setActiveUser(null)} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button onClick={() => setActiveUser(null)} className="p-2.5 md:p-3 bg-[#f5f5f7] rounded-full hover:bg-black/10 transition-colors shrink-0">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>
             </div>
 
-            <div className="flex-grow overflow-y-auto scrollbar-hide">
-              <div className="max-w-5xl mx-auto px-6 pt-16 pb-20 md:px-12 md:pt-24 md:pb-32">
+            <div className="flex-grow overflow-y-auto overflow-x-hidden scrollbar-hide">
+              <div className="max-w-5xl mx-auto px-5 pt-12 pb-20 md:px-10 md:pt-20 md:pb-32">
 
                 {/* 1. Bio & Highlights Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 mt-4">

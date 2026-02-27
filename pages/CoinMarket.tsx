@@ -58,16 +58,16 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
     };
 
     return (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center md:p-10 touch-none">
+        <div className="fixed inset-0 z-[600] flex items-center justify-center md:p-8 touch-none overflow-hidden">
             <div className="absolute inset-0 bg-white/80 backdrop-blur-3xl" onClick={onClose} />
 
-            <div className="relative bg-white w-full h-full md:h-auto md:max-w-5xl md:rounded-[60px] overflow-hidden apple-shadow-2xl border border-black/5 flex flex-col md:flex-row animate-in zoom-in-95 duration-500 touch-auto">
+            <div className="relative bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-5xl md:rounded-[60px] overflow-hidden apple-shadow-2xl border border-black/5 flex flex-col md:flex-row animate-in zoom-in-95 duration-500 touch-auto">
 
                 {/* Left Side: Branding */}
                 <div className="w-full md:w-2/5 bg-[#f5f5f7] p-8 md:p-16 flex flex-col justify-between shrink-0">
                     <div>
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-black rounded-2xl flex items-center justify-center mb-6 md:mb-10 shadow-lg">
-                            <span className="text-white font-black text-lg">₿</span>
+                            <span className="text-white font-black text-lg tracking-tight">Ƀ</span>
                         </div>
                         <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-black uppercase mb-4 md:mb-6 leading-[0.9]">
                             Coin<br />Market
@@ -98,7 +98,7 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
                     <div className="flex justify-between items-center mb-8 md:mb-12">
                         <div>
                             <h3 className="text-xl font-bold tracking-tight">Select Package</h3>
-                            <p className="text-[#86868b] text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Current Balance: {currentUser?.coins || 0} Coins</p>
+                            <p className="text-[#86868b] text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Balance: <span className="font-black text-black">Ƀ{currentUser?.coins || 0}</span></p>
                         </div>
                         <button onClick={onClose} className="p-2 md:p-3 bg-[#f5f5f7] rounded-full hover:scale-110 transition-transform">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
