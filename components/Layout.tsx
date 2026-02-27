@@ -53,12 +53,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     </>
   );
 
-  // Logged-in desktop center nav — Discovery only
-  const loggedInNav = (
-    <>
-      <NavButton view="discovery" label="Discovery" />
-    </>
-  );
+  // Logged-in desktop center nav — empty (Discovery is in the right cluster)
+  const loggedInNav = null;
 
   return (
     <nav className="sticky top-0 z-[200] bg-white/80 backdrop-blur-xl border-b border-black/[0.03] py-5 px-6 md:px-12 flex items-center justify-between overflow-hidden">
