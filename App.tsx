@@ -214,6 +214,16 @@ const App: React.FC = () => {
   }, [selectedCategory, isUrgent, users]);
 
   const handleLogin = (user: User, isNewUser?: boolean) => {
+    // Restore pending vendor intent from sessionStorage if it was saved before auth navigation
+    const savedIntent = sessionStorage.getItem('hmb_pending_vendor');
+    if (savedIntent && !pendingVendorIntent) {
+      try {
+        const restored = JSON.parse(savedIntent) as User;
+        setPendingVendorIntent(restored);
+        sessionStorage.removeItem('hmb_pending_vendor');
+      } catch (_) { }
+    }
+
     const existing = users.find(u => u.email === user.email);
     if (existing) {
       if (existing.isSuspended) {
@@ -685,8 +695,23 @@ const App: React.FC = () => {
       <AccessGateModal
         isOpen={showAccessGate}
         onClose={() => setShowAccessGate(false)}
-        onSignUp={() => { setShowAccessGate(false); setCurrentView('signup'); }}
-        onLogin={() => { setShowAccessGate(false); setCurrentView('auth'); }}
+        onSignUp={() => {
+          // Save intent to sessionStorage so it survives the auth navigation
+          if (pendingVendorIntent) {
+            sessionStorage.setItem('hmb_pending_vendor', JSON.stringify(pendingVendorIntent));
+          }
+          setShowAccessGate(false);
+          setActiveUser(null); // Close profile modal so signup page is fully visible
+          setCurrentView('signup');
+        }}
+        onLogin={() => {
+          if (pendingVendorIntent) {
+            sessionStorage.setItem('hmb_pending_vendor', JSON.stringify(pendingVendorIntent));
+          }
+          setShowAccessGate(false);
+          setActiveUser(null); // Close profile modal so login page is fully visible
+          setCurrentView('auth');
+        }}
       />
 
       {activeUser && (
