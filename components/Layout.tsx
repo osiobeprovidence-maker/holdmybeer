@@ -97,10 +97,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-[11px] font-bold uppercase tracking-widest">Profile</span>
             </button>
             <button
-              onClick={onShowCoinMarket}
+              onClick={() => onNavigate('discovery')}
               className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#86868b] hover:text-black transition-colors"
             >
-              Wallet
+              Discovery
             </button>
             <button onClick={onLogout} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Exit</button>
           </div>
