@@ -57,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const loggedInNav = null;
 
   return (
-    <nav className="sticky top-0 z-[200] bg-white/80 backdrop-blur-xl border-b border-black/[0.03] py-5 px-6 md:px-12 flex items-center justify-between overflow-hidden">
+    <nav className="sticky top-0 z-[200] bg-white/80 backdrop-blur-xl border-b border-black/[0.03] py-5 px-6 md:px-12 flex items-center justify-between">
       <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { onNavigate('home'); setIsMenuOpen(false); }}>
         <div className="w-8 h-8 bg-black flex items-center justify-center rounded-full shadow-sm">
           <span className="text-base leading-none">🍺</span>
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="fixed inset-0 bg-black/40 backdrop-blur-2xl z-[150] animate-in fade-in duration-300 lg:hidden"
             onClick={() => setIsMenuOpen(false)}
           />
-          <div className="fixed inset-x-0 top-0 bg-white z-[160] flex flex-col p-8 pt-24 lg:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div className="fixed inset-x-0 top-0 bg-white z-[500] flex flex-col p-8 pt-24 lg:hidden animate-in slide-in-from-top-full duration-500 rounded-b-[48px] shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex flex-col gap-6 mb-12">
               {currentUser ? (
                 // Logged-in mobile nav
