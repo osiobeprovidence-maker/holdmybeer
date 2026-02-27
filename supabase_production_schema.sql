@@ -132,7 +132,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Attach trigger to auth.users
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
@@ -189,7 +189,7 @@ BEGIN
 
   RETURN json_build_object('success', true, 'new_balance', v_new_balance);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================
 -- FUNCTION: Credit coins (for purchases)
@@ -221,4 +221,4 @@ BEGIN
 
   RETURN json_build_object('success', true, 'new_balance', v_new_balance);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
