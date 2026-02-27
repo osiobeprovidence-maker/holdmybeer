@@ -35,15 +35,15 @@ export const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ isVisible, a
     if (!isVisible && phase === 'hidden') return null;
 
     return (
-        <div className={`fixed inset-0 z-[4000] flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-400 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`fixed inset-0 overflow-hidden z-[4000] flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-400 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'}`}>
             <div className="flex flex-col items-center justify-center text-center w-full px-6">
 
                 {/* White Symbol Animation */}
                 <div
-                    className={`w-28 h-28 md:w-36 md:h-36 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] flex items-center justify-center
-                    ${phase === 'entry' ? 'scale-90 opacity-0 rotate-0' : 'scale-100 opacity-100 rotate-2'}
-                    ${phase === 'pause' ? 'drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'drop-shadow-none'}
-                    ${phase === 'exit' ? 'scale-95 opacity-0 duration-400' : ''}
+                    className={`w-28 h-28 md:w-36 md:h-36 transition-all duration-[800ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] flex items-center justify-center
+                    ${phase === 'entry' ? '-translate-x-[100vw] opacity-0 rotate-[-15deg]' : ''}
+                    ${(phase === 'pause' || phase === 'text') ? 'translate-x-0 opacity-100 rotate-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]' : ''}
+                    ${phase === 'exit' ? 'translate-x-[100vw] opacity-0 rotate-[15deg] duration-500' : ''}
                 `}>
                     <svg viewBox="0 0 100 100" className="w-full h-full text-white" fill="currentColor">
                         {/* Sharp Angular ZigZag (HMB Mark) */}
