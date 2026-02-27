@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav className="sticky top-0 z-[200] bg-white/80 backdrop-blur-xl border-b border-black/[0.03] py-5 px-6 md:px-12 flex items-center justify-between overflow-hidden">
-      <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { onNavigate(currentUser ? 'discovery' : 'home'); setIsMenuOpen(false); }}>
+      <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { onNavigate('home'); setIsMenuOpen(false); }}>
         <div className="w-8 h-8 bg-black flex items-center justify-center rounded-full shadow-sm">
           <span className="text-base leading-none">🍺</span>
         </div>
