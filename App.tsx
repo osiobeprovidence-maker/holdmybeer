@@ -576,7 +576,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-black">
+    <div className="min-h-screen flex flex-col bg-white text-black overflow-x-hidden w-full relative">
       <Navbar
         currentView={currentView}
         onNavigate={setCurrentView}
