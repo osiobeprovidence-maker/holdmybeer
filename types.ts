@@ -206,7 +206,7 @@ export enum Location {
   APAPA = 'Apapa'
 }
 
-export type IDType = 'NIN' | 'Driver License' | 'PVC' | 'International Passport' | 'BVN';
+export type IDType = 'NIN' | 'Driver License' | 'PVC' | 'International Passport';
 
 export interface ServicePackage {
   id: string;

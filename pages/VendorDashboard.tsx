@@ -218,15 +218,9 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
   const selectId = (type: IDType) => {
     setKycType(type);
-
-    // SPECIFIC ASSET RULES:
-    // 1. BVN: Number only
-    // 2. Driver License: Photo only
-    // 3. Passport, NIN, PVC: Number AND Photo
-
-    if (type === 'BVN') {
-      setKycStep('id_number');
-    } else if (type === 'Driver License') {
+    // Driver License: Photo only (no number)
+    // All others (NIN, PVC, Passport): Number first, then photo
+    if (type === 'Driver License') {
       setKycStep('id_photo');
     } else {
       setKycStep('id_number');
@@ -235,14 +229,8 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
   const submitIdNumber = () => {
     if (kycNumberInput.length < 5) return alert("Enter valid number.");
-
-    if (kycType === 'BVN') {
-      // BVN ends here
-      finalizeVerification();
-    } else {
-      // Passport, NIN, PVC move to photo step
-      setKycStep('id_photo');
-    }
+    // All non-Driver-License IDs proceed to photo step
+    setKycStep('id_photo');
   };
 
   const handleKycPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1194,8 +1182,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                         {[
                           { id: 'International Passport', label: 'Travel Access (Passport)' },
                           { id: 'NIN', label: 'NIN (National ID)' },
-                          { id: 'PVC', label: 'Voter\'s Card (PVC)' },
-                          { id: 'BVN', label: 'BVN (No Photo Required)' },
+                          { id: 'PVC', label: "Voter's Card (PVC)" },
                           { id: 'Driver License', label: 'Driver License (No Number Required)' }
                         ].map(t => (
                           <button key={t.id} onClick={() => selectId(t.id as IDType)} className="p-6 md:p-10 rounded-[24px] md:rounded-[32px] bg-white border border-black/5 font-black uppercase tracking-widest text-[10px] md:text-[11px] text-left hover:border-black transition-all flex justify-between items-center group">
