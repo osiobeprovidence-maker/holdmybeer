@@ -7,6 +7,7 @@ import { ProductTour } from './components/ProductTour';
 import CalendarModal from './components/CalendarModal';
 import { SuccessAnimation } from './components/SuccessAnimation';
 import { LoadingAnimation } from './components/LoadingAnimation';
+import AccessGateModal from './components/AccessGateModal';
 import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
@@ -69,6 +70,10 @@ const App: React.FC = () => {
   }>({ isVisible: false, actionText: '' });
 
   const [calendarVendor, setCalendarVendor] = useState<User | null>(null);
+
+  // Access gate for unauthenticated unlock attempts
+  const [showAccessGate, setShowAccessGate] = useState(false);
+  const [pendingVendorIntent, setPendingVendorIntent] = useState<User | null>(null);
 
   useEffect(() => {
     localStorage.setItem('hmb_unlocks', JSON.stringify(unlockedUserIds));
@@ -152,7 +157,7 @@ const App: React.FC = () => {
     setFilteredVendors(result);
   }, [selectedCategory, isUrgent, users]);
 
-  const handleLogin = (user: User) => {
+  const handleLogin = (user: User, isNewUser?: boolean) => {
     const existing = users.find(u => u.email === user.email);
     if (existing) {
       if (existing.isSuspended) {
@@ -213,6 +218,24 @@ const App: React.FC = () => {
       setCurrentUser(newUser);
     }
     setCurrentView('home');
+
+    // Show welcome coins animation for brand-new signups
+    if (isNewUser) {
+      setSuccessAnim({
+        isVisible: true,
+        actionText: '2 Coins Activated',
+        onCompleteCallback: () => {
+          // Re-open the vendor profile they were trying to access
+          if (pendingVendorIntent) {
+            setActiveUser(pendingVendorIntent);
+            setPendingVendorIntent(null);
+          }
+        }
+      });
+    } else if (pendingVendorIntent) {
+      setActiveUser(pendingVendorIntent);
+      setPendingVendorIntent(null);
+    }
   };
 
   const handleUnlockSuccess = (vendorId: string, amount: number, type: 'standard' | 'urgent') => {
@@ -301,7 +324,8 @@ const App: React.FC = () => {
 
   const handleUnlockWithCoins = async (vendor: User) => {
     if (!currentUser) {
-      setCurrentView('auth');
+      setPendingVendorIntent(vendor);
+      setShowAccessGate(true);
       return;
     }
 
@@ -357,7 +381,8 @@ const App: React.FC = () => {
     // similar logic to handleUnlockWithCoins but driven by the calendar
     if (!currentUser) {
       setCalendarVendor(null);
-      setCurrentView('auth');
+      setPendingVendorIntent(vendor);
+      setShowAccessGate(true);
       return;
     }
 
@@ -412,7 +437,12 @@ const App: React.FC = () => {
   };
 
   const handleKeepDate = async (vendor: User, selectedDate: Date) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setCalendarVendor(null);
+      setPendingVendorIntent(vendor);
+      setShowAccessGate(true);
+      return;
+    }
 
     if ((currentUser.coins || 0) < 1) {
       setCalendarVendor(null);
@@ -595,6 +625,13 @@ const App: React.FC = () => {
       )}
 
       <LoadingAnimation isVisible={isProcessingPayment} />
+
+      <AccessGateModal
+        isOpen={showAccessGate}
+        onClose={() => setShowAccessGate(false)}
+        onSignUp={() => { setShowAccessGate(false); setCurrentView('signup'); }}
+        onLogin={() => { setShowAccessGate(false); setCurrentView('auth'); }}
+      />
 
       {activeUser && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 md:p-6">

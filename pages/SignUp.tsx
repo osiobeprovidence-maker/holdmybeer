@@ -4,7 +4,7 @@ import { User, Location } from '../types';
 import { supabase } from '../services/supabaseClient';
 
 interface SignUpProps {
-    onLogin: (user: User) => void;
+    onLogin: (user: User, isNewUser?: boolean) => void;
     onNavigate: (view: string) => void;
 }
 
@@ -58,6 +58,9 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
 
             if (data.user) {
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+                const isNewUser = !profile || (profile.coins || 0) === 0;
+                const startingCoins = isNewUser ? 2 : (profile?.coins || 0);
+
                 const loggedInUser: User = profile ? {
                     id: profile.id,
                     name: profile.name,
@@ -70,7 +73,7 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
                     totalUnlocks: profile.total_unlocks,
                     isSuspended: profile.is_suspended,
                     reliabilityScore: profile.reliability_score || 70,
-                    coins: profile.coins || 0
+                    coins: startingCoins
                 } : {
                     id: data.user.id,
                     name: name || data.user.user_metadata?.name || 'Expert Client',
@@ -80,9 +83,18 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
                     kycVerified: false,
                     kycStatus: 'unverified',
                     avatar: `https://ui-avatars.com/api/?name=${name || 'Expert'}&background=000&color=fff`,
-                    coins: 0
+                    coins: 2
                 };
-                onLogin(loggedInUser);
+
+                // Credit 2 coins if new user
+                if (isNewUser && supabase) {
+                    await supabase.from('profiles').upsert({
+                        id: loggedInUser.id,
+                        coins: 2
+                    });
+                }
+
+                onLogin(loggedInUser, isNewUser);
             }
         } else {
             setTimeout(() => {
@@ -95,8 +107,8 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
                     kycVerified: false,
                     kycStatus: 'unverified',
                     avatar: `https://ui-avatars.com/api/?name=${name}&background=000&color=fff`,
-                    coins: 0
-                });
+                    coins: 2
+                }, true);
             }, 1000);
         }
     };
