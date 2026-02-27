@@ -695,44 +695,44 @@ const App: React.FC = () => {
           <div className="relative bg-white w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[48px] overflow-hidden flex flex-col apple-shadow-2xl animate-in zoom-in-95 duration-500 border border-black/5">
 
             {/* Header Sticky Area */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-5 py-5 md:px-10 md:py-8 flex items-center justify-between overflow-hidden">
-              <div className="flex items-center gap-3 md:gap-5 min-w-0">
+            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black/5 px-4 py-4 md:px-10 md:py-8 flex items-center justify-between overflow-hidden">
+              <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
                 <img src={activeUser.avatar} className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black/5 shrink-0" />
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                    <h2 className="text-lg md:text-2xl font-black tracking-tighter text-black uppercase truncate">{activeUser.businessName || activeUser.name}</h2>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${activeUser.availableToday ? 'bg-green-50 text-green-600' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${activeUser.availableToday ? 'bg-green-500' : 'bg-gray-400'}`} />
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-[15px] md:text-2xl font-black tracking-tighter text-black uppercase truncate leading-tight">{activeUser.businessName || activeUser.name}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${activeUser.availableToday ? 'bg-green-50 text-green-600' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeUser.availableToday ? 'bg-green-500' : 'bg-gray-400'}`} />
                       {activeUser.availableToday ? 'Available' : 'Offline'}
                     </span>
+                    <p className="text-[9px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-widest truncate">{activeUser.category} • {activeUser.location}</p>
                   </div>
-                  <p className="text-[10px] md:text-[11px] font-bold text-[#86868b] uppercase tracking-widest truncate">{activeUser.category} • {activeUser.location}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 md:gap-3 ml-4 shrink-0">
+              <div className="flex items-center gap-2 ml-3 shrink-0">
                 {unlockedUserIds.includes(activeUser.id) ? (
                   <button
                     onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }}
-                    className="btn-apple px-4 py-2.5 text-[10px] uppercase tracking-widest hidden sm:block"
+                    className="btn-apple px-3 py-2 text-[9px] uppercase tracking-widest hidden sm:block"
                   >
                     View Contact
                   </button>
                 ) : (
                   <button
                     onClick={() => handleUnlockWithCoins(activeUser)}
-                    className={`px-4 py-2.5 text-[10px] uppercase tracking-widest hidden sm:block rounded-full font-black shadow-xl transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
+                    className={`px-3 py-2 text-[9px] uppercase tracking-widest hidden sm:block rounded-full font-black shadow-lg transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
                   >
-                    {activeUser.availableToday && activeUser.panicModeOptIn ? '⚠️ Panic' : 'Hire Expert'}
+                    {activeUser.availableToday && activeUser.panicModeOptIn ? '⚠️ Panic' : 'Hire'}
                   </button>
                 )}
-                <button onClick={() => setActiveUser(null)} className="p-2.5 md:p-3 bg-[#f5f5f7] rounded-full hover:bg-black/10 transition-colors shrink-0">
+                <button onClick={() => setActiveUser(null)} className="w-9 h-9 md:w-10 md:h-10 bg-[#f5f5f7] rounded-full hover:bg-black/10 transition-colors shrink-0 flex items-center justify-center mr-1">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>
             </div>
 
             <div className="flex-grow overflow-y-auto overflow-x-hidden scrollbar-hide">
-              <div className="max-w-5xl mx-auto px-5 pt-12 pb-20 md:px-10 md:pt-20 md:pb-32">
+              <div className="w-full max-w-5xl mx-auto px-4 pt-10 pb-8 md:px-10 md:pt-20 md:pb-32" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}>
 
                 {/* 1. Bio & Highlights Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 mt-4">
@@ -855,38 +855,42 @@ const App: React.FC = () => {
                         {activeUser.socialLinks?.portfolio && <a href={activeUser.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-[#86868b] hover:text-black">Portfolio</a>}
                       </>
                     ) : (
-                      <div className="flex items-center gap-2 opacity-30 cursor-not-allowed" title="Unlock contact to see social links">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Contact Signals Locked</span>
+                      <div className="flex items-center gap-2 opacity-60 cursor-not-allowed">
+                        <svg className="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black">Contact Signals Locked</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 w-full md:w-auto">
+                  <div className="flex items-center gap-3 w-full md:w-auto">
                     {unlockedUserIds.includes(activeUser.id) ? (
-                      <div className="flex flex-wrap md:flex-nowrap gap-3 w-full">
-                        <a href={`tel:${activeUser.phone}`} className="flex-1 md:flex-none px-6 md:px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center">Call</a>
+                      <div className="flex gap-3 w-full">
+                        <a href={`tel:${activeUser.phone}`} className="flex-1 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-[20px] font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center">Call</a>
                         <a
                           href={`https://wa.me/${activeUser.phone?.replace('+', '').replace(/ /g, '')}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 md:flex-none px-6 md:px-8 py-5 bg-green-500 hover:bg-green-600 text-white rounded-full font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center"
+                          className="flex-1 py-5 bg-green-500 hover:bg-green-600 text-white rounded-[20px] font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center"
                         >
                           WhatsApp
                         </a>
-                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto btn-apple px-8 md:px-12 py-5 uppercase tracking-widest">Keep Date</button>
+                        <button onClick={() => setCalendarVendor(activeUser)} className="flex-1 btn-apple py-5 uppercase tracking-widest rounded-[20px]">Keep Date</button>
                       </div>
                     ) : (
-                      <>
-                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all">View Calendar</button>
+                      <div className="flex gap-3 w-full">
+                        <button
+                          onClick={() => setCalendarVendor(activeUser)}
+                          className="flex-1 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-[20px] font-black text-[11px] uppercase tracking-widest transition-all text-center"
+                        >
+                          View Calendar
+                        </button>
                         <button
                           onClick={() => handleUnlockWithCoins(activeUser)}
-                          className={`w-full md:w-auto px-12 py-5 uppercase tracking-widest flex items-center justify-center gap-4 rounded-full font-black transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
+                          className={`flex-1 py-4 uppercase tracking-widest flex flex-col items-center justify-center gap-0.5 rounded-[20px] font-black transition-all ${activeUser.availableToday && activeUser.panicModeOptIn ? 'bg-red-500 text-white animate-pulse' : 'btn-apple'}`}
                         >
-                          <span>{activeUser.availableToday && activeUser.panicModeOptIn ? '🚨 PANIC UNLOCK' : 'Unlock Contact'}</span>
-                          <span className="opacity-20">/</span>
-                          <span>{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
+                          <span className="text-[11px]">{activeUser.availableToday && activeUser.panicModeOptIn ? '🚨 Panic Unlock' : 'Unlock Contact'}</span>
+                          <span className="text-[9px] opacity-60 font-black">{activeUser.availableToday ? '2 Coins' : '1 Coin'}</span>
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
