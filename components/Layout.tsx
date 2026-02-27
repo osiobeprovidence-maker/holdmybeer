@@ -53,12 +53,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     </>
   );
 
-  // Logged-in desktop nav items
+  // Logged-in desktop center nav — Discovery only
   const loggedInNav = (
     <>
       <NavButton view="discovery" label="Discovery" />
-      <NavButton view="pricing" label="Pricing" />
-      <NavButton view="for-vendors" label="For Vendors" />
     </>
   );
 
@@ -90,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {currentUser ? (
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-5">
             <button
               onClick={() => onNavigate('dashboard')}
               className="flex items-center gap-2 bg-[#f5f5f7] px-4 py-2 rounded-full hover:bg-[#ebebe7] transition-colors"
