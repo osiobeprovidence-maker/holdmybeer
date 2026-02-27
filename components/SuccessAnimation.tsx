@@ -9,23 +9,22 @@ export interface SuccessAnimationProps {
 }
 
 export const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ isVisible, actionText, balance, deducted, onComplete }) => {
-    const [phase, setPhase] = useState<'hidden' | 'entry' | 'pause' | 'text' | 'exit'>('hidden');
+    const [phase, setPhase] = useState<'hidden' | 'blank' | 'entry' | 'exit'>('hidden');
 
     useEffect(() => {
         if (isVisible) {
-            setPhase('entry');
+            setPhase('blank');
 
-            const enterT = setTimeout(() => setPhase('pause'), 50);
-            const textT = setTimeout(() => setPhase('text'), 1000);
-            const exitT = setTimeout(() => setPhase('exit'), 2500);
+            // Wait 200ms with pure white screen (blank phase) to transition cleanly
+            const entryT = setTimeout(() => setPhase('entry'), 200);
+            const exitT = setTimeout(() => setPhase('exit'), 1800);
             const completeT = setTimeout(() => {
                 setPhase('hidden');
                 onComplete();
-            }, 2900);
+            }, 2200);
 
             return () => {
-                clearTimeout(enterT);
-                clearTimeout(textT);
+                clearTimeout(entryT);
                 clearTimeout(exitT);
                 clearTimeout(completeT);
             };
@@ -35,40 +34,31 @@ export const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ isVisible, a
     if (!isVisible && phase === 'hidden') return null;
 
     return (
-        <div className={`fixed inset-0 overflow-hidden z-[4000] flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-400 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`fixed inset-0 z-[4000] flex items-center justify-center bg-white transition-opacity duration-400 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'}`}>
             <div className="flex flex-col items-center justify-center text-center w-full px-6">
 
-                {/* White Symbol Animation */}
-                <div
-                    className={`w-28 h-28 md:w-36 md:h-36 transition-all duration-[800ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] flex items-center justify-center
-                    ${phase === 'entry' ? '-translate-x-[100vw] opacity-0 rotate-[-15deg]' : ''}
-                    ${(phase === 'pause' || phase === 'text') ? 'translate-x-0 opacity-100 rotate-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]' : ''}
-                    ${phase === 'exit' ? 'translate-x-[100vw] opacity-0 rotate-[15deg] duration-500' : ''}
-                `}>
-                    <svg viewBox="0 0 100 100" className="w-full h-full text-white" fill="currentColor">
-                        {/* Sharp Angular ZigZag (HMB Mark) */}
-                        <path d="M8,70 L38,10 L58,45 L78,5 L102,50 L82,85 L65,50 L45,90 L25,35 L20,75 Z" />
+                {/* Subtle Checkmark */}
+                <div className={`w-16 h-16 md:w-20 md:h-20 mb-8 rounded-full border border-black/5 bg-[#f5f5f7] flex items-center justify-center transition-all duration-500 transform ease-[cubic-bezier(0.2,0.8,0.2,1)] ${phase === 'entry' ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
+                    <svg className="w-8 h-8 md:w-10 md:h-10 text-[#34C759]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
 
-                {/* Success Transition Elements */}
-                <div className={`mt-16 transition-all duration-500 ease-out transform
-                    ${(phase === 'text' || phase === 'exit') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-                `}>
-                    <p className="text-white/40 font-black uppercase tracking-[0.3em] text-[10px] mb-3">Payment Successful</p>
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[#34C759] uppercase tracking-tighter mb-12">{actionText}</h2>
+                <div className={`transition-all duration-500 ease-out transform ${phase === 'entry' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <p className="text-[#86868b] font-black uppercase tracking-[0.3em] text-[10px] sm:text-[11px] mb-3 md:mb-4">Payment Successful</p>
+                    <h2 className="text-xl md:text-3xl font-black text-black uppercase tracking-tighter mb-10">{actionText}</h2>
 
                     {deducted ? (
                         <div className="flex flex-col items-center">
-                            <p className="text-white/60 font-black uppercase tracking-[0.2em] text-[11px] mb-2">{deducted} Coin{deducted !== 1 ? 's' : ''} Used</p>
-                            <p className="text-white/40 font-bold uppercase tracking-widest text-[12px]">
-                                Remaining: <span className="text-white font-black">{balance} Coins</span>
+                            <p className="text-black font-black uppercase tracking-[0.2em] text-[11px] mb-2">{deducted} Coin{deducted !== 1 ? 's' : ''} Used</p>
+                            <p className="text-[#86868b] font-bold uppercase tracking-widest text-[11px] md:text-[12px]">
+                                Balance: <span className="text-black font-black">{balance} Coins</span>
                             </p>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center">
-                            <p className="text-white/40 font-bold uppercase tracking-widest text-[12px]">
-                                Wallet Balance: <span className="text-white font-black">{balance} Coins</span>
+                            <p className="text-[#86868b] font-bold uppercase tracking-widest text-[11px] md:text-[12px]">
+                                Balance: <span className="text-black font-black">{balance} Coins</span>
                             </p>
                         </div>
                     )}

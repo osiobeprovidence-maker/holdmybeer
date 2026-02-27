@@ -6,6 +6,7 @@ import { Navbar, Footer } from './components/Layout';
 import { ProductTour } from './components/ProductTour';
 import CalendarModal from './components/CalendarModal';
 import { SuccessAnimation } from './components/SuccessAnimation';
+import { LoadingAnimation } from './components/LoadingAnimation';
 import { supabase } from './services/supabaseClient';
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
@@ -273,6 +274,9 @@ const App: React.FC = () => {
     setCurrentUser(updatedUser);
     setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
+    setIsProcessingPayment(true);
+    const startTime = Date.now();
+
     if (supabase) {
       await supabase
         .from('profiles')
@@ -282,6 +286,10 @@ const App: React.FC = () => {
         })
         .eq('id', currentUser.id);
     }
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
+    setIsProcessingPayment(false);
 
     setShowCoinMarket(false);
 
@@ -305,8 +313,9 @@ const App: React.FC = () => {
     }
 
     setIsProcessingPayment(true);
-
     try {
+      const startTime = Date.now();
+
       const newBalance = currentUser.coins - requiredCoins;
       const updatedUser = { ...currentUser, coins: newBalance };
 
@@ -317,11 +326,15 @@ const App: React.FC = () => {
           .eq('id', currentUser.id);
       }
 
-      setCurrentUser(updatedUser);
-      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
-
       const isUrgentUnlock = vendor.availableToday && vendor.panicModeOptIn;
       const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
+      setIsProcessingPayment(false);
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
       handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
@@ -358,6 +371,8 @@ const App: React.FC = () => {
 
     setIsProcessingPayment(true);
     try {
+      const startTime = Date.now();
+
       const newBalance = currentUser.coins - requiredCoins;
       const updatedUser = { ...currentUser, coins: newBalance };
 
@@ -368,10 +383,14 @@ const App: React.FC = () => {
           .eq('id', currentUser.id);
       }
 
+      const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
+      setIsProcessingPayment(false);
+
       setCurrentUser(updatedUser);
       setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
-
-      const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
       handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
       setCalendarVendor(null);
@@ -403,6 +422,8 @@ const App: React.FC = () => {
 
     setIsProcessingPayment(true);
     try {
+      const startTime = Date.now();
+
       const newBalance = currentUser.coins - 1;
       const updatedUser = { ...currentUser, coins: newBalance };
 
@@ -413,13 +434,16 @@ const App: React.FC = () => {
           .eq('id', currentUser.id);
       }
 
-      setCurrentUser(updatedUser);
-      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
-
-      // Construct WhatsApp message
       const dateStr = selectedDate.toLocaleDateString();
       const message = encodeURIComponent(`Hello ${vendor.businessName || vendor.name}, I am interested in booking your services for ${dateStr}. I connected with you on HoldMyBeer.`);
       const phoneNumber = vendor.phone?.replace(/\D/g, '');
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
+      setIsProcessingPayment(false);
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
       setCalendarVendor(null);
       setActiveUser(null);
@@ -570,15 +594,7 @@ const App: React.FC = () => {
         />
       )}
 
-      {isProcessingPayment && (
-        <div className="fixed inset-0 z-[700] flex items-center justify-center bg-white/90 backdrop-blur-3xl animate-in fade-in duration-500">
-          <div className="text-center">
-            <div className="w-16 h-16 border-[4px] border-[#f5f5f7] border-t-black rounded-full animate-spin mx-auto mb-8"></div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter">Verifying Handshake...</h2>
-            <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em] mt-4">Securing Protocol Connection</p>
-          </div>
-        </div>
-      )}
+      <LoadingAnimation isVisible={isProcessingPayment} />
 
       {activeUser && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 md:p-6">
