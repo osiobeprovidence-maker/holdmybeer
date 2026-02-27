@@ -11,10 +11,10 @@ interface MyConnectionsProps {
   protocolId: string;
 }
 
-const MyConnections: React.FC<MyConnectionsProps> = ({ 
-  vendors, 
-  unlockedVendorIds, 
-  serviceRequests, 
+const MyConnections: React.FC<MyConnectionsProps> = ({
+  vendors,
+  unlockedVendorIds,
+  serviceRequests,
   currentUser,
   onVendorSelect,
   protocolId
@@ -28,11 +28,11 @@ const MyConnections: React.FC<MyConnectionsProps> = ({
           <p className="text-[12px] font-bold text-[#86868b] uppercase tracking-[0.4em] mb-4">Historical Access</p>
           <h1 className="text-5xl md:text-8xl font-extrabold mb-6 tracking-tighter text-black uppercase leading-none">History</h1>
           <div className="flex flex-wrap items-center gap-4">
-             <p className="text-[#86868b] font-bold uppercase text-[11px] tracking-widest opacity-50">Saved connection instances available on this device.</p>
-             <div className="bg-black/5 px-3 py-1.5 rounded-full flex items-center gap-2 border border-black/5">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-tighter font-mono">NODE ID: {protocolId}</span>
-             </div>
+            <p className="text-[#86868b] font-bold uppercase text-[11px] tracking-widest opacity-50">Saved connection instances available on this device.</p>
+            <div className="bg-black/5 px-3 py-1.5 rounded-full flex items-center gap-2 border border-black/5">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-tighter font-mono">NODE ID: {protocolId}</span>
+            </div>
           </div>
         </div>
         {!currentUser && (
@@ -50,35 +50,41 @@ const MyConnections: React.FC<MyConnectionsProps> = ({
           return (
             <div key={vendor.id} className="apple-card p-6 md:p-12 apple-shadow flex flex-col md:flex-row gap-12 items-center">
               <div className="w-24 h-24 md:w-48 md:h-48 flex-shrink-0">
-                 <img src={vendor.avatar} className="w-full h-full rounded-[32px] md:rounded-[40px] object-cover apple-shadow" />
+                <img src={vendor.avatar} className="w-full h-full rounded-[32px] md:rounded-[40px] object-cover apple-shadow" />
               </div>
 
               <div className="flex-grow text-center md:text-left">
                 <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2 opacity-30">{vendor.category}</p>
                 <h3 className="text-4xl font-extrabold text-black tracking-tight mb-8 uppercase">{vendor.businessName}</h3>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
                   <div className="bg-[#f5f5f7] p-6 rounded-[32px] border border-black/5 flex flex-col justify-center">
                     <p className="text-[9px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Mobile Access</p>
                     <p className="text-xl font-extrabold text-black tracking-tight">{vendor.phone}</p>
                   </div>
-                  <div className="flex gap-4">
-                    <a href={`tel:${vendor.phone}`} className="flex-1 bg-black text-white rounded-[32px] flex items-center justify-center text-[11px] font-black uppercase tracking-widest hover:scale-105 transition-all">Call</a>
-                    <a 
-                      href={`https://wa.me/${vendor.phone?.replace('+', '').replace(/ /g, '')}`} 
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    <a href={`tel:${vendor.phone}`} className="flex-1 min-w-[100px] bg-[#f5f5f7] hover:bg-black/5 text-black rounded-[32px] flex items-center justify-center py-4 text-[11px] font-black uppercase tracking-widest transition-all text-center">Call</a>
+                    <a
+                      href={`https://wa.me/${vendor.phone?.replace('+', '').replace(/ /g, '')}`}
                       target="_blank"
-                      className="flex-1 bg-black text-white rounded-[32px] flex items-center justify-center text-[11px] font-black uppercase tracking-widest border border-black hover:bg-white hover:text-black transition-all"
+                      className="flex-1 min-w-[100px] bg-green-500 hover:bg-green-600 text-white rounded-[32px] flex items-center justify-center py-4 text-[11px] font-black uppercase tracking-widest transition-all text-center"
                     >
                       WhatsApp
                     </a>
+                    <button
+                      onClick={() => onVendorSelect(vendor)}
+                      className="flex-1 min-w-[100px] bg-black text-white hover:bg-black/80 rounded-[32px] flex items-center justify-center py-4 text-[11px] font-black uppercase tracking-widest transition-all"
+                    >
+                      Keep Date
+                    </button>
                   </div>
                 </div>
               </div>
 
               <div className="text-right hidden md:block">
-                 <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Instance Date</p>
-                 <p className="text-sm font-bold text-black uppercase">{new Date(request?.timestamp || Date.now()).toLocaleDateString()}</p>
-                 <button onClick={() => onVendorSelect(vendor)} className="mt-8 text-black font-black text-[10px] uppercase tracking-widest border-b-2 border-black pb-1 hover:opacity-50 transition-all">Full Intent →</button>
+                <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Instance Date</p>
+                <p className="text-sm font-bold text-black uppercase">{new Date(request?.timestamp || Date.now()).toLocaleDateString()}</p>
+                <button onClick={() => onVendorSelect(vendor)} className="mt-8 text-[#86868b] font-black text-[10px] uppercase tracking-widest border-b border-transparent hover:border-[#86868b] pb-1 transition-all">View Profile</button>
               </div>
             </div>
           );

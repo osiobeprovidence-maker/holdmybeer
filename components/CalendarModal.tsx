@@ -8,10 +8,11 @@ interface CalendarModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUnlock: (vendor: Vendor, isUrgent: boolean, selectedDate: Date) => void;
+    onKeepDate?: (vendor: Vendor, selectedDate: Date) => void;
     isUnlocked: boolean;
 }
 
-const CalendarModal: React.FC<CalendarModalProps> = ({ vendor, isOpen, onClose, onUnlock, isUnlocked }) => {
+const CalendarModal: React.FC<CalendarModalProps> = ({ vendor, isOpen, onClose, onUnlock, onKeepDate, isUnlocked }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [viewMode, setViewMode] = useState<'month' | 'two-weeks'>('month');
@@ -224,8 +225,8 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ vendor, isOpen, onClose, 
                         <div className="text-right">
                             <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1">Status</p>
                             <p className={`text-sm font-black uppercase ${selectedStatus === 'AVAILABLE' ? 'text-green-500' :
-                                    selectedStatus === 'LIMITED' ? 'text-amber-500' :
-                                        selectedStatus === 'BOOKED' ? 'text-red-500' : 'text-black'
+                                selectedStatus === 'LIMITED' ? 'text-amber-500' :
+                                    selectedStatus === 'BOOKED' ? 'text-red-500' : 'text-black'
                                 }`}>
                                 {selectedStatus}
                             </p>
@@ -237,9 +238,14 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ vendor, isOpen, onClose, 
                             Date Unavailable
                         </div>
                     ) : isUnlocked ? (
-                        <div className="w-full py-4 bg-green-50 text-center rounded-full text-[11px] font-black text-green-600 uppercase tracking-widest border border-green-200">
-                            Contact Unlocked
-                        </div>
+                        <button
+                            onClick={() => selectedDate && onKeepDate && onKeepDate(vendor, selectedDate)}
+                            className="w-full flex-1 btn-apple py-5 text-[11px] uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
+                        >
+                            <span>Keep Date</span>
+                            <span className="opacity-50">|</span>
+                            <span>1 Coin</span>
+                        </button>
                     ) : (
                         <div className="flex gap-3">
                             <button

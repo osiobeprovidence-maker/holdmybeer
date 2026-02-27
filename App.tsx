@@ -367,6 +367,52 @@ const App: React.FC = () => {
     }
   };
 
+  const handleKeepDate = async (vendor: User, selectedDate: Date) => {
+    if (!currentUser) return;
+
+    if ((currentUser.coins || 0) < 1) {
+      setCalendarVendor(null);
+      setShowCoinMarket(true);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      const newBalance = currentUser.coins - 1;
+      const updatedUser = { ...currentUser, coins: newBalance };
+
+      if (supabase) {
+        await supabase
+          .from('profiles')
+          .update({ coins: newBalance })
+          .eq('id', currentUser.id);
+      }
+
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
+      // Construct WhatsApp message
+      const dateStr = selectedDate.toLocaleDateString();
+      const message = encodeURIComponent(`Hello ${vendor.businessName || vendor.name}, I am interested in booking your services for ${dateStr}. I connected with you on HoldMyBeer.`);
+      const phoneNumber = vendor.phone?.replace(/\D/g, '');
+
+      setCalendarVendor(null);
+      setActiveUser(null);
+
+      if (phoneNumber) {
+        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+      } else {
+        alert('Vendor phone number not found.');
+      }
+
+    } catch (error) {
+      console.error("Keep date error:", error);
+      alert("Error processing date request.");
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handleUpdateUser = (updatedUser: User) => {
     if (currentUser && currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
@@ -668,10 +714,18 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     {unlockedUserIds.includes(activeUser.id) ? (
-                      <>
-                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all">View Calendar</button>
-                        <button onClick={() => { setActiveUser(null); setCurrentView('my-connections'); }} className="w-full md:w-auto btn-apple px-12 py-5 uppercase tracking-widest">View Contact Signal</button>
-                      </>
+                      <div className="flex flex-wrap md:flex-nowrap gap-3 w-full">
+                        <a href={`tel:${activeUser.phone}`} className="flex-1 md:flex-none px-6 md:px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center">Call</a>
+                        <a
+                          href={`https://wa.me/${activeUser.phone?.replace('+', '').replace(/ /g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 md:flex-none px-6 md:px-8 py-5 bg-green-500 hover:bg-green-600 text-white rounded-full font-black text-[11px] uppercase tracking-widest transition-all text-center flex items-center justify-center"
+                        >
+                          WhatsApp
+                        </a>
+                        <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto btn-apple px-8 md:px-12 py-5 uppercase tracking-widest">Keep Date</button>
+                      </div>
                     ) : (
                       <>
                         <button onClick={() => setCalendarVendor(activeUser)} className="w-full md:w-auto px-8 py-5 bg-[#f5f5f7] hover:bg-black/10 text-black rounded-full font-black text-[11px] uppercase tracking-widest transition-all">View Calendar</button>
@@ -703,6 +757,7 @@ const App: React.FC = () => {
           isOpen={!!calendarVendor}
           onClose={() => setCalendarVendor(null)}
           onUnlock={handleCalendarUnlock}
+          onKeepDate={handleKeepDate}
           isUnlocked={unlockedUserIds.includes(calendarVendor.id)}
         />
       )}
