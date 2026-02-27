@@ -10,7 +10,9 @@ interface VendorCardProps {
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({ vendor, onSelect, isUnlocked, isUrgent }) => {
-  const priceRange = vendor.priceRange || [0, 0];
+  const activePackages = vendor.packages?.filter(p => p.isActive) || [];
+  const computedMin = activePackages.length > 0 ? Math.min(...activePackages.map(p => p.price)) : (vendor.priceRange?.[0] || 0);
+  const computedMax = activePackages.length > 0 ? Math.max(...activePackages.map(p => p.price)) : (vendor.priceRange?.[1] || 0);
   const rating = vendor.ratingAvg || 'NEW';
 
   return (
@@ -49,8 +51,12 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onSelect, isUnlocked, i
           </span>
           <span className={`font-bold text-sm ${isUrgent ? 'text-red-500' : 'text-black'}`}>
             {isUrgent
-              ? `₦${(vendor.panicModePrice || priceRange[0]).toLocaleString()}`
-              : `₦${priceRange[0].toLocaleString()} - ₦${priceRange[1].toLocaleString()}`
+              ? `₦${(vendor.panicModePrice || computedMin).toLocaleString()}`
+              : computedMin === computedMax && computedMin === 0
+                ? 'Price on Request'
+                : computedMin === computedMax
+                  ? `₦${computedMin.toLocaleString()}`
+                  : `₦${computedMin.toLocaleString()} – ₦${computedMax.toLocaleString()}`
             }
           </span>
         </div>

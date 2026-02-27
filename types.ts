@@ -208,6 +208,17 @@ export enum Location {
 
 export type IDType = 'NIN' | 'Driver License' | 'PVC' | 'International Passport' | 'BVN';
 
+export interface ServicePackage {
+  id: string;
+  name: string;
+  description?: string;
+  inclusions: string[];
+  price: number;
+  duration?: string;
+  isPopular?: boolean;
+  isActive: boolean;
+}
+
 export interface ServiceRequest {
   id: string;
   clientId: string;
@@ -273,6 +284,7 @@ export interface User {
   venueCapacity?: number;
   venueType?: 'Indoor' | 'Outdoor' | 'Both';
   hasParking?: boolean;
+  packages?: ServicePackage[];
 }
 
 export type Vendor = User;

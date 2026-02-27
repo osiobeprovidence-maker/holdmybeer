@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Category, User, ServiceRequest, Location } from './types';
+import { Category, User, ServiceRequest, Location, ServicePackage } from './types';
 import { MOCK_USERS } from './constants';
 import { Navbar, Footer } from './components/Layout';
 import { ProductTour } from './components/ProductTour';
@@ -23,6 +23,62 @@ import AdminDashboard from './pages/AdminDashboard';
 import CoinMarket from './pages/CoinMarket';
 import ForVendors from './pages/ForVendors';
 import { PrivacyPolicy, RefundPolicy } from './pages/Policies';
+
+// --- Price List Section Component ---
+const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }) => {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  return (
+    <div className="mb-20 border-t border-black/5 pt-12">
+      <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-[0.3em] mb-2">Price List</h4>
+      <h3 className="text-2xl font-black tracking-tighter uppercase mb-8">Service Packages</h3>
+      <div className="space-y-3">
+        {packages.map(pkg => (
+          <div key={pkg.id} className="border border-black/5 rounded-[24px] overflow-hidden transition-all">
+            <button
+              onClick={() => setExpanded(expanded === pkg.id ? null : pkg.id)}
+              className="w-full flex items-center justify-between p-6 text-left hover:bg-[#f5f5f7] transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-base font-black text-black tracking-tight">{pkg.name}</span>
+                    {pkg.isPopular && (
+                      <span className="px-2.5 py-0.5 bg-black text-white text-[9px] font-black uppercase tracking-widest rounded-full">Most Popular</span>
+                    )}
+                  </div>
+                  {pkg.duration && (
+                    <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mt-0.5 block">{pkg.duration}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <span className="text-lg font-black text-black">₦{pkg.price.toLocaleString()}</span>
+                <svg className={`w-4 h-4 text-black/30 transition-transform duration-200 ${expanded === pkg.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+            {expanded === pkg.id && pkg.inclusions.length > 0 && (
+              <div className="px-6 pb-6 bg-[#f9f9f9] border-t border-black/5">
+                {pkg.description && (
+                  <p className="text-sm font-medium text-[#86868b] mt-4 mb-4 italic">{pkg.description}</p>
+                )}
+                <ul className="space-y-2 mt-4">
+                  {pkg.inclusions.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 bg-black rounded-full mt-1.5 shrink-0" />
+                      <span className="text-sm font-bold text-black">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
@@ -778,6 +834,11 @@ const App: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* 3.5 Price List */}
+                {activeUser.packages && activeUser.packages.filter(p => p.isActive).length > 0 && (
+                  <PriceListSection packages={activeUser.packages.filter(p => p.isActive)} />
+                )}
 
                 {/* 4. Social Links & Contact */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-black/5">

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Category, Location, IDType, ServiceRequest, CATEGORY_GROUPS } from '../types';
+import { User, Category, Location, IDType, ServiceRequest, CATEGORY_GROUPS, ServicePackage } from '../types';
 import { initializePaystack } from '../services/paymentService';
 
 interface DashboardProps {
@@ -27,10 +27,17 @@ const VENUE_CATEGORIES = [
 ];
 
 const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlockedVendors, serviceRequests, allUsers, onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'portfolio' | 'availability' | 'verification' | 'connections'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'packages' | 'availability' | 'portfolio' | 'verification' | 'connections'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+
+  // Packages state
+  const [packages, setPackages] = useState<ServicePackage[]>(user.packages || []);
+  const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
+  const [newPackage, setNewPackage] = useState<Omit<ServicePackage, 'id'>>({ name: '', description: '', inclusions: [], price: 0, duration: '', isPopular: false, isActive: true });
+  const [newInclusion, setNewInclusion] = useState('');
+  const [showAddPackage, setShowAddPackage] = useState(false);
 
   // Verification State
   const [kycStep, setKycStep] = useState<VerificationStep>(user.kycVerified ? 'success' : 'phone');
@@ -545,6 +552,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             {[
               { id: 'overview', label: 'Analytics' },
               { id: 'spot', label: 'Configuration' },
+              { id: 'packages', label: 'Packages' },
               { id: 'availability', label: 'Availability' },
               { id: 'portfolio', label: 'Work Gallery' },
               { id: 'verification', label: 'Identity' }
@@ -809,6 +817,202 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                       <button onClick={handleSaveSpot} className="w-full btn-apple py-6 text-lg uppercase tracking-widest shadow-2xl mt-8">Apply Configuration</button>
                     )}
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'packages' && (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <h3 className="text-3xl font-black uppercase tracking-tighter mb-1">Service Packages</h3>
+                      <p className="text-[#86868b] font-bold uppercase text-[10px] tracking-widest">Build your price list. Price range auto-updates on discovery.</p>
+                    </div>
+                    <button
+                      onClick={() => setShowAddPackage(!showAddPackage)}
+                      className="btn-apple px-6 py-3 text-[10px]"
+                    >
+                      {showAddPackage ? 'Cancel' : '+ Add Package'}
+                    </button>
+                  </div>
+
+                  {/* Add New Package Form */}
+                  {showAddPackage && (
+                    <div className="bg-[#f5f5f7] rounded-[32px] p-8 space-y-6 border border-black/5">
+                      <h4 className="text-[10px] font-black text-[#86868b] uppercase tracking-widest">New Package</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-2">Package Name</label>
+                          <input
+                            value={newPackage.name}
+                            onChange={e => setNewPackage({ ...newPackage, name: e.target.value })}
+                            placeholder="e.g. Basic Session"
+                            className="w-full bg-white rounded-2xl p-4 font-bold text-black outline-none border border-black/5 focus:border-black/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-2">Price (₦)</label>
+                          <input
+                            type="number"
+                            value={newPackage.price || ''}
+                            onChange={e => setNewPackage({ ...newPackage, price: Number(e.target.value) })}
+                            placeholder="50000"
+                            className="w-full bg-white rounded-2xl p-4 font-bold text-black outline-none border border-black/5 focus:border-black/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-2">Duration (optional)</label>
+                          <input
+                            value={newPackage.duration || ''}
+                            onChange={e => setNewPackage({ ...newPackage, duration: e.target.value })}
+                            placeholder="e.g. 2 hours"
+                            className="w-full bg-white rounded-2xl p-4 font-bold text-black outline-none border border-black/5 focus:border-black/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-2">Short Description</label>
+                          <input
+                            value={newPackage.description || ''}
+                            onChange={e => setNewPackage({ ...newPackage, description: e.target.value })}
+                            placeholder="What's included in a sentence"
+                            className="w-full bg-white rounded-2xl p-4 font-bold text-black outline-none border border-black/5 focus:border-black/20"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Inclusions */}
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-[#86868b] uppercase tracking-widest ml-2">Inclusions</label>
+                        <div className="flex gap-3">
+                          <input
+                            value={newInclusion}
+                            onChange={e => setNewInclusion(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && newInclusion.trim()) {
+                                setNewPackage(prev => ({ ...prev, inclusions: [...prev.inclusions, newInclusion.trim()] }));
+                                setNewInclusion('');
+                              }
+                            }}
+                            placeholder="Type inclusion and press Enter"
+                            className="flex-1 bg-white rounded-2xl p-4 font-bold text-black outline-none border border-black/5"
+                          />
+                          <button
+                            onClick={() => {
+                              if (newInclusion.trim()) {
+                                setNewPackage(prev => ({ ...prev, inclusions: [...prev.inclusions, newInclusion.trim()] }));
+                                setNewInclusion('');
+                              }
+                            }}
+                            className="px-5 py-3 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest"
+                          >Add</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {newPackage.inclusions.map((inc, i) => (
+                            <span key={i} className="flex items-center gap-2 bg-white border border-black/10 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                              {inc}
+                              <button onClick={() => setNewPackage(prev => ({ ...prev, inclusions: prev.inclusions.filter((_, idx) => idx !== i) }))} className="text-black/30 hover:text-black font-black">×</button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <div
+                            onClick={() => setNewPackage(prev => ({ ...prev, isPopular: !prev.isPopular }))}
+                            className={`w-10 h-6 rounded-full transition-all ${newPackage.isPopular ? 'bg-black' : 'bg-black/10'} relative`}
+                          >
+                            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${newPackage.isPopular ? 'left-5' : 'left-1'}`} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#86868b]">Mark as Most Popular</span>
+                        </label>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (!newPackage.name || !newPackage.price) return alert('Package name and price are required.');
+                          const pkg: ServicePackage = { ...newPackage, id: Math.random().toString(36).substr(2, 9) };
+                          const updated = [...packages, pkg];
+                          setPackages(updated);
+                          onUpdateUser({ ...user, packages: updated });
+                          setNewPackage({ name: '', description: '', inclusions: [], price: 0, duration: '', isPopular: false, isActive: true });
+                          setShowAddPackage(false);
+                        }}
+                        className="btn-apple w-full py-5 text-[11px] tracking-widest"
+                      >
+                        Save Package
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Existing Packages */}
+                  {packages.length === 0 ? (
+                    <div className="text-center py-16 bg-[#f5f5f7] rounded-[32px] border-2 border-dashed border-black/5">
+                      <p className="text-4xl mb-4">📦</p>
+                      <p className="text-[10px] font-black text-[#86868b] uppercase tracking-widest">No packages yet. Add your first service package.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {packages.map(pkg => (
+                        <div key={pkg.id} className={`bg-white border rounded-[24px] p-6 transition-all ${pkg.isActive ? 'border-black/5' : 'border-black/5 opacity-50'}`}>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-3 mb-1">
+                                <span className="font-black text-black tracking-tight">{pkg.name}</span>
+                                {pkg.isPopular && <span className="px-2 py-0.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-full">Most Popular</span>}
+                              </div>
+                              <span className="text-lg font-black text-black">₦{pkg.price.toLocaleString()}</span>
+                              {pkg.duration && <span className="text-[10px] text-[#86868b] font-bold ml-2 uppercase tracking-widest">· {pkg.duration}</span>}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {/* Active toggle */}
+                              <div
+                                onClick={() => {
+                                  const updated = packages.map(p => p.id === pkg.id ? { ...p, isActive: !p.isActive } : p);
+                                  setPackages(updated);
+                                  onUpdateUser({ ...user, packages: updated });
+                                }}
+                                className={`w-10 h-6 rounded-full transition-all cursor-pointer ${pkg.isActive ? 'bg-black' : 'bg-black/10'} relative`}
+                              >
+                                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${pkg.isActive ? 'left-5' : 'left-1'}`} />
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const updated = packages.filter(p => p.id !== pkg.id);
+                                  setPackages(updated);
+                                  onUpdateUser({ ...user, packages: updated });
+                                }}
+                                className="w-8 h-8 bg-red-50 hover:bg-red-500 hover:text-white text-red-400 rounded-full flex items-center justify-center transition-colors font-black text-sm"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                          {pkg.inclusions.length > 0 && (
+                            <ul className="mt-4 space-y-1.5 border-t border-black/5 pt-4">
+                              {pkg.inclusions.map((inc, i) => (
+                                <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-[#86868b]">
+                                  <span className="w-1 h-1 bg-[#86868b] rounded-full" />{inc}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Auto price range preview */}
+                  {packages.filter(p => p.isActive).length > 0 && (
+                    <div className="bg-black text-white rounded-[24px] p-6 flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Auto Price Range on Discovery</p>
+                        <p className="text-2xl font-black tracking-tighter">
+                          ₦{Math.min(...packages.filter(p => p.isActive).map(p => p.price)).toLocaleString()} – ₦{Math.max(...packages.filter(p => p.isActive).map(p => p.price)).toLocaleString()}
+                        </p>
+                      </div>
+                      <span className="text-3xl opacity-20">📊</span>
+                    </div>
+                  )}
                 </div>
               )}
 
