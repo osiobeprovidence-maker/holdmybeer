@@ -136,6 +136,68 @@ const App: React.FC = () => {
     localStorage.setItem('hmb_requests', JSON.stringify(serviceRequests));
   }, [unlockedUserIds, serviceRequests]);
 
+  // ── SESSION RESTORE ON PAGE REFRESH ──────────────────────────
+  // This is what keeps users logged in after a page reload.
+  useEffect(() => {
+    if (!supabase) return;
+
+    const restoreSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          const restoredUser: User = {
+            id: profile.id,
+            name: profile.name || profile.full_name || session.user.email?.split('@')[0] || 'User',
+            email: profile.email || session.user.email || '',
+            isCreator: profile.is_creator || false,
+            location: profile.location || 'Lagos Island',
+            kycVerified: profile.kyc_verified || false,
+            kycStatus: profile.kyc_status || 'unverified',
+            avatar: profile.avatar || `https://ui-avatars.com/api/?name=${profile.name || 'User'}&background=000&color=fff`,
+            totalUnlocks: profile.total_unlocks || 0,
+            isSuspended: profile.is_suspended || false,
+            reliabilityScore: profile.reliability_score || 70,
+            coins: profile.coins || 0,
+            businessName: profile.business_name,
+            category: profile.category,
+            isPaid: profile.is_paid || false,
+            isPreLaunch: profile.is_pre_launch || false,
+            hasPurchasedSignUpPack: profile.has_purchased_sign_up_pack || false,
+            panicModeOptIn: profile.panic_mode_opt_in || false,
+            panicModePrice: profile.panic_mode_price || 0,
+            phone: profile.phone,
+            bio: profile.bio,
+            availableToday: profile.available_today || false,
+            availabilityStatus: profile.availability_status || 'AVAILABLE',
+            blockedDates: profile.blocked_dates || [],
+            lastAvailabilityUpdate: profile.last_availability_update ? new Date(profile.last_availability_update).getTime() : Date.now()
+          } as User;
+          setCurrentUser(restoredUser);
+          console.log('[HMB] Session restored for:', restoredUser.email);
+        }
+      }
+    };
+
+    restoreSession();
+
+    // Listen for auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[HMB] Auth event:', event);
+      if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+        setCurrentView('home');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Load from Supabase on mount
   useEffect(() => {
     const initData = async () => {
@@ -367,13 +429,26 @@ const App: React.FC = () => {
     const startTime = Date.now();
 
     if (supabase) {
-      await supabase
-        .from('profiles')
-        .update({
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('credit_coins', {
+        p_user_id: currentUser.id,
+        p_amount: coinsToAdd,
+        p_description: `Coin Purchase – ${coinsToAdd} coins`,
+        p_reference: `purchase-${Date.now()}`
+      });
+
+      if (rpcError || !rpcResult?.success) {
+        console.error('[HMB] Credit coins failed:', rpcError?.message);
+        // Fallback: direct update
+        await supabase.from('profiles').update({
           coins: newBalance,
           has_purchased_sign_up_pack: updatedUser.hasPurchasedSignUpPack
-        })
-        .eq('id', currentUser.id);
+        }).eq('id', currentUser.id);
+      } else {
+        // Also update sign up pack flag if needed
+        if (isSignUpPack) {
+          await supabase.from('profiles').update({ has_purchased_sign_up_pack: true }).eq('id', currentUser.id);
+        }
+      }
     }
 
     const elapsed = Date.now() - startTime;
@@ -405,18 +480,35 @@ const App: React.FC = () => {
     setIsProcessingPayment(true);
     try {
       const startTime = Date.now();
+      const isUrgentUnlock = vendor.availableToday && vendor.panicModeOptIn;
+      const unlockDesc = isUrgentUnlock ? `Panic Unlock – ${vendor.businessName || vendor.name}` : `Contact Unlock – ${vendor.businessName || vendor.name}`;
 
-      const newBalance = currentUser.coins - requiredCoins;
-      const updatedUser = { ...currentUser, coins: newBalance };
+      let newBalance = currentUser.coins - requiredCoins;
 
+      // Use server-side RPC for coin deduction (validates balance server-side)
       if (supabase) {
-        await supabase
-          .from('profiles')
-          .update({ coins: newBalance })
-          .eq('id', currentUser.id);
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('deduct_coins', {
+          p_user_id: currentUser.id,
+          p_amount: requiredCoins,
+          p_description: unlockDesc,
+          p_reference: `unlock-${vendor.id}-${Date.now()}`
+        });
+
+        if (rpcError || !rpcResult?.success) {
+          console.error('[HMB] Coin deduction failed:', rpcError?.message || rpcResult?.error);
+          alert(rpcResult?.error === 'Insufficient coins'
+            ? 'Not enough coins. Please top up your wallet.'
+            : 'Unlock failed. Please try again.');
+          setIsProcessingPayment(false);
+          return;
+        }
+        newBalance = rpcResult.new_balance;
       }
 
-      const isUrgentUnlock = vendor.availableToday && vendor.panicModeOptIn;
+      const updatedUser = { ...currentUser, coins: newBalance };
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+
       const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
 
       const elapsed = Date.now() - startTime;
@@ -677,7 +769,11 @@ const App: React.FC = () => {
         currentView={currentView}
         onNavigate={setCurrentView}
         currentUser={currentUser}
-        onLogout={() => { setCurrentUser(null); setCurrentView('home'); }}
+        onLogout={async () => {
+          if (supabase) await supabase.auth.signOut();
+          setCurrentUser(null);
+          setCurrentView('home');
+        }}
         onShowCoinMarket={() => setShowCoinMarket(true)}
       />
       <main className="flex-grow max-w-7xl mx-auto px-6 pt-24 pb-12 md:pt-40 w-full">{renderCurrentView()}</main>

@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = 'https://hdoqgtzclfedakbwgnbi.supabase.co';
+const supabaseAnonKey = 'sb_publishable_bSSuEaFN0MwdebDI0KsZUA_3e_HOu74';
 
-// We only initialize the client if the URL and Key are provided as env vars.
-// This prevents crashes before you actually connect your project.
-export const supabase = supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : null;
+// Production Supabase client with session persistence
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,         // Keep session across refreshes
+        autoRefreshToken: true,       // Auto-renew token before expiry
+        detectSessionInUrl: true,     // Handle magic link / OTP callbacks
+        storageKey: 'hmb-auth-token', // Unique storage key for this app
+    }
+});
