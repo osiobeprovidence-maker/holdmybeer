@@ -23,6 +23,7 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
             const { error } = await supabase.auth.signInWithOtp({
                 email,
                 options: {
+                    shouldCreateUser: true,
                     data: { name },
                 }
             });
