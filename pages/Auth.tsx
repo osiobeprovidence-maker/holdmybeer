@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 interface AuthProps {
@@ -8,7 +8,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
-  const sendOTP = useMutation(api.auth.sendOTP);
+  const sendOTP = useAction(api.auth.sendOTP);
   const verifyOTP = useMutation(api.auth.verifyOTP);
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');

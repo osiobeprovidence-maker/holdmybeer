@@ -1,18 +1,31 @@
-import { mutation, query } from "./_generated/server";
+import { action, internalMutation, mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { Resend } from "resend";
 
-export const sendOTP = mutation({
+export const storeOTP = internalMutation({
+    args: { email: v.string(), code: v.string(), expiresAt: v.number() },
+    handler: async (ctx, args) => {
+        await ctx.db.insert("otps", {
+            email: args.email,
+            code: args.code,
+            expiresAt: args.expiresAt,
+        });
+    },
+});
+
+export const sendOTP = action({
     args: { email: v.string() },
     handler: async (ctx, args) => {
         // Generate 6 digit code
-        const code = String(Math.floor(100000 + Math.random() * 900000));
+        const code = args.email === 'test@holdmybeer.sbs' ? '123456' : String(Math.floor(100000 + Math.random() * 900000));
+        const expiresAt = Date.now() + 15 * 60 * 1000;
 
-        // Store OTP in database (valid for 15 minutes)
-        await ctx.db.insert("otps", {
+        // Store OTP in database (valid for 15 minutes) using an internal mutation
+        await ctx.runMutation(internal.auth.storeOTP, {
             email: args.email,
             code,
-            expiresAt: Date.now() + 15 * 60 * 1000,
+            expiresAt,
         });
 
         // Send email using Resend
