@@ -191,9 +191,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] text-center mb-6">Join the Protocol</p>
-                  <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="w-full py-5 bg-black text-white rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign In with Magic Link</button>
+                <div className="pt-8 border-t border-black/5 mt-8 space-y-4">
+                  <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="w-full py-5 bg-black text-white rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign In / Sign Up</button>
                 </div>
               )}
             </div>

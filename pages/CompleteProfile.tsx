@@ -119,7 +119,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
                 </div>
 
                 <p className="text-center text-[10px] text-[#86868b] font-bold uppercase tracking-widest mt-8 opacity-50">
-                    Passwordless · Magic Link · Secured by Convex
+                    Passwordless · OTP · Secured by Convex
                 </p>
             </div>
         </div>
