@@ -19,7 +19,7 @@ const Auth: React.FC<AuthProps> = () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      await signIn("resend-otp", { email });
+      await signIn("email", { email });
       setStep('code');
     } catch (error: any) {
       console.error(error);
@@ -35,7 +35,7 @@ const Auth: React.FC<AuthProps> = () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      await signIn("resend-otp", { email, code });
+      await signIn("email", { email, code });
       // profileStatus in App.tsx will now update and route the user automatically
     } catch (error: any) {
       console.error(error);
