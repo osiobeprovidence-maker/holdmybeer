@@ -4,7 +4,10 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import App from './App';
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string, {
+  // Enable verbose logging so we can see auth token exchange in console
+  verbose: true,
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,9 +16,15 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
-  <React.StrictMode>
-    <ConvexAuthProvider client={convex}>
-      <App />
-    </ConvexAuthProvider>
-  </React.StrictMode>
+  // NOTE: StrictMode removed intentionally — it causes double-mount which
+  // can race-condition the ?code= URL param exchange in ConvexAuthProvider.
+  <ConvexAuthProvider
+    client={convex}
+    replaceURL={(url) => {
+      // Clean the ?code= param from the URL after magic link sign-in
+      window.history.replaceState({}, "", url);
+    }}
+  >
+    <App />
+  </ConvexAuthProvider>
 );
