@@ -21,12 +21,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     setErrorMsg('');
 
     try {
-      await signIn("password", {
+      await signIn("resend", {
         email,
-        password,
-        name: isSignup ? name : undefined,
-        flow: isSignup ? "signUp" : "signIn"
       });
+
+      // Instead of faking login immediately, we just alert them to check their email for the token
+      alert("A login link has been sent to your email! Click it to access your account.");
+      setLoading(false);
+      return;
 
       // Note: App.tsx will naturally manage user state via Convex after this succeeds,
       // but we mock the initial pass back to satisfy the old App.tsx interface 
@@ -88,7 +90,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#86868b] ml-4">Email Address</label>
             <input
               type="email"
@@ -100,19 +102,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#86868b] ml-4">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#f5f5f7] border-none rounded-3xl px-8 py-5 text-black outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold text-lg placeholder:text-black/20"
-              placeholder="••••••••"
-              minLength={6}
-            />
-          </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -121,18 +110,15 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
-              isSignup ? 'Generate Access' : 'Authenticate'
+              isSignup ? 'Send Signup Magic Link' : 'Send Login Magic Link'
             )}
           </button>
         </form>
 
-        <div className="mt-12 pt-10 border-t border-black/[0.03] text-center">
-          <button
-            onClick={() => setIsSignup(!isSignup)}
-            className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#86868b] hover:text-black transition-colors"
-          >
-            {isSignup ? 'Already have access? Sign in' : "New to the protocol? Create profile"}
-          </button>
+        <div className="mt-12 pt-10 border-t border-black/[0.03] text-center flex justify-center">
+          <p className="text-[11px] font-bold uppercase max-w-[200px] tracking-[0.2em] text-[#86868b] transition-colors leading-relaxed">
+            PASSWORDLESS AUTHENTICATION ACTIVE
+          </p>
         </div>
       </div>
     </div>

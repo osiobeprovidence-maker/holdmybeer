@@ -1,6 +1,9 @@
 import { convexAuth } from "@convex-dev/auth/server";
-import { Password } from "@convex-dev/auth/providers/Password";
+import Resend from "@auth/core/providers/resend";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-    providers: [Password],
+    providers: [Resend({
+        apiKey: process.env.AUTH_RESEND_KEY,
+        from: "login@holdmybeer.com" // Update this to your verified Resend domain if going to real production later
+    })],
 });
