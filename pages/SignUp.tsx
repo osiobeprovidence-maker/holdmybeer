@@ -10,7 +10,6 @@ interface SignUpProps {
 const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
     const { signIn } = useAuthActions();
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -21,27 +20,13 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
         setErrorMsg('');
 
         try {
-            await signIn("password", {
+            await signIn("resend", {
                 email,
-                password,
-                name,
-                flow: "signUp"
             });
 
-            onLogin({
-                id: 'convex-auth-temp-id',
-                name: name || 'Convex User',
-                email: email,
-                isCreator: false,
-                location: Location.LAGOS_ISLAND,
-                kycVerified: false,
-                kycStatus: 'unverified',
-                avatar: `https://ui-avatars.com/api/?name=${name || 'User'}&background=000&color=fff`,
-                coins: 2, // Signup bonus preview
-                totalUnlocks: 0,
-                isSuspended: false,
-                reliabilityScore: 70
-            }, true);
+            alert("A magic link to generate your profile has been sent to your email!");
+            setLoading(false);
+            return;
         } catch (error: any) {
             console.error(error);
             setErrorMsg(error.message || "Failed to create profile.");
@@ -107,25 +92,12 @@ const SignUp: React.FC<SignUpProps> = ({ onLogin, onNavigate }) => {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#86868b] ml-4">Security Key (Password)</label>
-                            <input
-                                type="password"
-                                required
-                                minLength={6}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-[#f5f5f7] border-none rounded-[28px] px-8 py-5 text-black outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold text-lg placeholder:text-black/10"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
                         <button
                             type="submit"
                             disabled={loading}
                             className="w-full bg-black text-white py-6 rounded-[28px] mt-6 shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all text-sm uppercase tracking-widest font-black flex items-center justify-center gap-3"
                         >
-                            {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Generate Access'}
+                            {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Send Signup Magic Link'}
                         </button>
                     </form>
 
