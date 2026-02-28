@@ -3,9 +3,10 @@ import { useAuthActions } from "@convex-dev/auth/react";
 
 interface AuthProps {
   onLogin?: (user: any) => void;
+  onNavigate?: (view: string) => void;
 }
 
-const Auth: React.FC<AuthProps> = () => {
+const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
   const { signIn } = useAuthActions();
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
@@ -36,7 +37,13 @@ const Auth: React.FC<AuthProps> = () => {
     setErrorMsg('');
     try {
       await signIn("email", { email, code });
-      // profileStatus in App.tsx will now update and route the user automatically
+
+      // Force navigation or reload upon successful session creation
+      if (onNavigate) {
+        onNavigate('dashboard');
+      } else {
+        window.location.reload();
+      }
     } catch (error: any) {
       console.error(error);
       setErrorMsg(error.message || "Invalid or expired code. Please try again.");

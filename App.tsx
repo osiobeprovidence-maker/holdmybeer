@@ -671,14 +671,14 @@ const App: React.FC = () => {
             allUsers={users}
             onNavigate={setCurrentView}
           />
-        ) : <Auth onLogin={handleLogin} />;
+        ) : <Auth onNavigate={setCurrentView} onLogin={handleLogin} />;
       case 'my-connections': return <MyConnections vendors={users.filter(u => u.isCreator)} unlockedVendorIds={unlockedUserIds} serviceRequests={serviceRequests} currentUser={currentUser} onVendorSelect={setActiveUser} protocolId={protocolId} />;
       case 'how-it-works': return <HowItWorks />;
       case 'about': return <About />;
       case 'for-vendors': return <ForVendors onNavigate={setCurrentView} />;
       case 'policies': return <PrivacyPolicy />;
       case 'refund-policy': return <RefundPolicy />;
-      case 'auth': return <Auth onLogin={handleLogin} />;
+      case 'auth': return <Auth onNavigate={setCurrentView} onLogin={handleLogin} />;
       case 'complete-profile': return (
         <CompleteProfile
           onComplete={() => {
