@@ -1,79 +1,116 @@
-import { convexAuth } from "@convex-dev/auth/server";
-import { Email } from "@convex-dev/auth/providers/Email";
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 import { Resend } from "resend";
 
-// 48 hours in milliseconds
-const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+export const sendOTP = mutation({
+    args: { email: v.string() },
+    handler: async (ctx, args) => {
+        // Generate 6 digit code
+        const code = String(Math.floor(100000 + Math.random() * 900000));
 
-// Custom OTP provider using Resend — sends a 6-digit code, no magic link redirect needed
-const ResendOTPProvider = Email({
-    maxAge: 60 * 15, // code is valid for 15 minutes
-    // Generate a clean 6-digit numeric code (e.g. 482910)
-    generateVerificationToken: async () => {
-        return String(Math.floor(100000 + Math.random() * 900000));
-    },
-    async sendVerificationRequest({ identifier: email, token }) {
+        // Store OTP in database (valid for 15 minutes)
+        await ctx.db.insert("otps", {
+            email: args.email,
+            code,
+            expiresAt: Date.now() + 15 * 60 * 1000,
+        });
+
+        // Send email using Resend
         const resend = new Resend(process.env.AUTH_RESEND_KEY);
         const { error } = await resend.emails.send({
             from: "login@holdmybeer.sbs",
-            to: [email],
+            to: [args.email],
             subject: `Your HoldMyBeer Login Code`,
             html: `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #000;">
-                    <div style="text-align: center; margin-bottom: 32px;">
-                        <span style="font-size: 40px;">🍺</span>
-                        <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 12px 0 0; color: #000;">HoldMyBeer</h1>
-                    </div>
-                    <div style="background: #f5f5f7; border-radius: 24px; padding: 40px; text-align: center;">
-                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3em; color: #86868b; margin: 0 0 16px;">Your Login Code</p>
-                        <div style="font-size: 52px; font-weight: 900; letter-spacing: 0.25em; color: #000; margin: 0 0 16px; font-variant-numeric: tabular-nums;">${token}</div>
-                        <p style="font-size: 13px; color: #86868b; margin: 0;">Valid for 15 minutes. Do not share this code.</p>
-                    </div>
-                    <p style="text-align: center; font-size: 11px; color: #86868b; margin-top: 32px; text-transform: uppercase; letter-spacing: 0.2em;">If you didn't request this, you can safely ignore this email.</p>
-                </div>
-            `,
+          <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #000;">
+              <div style="text-align: center; margin-bottom: 32px;">
+                  <span style="font-size: 40px;">🍺</span>
+                  <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 12px 0 0; color: #000;">HoldMyBeer</h1>
+              </div>
+              <div style="background: #f5f5f7; border-radius: 24px; padding: 40px; text-align: center;">
+                  <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3em; color: #86868b; margin: 0 0 16px;">Your Login Code</p>
+                  <div style="font-size: 52px; font-weight: 900; letter-spacing: 0.25em; color: #000; margin: 0 0 16px; font-variant-numeric: tabular-nums;">${code}</div>
+                  <p style="font-size: 13px; color: #86868b; margin: 0;">Valid for 15 minutes. Do not share this code.</p>
+              </div>
+              <p style="text-align: center; font-size: 11px; color: #86868b; margin-top: 32px; text-transform: uppercase; letter-spacing: 0.2em;">If you didn't request this, you can safely ignore this email.</p>
+          </div>
+      `,
         });
+
         if (error) {
             throw new Error(`Failed to send OTP email: ${error.message}`);
         }
+
+        return { success: true };
     },
 });
 
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-    providers: [ResendOTPProvider],
-    session: {
-        totalDurationMs: FORTY_EIGHT_HOURS,
-        inactiveDurationMs: FORTY_EIGHT_HOURS,
-    },
-    callbacks: {
-        async afterUserCreatedOrUpdated(ctx, args) {
-            // Only runs on brand-new users (existingUserId will be null)
-            if (args.existingUserId !== null) return;
+export const verifyOTP = mutation({
+    args: { email: v.string(), code: v.string() },
+    handler: async (ctx, args) => {
+        // Find the OTP matching the email and code
+        const otps = await ctx.db
+            .query("otps")
+            .withIndex("by_email", (q) => q.eq("email", args.email))
+            .collect();
 
-            const userIdString = args.userId as string;
-            const db = (ctx as any).db;
+        // Sort by most recent first
+        otps.sort((a, b) => b._creationTime - a._creationTime);
 
-            // Create a slim skeleton — CompleteProfile page fills the rest
-            const existing = await db
-                .query("profiles")
-                .withIndex("by_userId", (q: any) => q.eq("userId", userIdString))
-                .unique();
+        const latestOTP = otps[0];
 
-            if (!existing) {
-                await db.insert("profiles", {
-                    userId: userIdString,
-                    email: args.profile?.email as string | undefined,
-                    is_creator: false,
-                    kyc_verified: false,
-                    kyc_status: "unverified",
-                    has_purchased_sign_up_pack: false,
-                    panic_mode_opt_in: false,
-                    panic_mode_price: 0,
-                    coins: 0, // credited AFTER CompleteProfile is submitted
-                    is_suspended: false,
-                    reliability_score: 70,
-                });
-            }
+        if (!latestOTP || latestOTP.code !== args.code) {
+            throw new Error("Invalid code.");
         }
-    }
+
+        if (Date.now() > latestOTP.expiresAt) {
+            throw new Error("Code has expired.");
+        }
+
+        // Delete the used OTP
+        await ctx.db.delete(latestOTP._id);
+
+        // Find or create user
+        let user = await ctx.db
+            .query("users")
+            .withIndex("by_email", (q) => q.eq("email", args.email))
+            .unique();
+
+        let isNewUser = false;
+        if (!user) {
+            const userId = await ctx.db.insert("users", { email: args.email });
+            user = await ctx.db.get(userId);
+            isNewUser = true;
+
+            // Auto-create basic profile
+            await ctx.db.insert("profiles", {
+                userId: userId,
+                email: args.email,
+                is_creator: false,
+                kyc_verified: false,
+                kyc_status: "unverified",
+                has_purchased_sign_up_pack: false,
+                panic_mode_opt_in: false,
+                panic_mode_price: 0,
+                coins: 0,
+                is_suspended: false,
+                reliability_score: 70,
+            });
+        }
+
+        // Create session
+        const sessionId = await ctx.db.insert("sessions", {
+            userId: user!._id,
+        });
+
+        return { sessionId, isNewUser };
+    },
+});
+
+export const logout = mutation({
+    args: { sessionId: v.id("sessions") },
+    handler: async (ctx, args) => {
+        await ctx.db.delete(args.sessionId);
+        return { success: true };
+    },
 });

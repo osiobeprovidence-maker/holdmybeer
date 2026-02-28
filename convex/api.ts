@@ -1,11 +1,17 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+
+async function getSessionUserId(ctx: any, sessionId?: string) {
+    if (!sessionId) return null;
+    const session = await ctx.db.get(sessionId as any);
+    if (!session) return null;
+    return session.userId;
+}
 
 export const current = query({
-    args: {},
-    handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
+    args: { sessionId: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) {
             return null;
         }
@@ -43,9 +49,10 @@ export const updateProfile = mutation({
         available_today: v.optional(v.boolean()),
         top_skills: v.optional(v.array(v.string())),
         social_links: v.optional(v.any()),
+        sessionId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) throw new Error("Not authenticated");
 
         const profile = await ctx.db
@@ -78,10 +85,11 @@ export const adminUpdateProfile = mutation({
 
         if (!profile) throw new Error("Profile not found");
 
-        const { userId, ...patchArgs } = args;
+        const { userId, sessionId, ...patchArgs } = args as any;
         await ctx.db.patch(profile._id, patchArgs);
     },
 });
+
 
 export const generateUploadUrl = mutation(async (ctx) => {
     return await ctx.storage.generateUploadUrl();
@@ -100,9 +108,10 @@ export const insertUnlock = mutation({
         tier: v.union(v.literal("standard"), v.literal("urgent")),
         amount: v.number(),
         status: v.string(),
+        sessionId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) throw new Error("Not authenticated");
 
         await ctx.db.insert("unlocks", {
@@ -116,9 +125,10 @@ export const creditCoins = mutation({
     args: {
         amount: v.number(),
         description: v.string(),
+        sessionId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) throw new Error("Not authenticated");
 
         const profile = await ctx.db
@@ -145,9 +155,10 @@ export const deductCoins = mutation({
     args: {
         amount: v.number(),
         description: v.string(),
+        sessionId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) throw new Error("Not authenticated");
 
         const profile = await ctx.db
@@ -179,9 +190,10 @@ export const completeProfile = mutation({
     args: {
         full_name: v.string(),
         phone: v.string(),
+        sessionId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) throw new Error("Not authenticated");
 
         const profile = await ctx.db
@@ -224,9 +236,9 @@ export const completeProfile = mutation({
 
 // Check if current user has a completed profile (name + phone filled)
 export const getProfileStatus = query({
-    args: {},
-    handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
+    args: { sessionId: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionId);
         if (!userId) return null;
 
         const profile = await ctx.db

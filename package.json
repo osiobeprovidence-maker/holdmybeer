@@ -10,8 +10,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/core": "^0.37.4",
-    "@convex-dev/auth": "^0.0.91",
     "@google/genai": "^1.41.0",
     "convex": "^1.32.0",
     "date-fns": "^4.1.0",

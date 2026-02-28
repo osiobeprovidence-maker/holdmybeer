@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
 
 interface AuthProps {
   onLogin?: (user: any) => void;
@@ -7,7 +8,8 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
-  const { signIn } = useAuthActions();
+  const sendOTP = useMutation(api.auth.sendOTP);
+  const verifyOTP = useMutation(api.auth.verifyOTP);
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -20,7 +22,7 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
     setLoading(true);
     setErrorMsg('');
     try {
-      await signIn("email", { email });
+      await sendOTP({ email });
       setStep('code');
     } catch (error: any) {
       console.error(error);
@@ -36,7 +38,10 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
     setLoading(true);
     setErrorMsg('');
     try {
-      await signIn("email", { email, code });
+      const result = await verifyOTP({ email, code });
+      if (result.sessionId) {
+        localStorage.setItem("hmb_session_id", result.sessionId);
+      }
 
       // Force navigation or reload upon successful session creation
       if (onNavigate) {

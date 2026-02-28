@@ -10,7 +10,6 @@ import { LoadingAnimation } from './components/LoadingAnimation';
 import AccessGateModal from './components/AccessGateModal';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "./convex/_generated/api";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
 import MyConnections from './pages/MyConnections';
@@ -85,17 +84,32 @@ const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
-  const convexUser = useQuery(api.api.current);
-  const profileStatus = useQuery(api.api.getProfileStatus);
+  const sessionId = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
+
+  const convexUser = useQuery(api.api.current, { sessionId });
+  const profileStatus = useQuery(api.api.getProfileStatus, { sessionId });
   const convexProfiles = useQuery(api.api.searchProfiles);
   const convexUnlocks = useQuery(api.api.getUnlocks);
 
-  const updateProfileMutation = useMutation(api.api.updateProfile);
-  const adminUpdateProfileMutation = useMutation(api.api.adminUpdateProfile);
-  const creditCoinsMutation = useMutation(api.api.creditCoins);
-  const deductCoinsMutation = useMutation(api.api.deductCoins);
-  const insertUnlockMutation = useMutation(api.api.insertUnlock);
-  const { signOut } = useAuthActions();
+  const _updateProfileMutation = useMutation(api.api.updateProfile);
+  const _adminUpdateProfileMutation = useMutation(api.api.adminUpdateProfile);
+  const _creditCoinsMutation = useMutation(api.api.creditCoins);
+  const _deductCoinsMutation = useMutation(api.api.deductCoins);
+  const _insertUnlockMutation = useMutation(api.api.insertUnlock);
+
+  const updateProfileMutation = (args: any) => _updateProfileMutation({ ...args, sessionId });
+  const adminUpdateProfileMutation = (args: any) => _adminUpdateProfileMutation({ ...args, sessionId });
+  const creditCoinsMutation = (args: any) => _creditCoinsMutation({ ...args, sessionId });
+  const deductCoinsMutation = (args: any) => _deductCoinsMutation({ ...args, sessionId });
+  const insertUnlockMutation = (args: any) => _insertUnlockMutation({ ...args, sessionId });
+
+  const logoutMutation = useMutation(api.auth.logout);
+  const signOut = async () => {
+    if (sessionId) await logoutMutation({ sessionId: sessionId as any }).catch(() => { });
+    localStorage.removeItem("hmb_session_id");
+    window.location.reload();
+  };
+
   const [currentUserLocal, setCurrentUserLocal] = useState<User | null>(null);
   const currentUser = React.useMemo(() => {
     if (!convexUser) return currentUserLocal;
