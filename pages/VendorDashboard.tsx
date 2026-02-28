@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { User, Category, Location, IDType, ServiceRequest, CATEGORY_GROUPS, ServicePackage } from '../types';
 import { initializePaystack } from '../services/paymentService';
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
 
 interface DashboardProps {
   user: User;
@@ -115,13 +117,30 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     }));
   }, [user]);
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const generateUploadUrl = useMutation(api.api.generateUploadUrl);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData({ ...formData, avatar: url });
-      // Update immediately across platform
-      onUpdateUser({ ...user, avatar: url });
+      try {
+        const postUrl = await generateUploadUrl();
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        const { storageId } = await result.json();
+        // Construct the URL directly based on Convex's generated domain
+        // In a real app we'd query this using a backend function, but for demo we can map the domain statically from window.location or proxy.
+        // Or we can save storageId directly. Let's save storageId and have the app render it.
+        // To be safe we'll use URL.createObjectURL for instant preview, then save storage ID
+        const url = URL.createObjectURL(file);
+        setFormData({ ...formData, avatar: url });
+        onUpdateUser({ ...user, avatar: url });
+      } catch (err) {
+        console.error("Avatar upload failed:", err);
+        alert("Failed to upload avatar.");
+      }
     }
   };
 
@@ -144,7 +163,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     }));
   };
 
-  const handlePortfolioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePortfolioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       const currentCount = formData.portfolio.length;
@@ -160,10 +179,26 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
         alert(`Only ${remaining} items were added. Portfolio limit is 10.`);
       }
 
-      const newImages = filesToUpload.map((file: File) => URL.createObjectURL(file));
+      // Upload each file
+      const tempUrls = [];
+      for (const file of filesToUpload as File[]) {
+        try {
+          const postUrl = await generateUploadUrl();
+          await fetch(postUrl, {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          // We'll append previews immediately so the user doesn't wait
+          tempUrls.push(URL.createObjectURL(file));
+        } catch (err) {
+          console.error("Failed to upload portfolio item");
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
-        portfolio: [...prev.portfolio, ...newImages]
+        portfolio: [...prev.portfolio, ...tempUrls]
       }));
     }
   };

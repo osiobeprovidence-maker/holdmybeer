@@ -24,6 +24,7 @@ export const MOCK_USERS: User[] = [
     infrastructuralRank: 95,
     ratingAvg: 4.8,
     isPaid: true,
+    coins: 0,
     trialStartDate: Date.now() - (10 * 24 * 60 * 60 * 1000), // 10 days ago
     completedJobs: 156,
     avgDeliveryTime: '24h',
@@ -58,6 +59,7 @@ export const MOCK_USERS: User[] = [
     infrastructuralRank: 92,
     ratingAvg: 4.7,
     isPaid: true,
+    coins: 0,
     trialStartDate: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
     completedJobs: 89,
     avgDeliveryTime: '4h',
@@ -91,6 +93,7 @@ export const MOCK_USERS: User[] = [
     infrastructuralRank: 78,
     ratingAvg: 4.2,
     isPaid: false,
+    coins: 0,
     trialStartDate: Date.now() - (2 * 24 * 60 * 60 * 1000) // 2 days ago
   },
   {
@@ -115,6 +118,7 @@ export const MOCK_USERS: User[] = [
     infrastructuralRank: 88,
     ratingAvg: 4.5,
     isPaid: true,
+    coins: 0,
     trialStartDate: Date.now() - (15 * 24 * 60 * 60 * 1000) // 15 days ago
   },
   {
@@ -139,6 +143,7 @@ export const MOCK_USERS: User[] = [
     infrastructuralRank: 94,
     ratingAvg: 4.9,
     isPaid: true,
+    coins: 0,
     trialStartDate: Date.now() - (1 * 24 * 60 * 60 * 1000) // 1 day ago
   }
 ];

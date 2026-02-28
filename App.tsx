@@ -8,7 +8,9 @@ import CalendarModal from './components/CalendarModal';
 import { SuccessAnimation } from './components/SuccessAnimation';
 import { LoadingAnimation } from './components/LoadingAnimation';
 import AccessGateModal from './components/AccessGateModal';
-import { supabase } from './services/supabaseClient';
+import { useQuery, useMutation } from "convex/react";
+import { api } from "./convex/_generated/api";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { initializePaystack } from './services/paymentService';
 import Home from './pages/Home';
 import MyConnections from './pages/MyConnections';
@@ -80,9 +82,36 @@ const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }
   );
 };
 
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const convexUser = useQuery(api.api.current);
+  const convexProfiles = useQuery(api.api.searchProfiles);
+  const convexUnlocks = useQuery(api.api.getUnlocks);
+
+  const updateProfileMutation = useMutation(api.api.updateProfile);
+  const adminUpdateProfileMutation = useMutation(api.api.adminUpdateProfile);
+  const creditCoinsMutation = useMutation(api.api.creditCoins);
+  const deductCoinsMutation = useMutation(api.api.deductCoins);
+  const insertUnlockMutation = useMutation(api.api.insertUnlock);
+  const { signOut } = useAuthActions();
+  const [currentUserLocal, setCurrentUserLocal] = useState<User | null>(null);
+  const currentUser = React.useMemo(() => {
+    if (!convexUser) return currentUserLocal;
+    return {
+      ...convexUser,
+      id: convexUser.userId,
+      name: convexUser.name || convexUser.full_name || 'User',
+      isCreator: convexUser.is_creator,
+      kycVerified: convexUser.kyc_verified,
+      kycStatus: convexUser.kyc_status,
+      reliabilityScore: convexUser.reliability_score || 70,
+      totalUnlocks: 0,
+      avatar: convexUser.avatar || `https://ui-avatars.com/api/?name=${convexUser.name || 'User'}&background=000&color=fff`,
+      hasPurchasedSignUpPack: convexUser.has_purchased_sign_up_pack,
+    } as unknown as User;
+  }, [convexUser, currentUserLocal]);
+  const setCurrentUser = setCurrentUserLocal;
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [showCoinMarket, setShowCoinMarket] = useState(false);
 
@@ -136,122 +165,59 @@ const App: React.FC = () => {
     localStorage.setItem('hmb_requests', JSON.stringify(serviceRequests));
   }, [unlockedUserIds, serviceRequests]);
 
-  // ── SESSION RESTORE ON PAGE REFRESH ──────────────────────────
-  // This is what keeps users logged in after a page reload.
+  // Auto-sync users from Convex
   useEffect(() => {
-    if (!supabase) return;
+    if (convexProfiles) {
+      const mappedUsers = convexProfiles.map(p => ({
+        ...p,
+        id: p.userId, // Map Convex userId to our frontend 'id'
+        name: p.name || p.full_name || 'User',
+        isCreator: p.is_creator,
+        kycVerified: p.kyc_verified,
+        kycStatus: p.kyc_status,
+        businessName: p.business_name || '', // Add placeholders for data not mapped in default schema yet
+        infrastructuralRank: p.infrastructural_rank || 0,
+        availableToday: p.available_today || false,
+        reliabilityScore: p.reliability_score || 70,
+        totalUnlocks: p.total_unlocks || 0,
+        ratingAvg: p.rating_avg || 0,
+        isSuspended: p.is_suspended,
+        trialStartDate: p.trial_start_date || Date.now(),
+        completedJobs: p.completed_jobs || 0,
+        avgDeliveryTime: p.avg_delivery_time || '24h',
+        topSkills: p.top_skills || [],
+        socialLinks: p.social_links || {},
+        coins: p.coins || 0,
+        isPaid: p.is_paid || false,
+        isPreLaunch: p.is_pre_launch || false,
+        hasPurchasedSignUpPack: p.has_purchased_sign_up_pack,
+        preferredLocation: p.preferred_location as Location,
+        panicModeOptIn: p.panic_mode_opt_in || false,
+        panicModePrice: p.panic_mode_price || 0,
+        availabilityStatus: p.availability_status || 'AVAILABLE',
+        blockedDates: p.blocked_dates || [],
+        lastAvailabilityUpdate: p.last_availability_update || Date.now()
+      }));
 
-    const restoreSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+      // Merge MOCK users with real DB users so the app still looks populated while we add features
+      setUsers([...MOCK_USERS, ...(mappedUsers as unknown as User[])]);
+    }
+  }, [convexProfiles]);
 
-        if (profile) {
-          const restoredUser: User = {
-            id: profile.id,
-            name: profile.name || profile.full_name || session.user.email?.split('@')[0] || 'User',
-            email: profile.email || session.user.email || '',
-            isCreator: profile.is_creator || false,
-            location: profile.location || 'Lagos Island',
-            kycVerified: profile.kyc_verified || false,
-            kycStatus: profile.kyc_status || 'unverified',
-            avatar: profile.avatar || `https://ui-avatars.com/api/?name=${profile.name || 'User'}&background=000&color=fff`,
-            totalUnlocks: profile.total_unlocks || 0,
-            isSuspended: profile.is_suspended || false,
-            reliabilityScore: profile.reliability_score || 70,
-            coins: profile.coins || 0,
-            businessName: profile.business_name,
-            category: profile.category,
-            isPaid: profile.is_paid || false,
-            isPreLaunch: profile.is_pre_launch || false,
-            hasPurchasedSignUpPack: profile.has_purchased_sign_up_pack || false,
-            panicModeOptIn: profile.panic_mode_opt_in || false,
-            panicModePrice: profile.panic_mode_price || 0,
-            phone: profile.phone,
-            bio: profile.bio,
-            availableToday: profile.available_today || false,
-            availabilityStatus: profile.availability_status || 'AVAILABLE',
-            blockedDates: profile.blocked_dates || [],
-            lastAvailabilityUpdate: profile.last_availability_update ? new Date(profile.last_availability_update).getTime() : Date.now()
-          } as User;
-          setCurrentUser(restoredUser);
-          console.log('[HMB] Session restored for:', restoredUser.email);
-        }
-      }
-    };
-
-    restoreSession();
-
-    // Listen for auth state changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[HMB] Auth event:', event);
-      if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-        setCurrentView('home');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Load from Supabase on mount
+  // Sync Unlocks
   useEffect(() => {
-    const initData = async () => {
-      if (!supabase) return;
-
-      const { data: profiles } = await supabase.from('profiles').select('*');
-      if (profiles && profiles.length > 0) {
-        // Map snake_case from DB to camelCase for frontend
-        const mappedUsers = profiles.map(p => ({
-          ...p,
-          isCreator: p.is_creator,
-          kycVerified: p.kyc_verified,
-          kycStatus: p.kyc_status,
-          businessName: p.business_name,
-          infrastructuralRank: p.infrastructural_rank,
-          availableToday: p.available_today,
-          reliabilityScore: p.reliability_score,
-          totalUnlocks: p.total_unlocks,
-          ratingAvg: p.rating_avg,
-          isSuspended: p.is_suspended,
-          trialStartDate: p.trial_start_date,
-          completedJobs: p.completed_jobs,
-          avgDeliveryTime: p.avg_delivery_time,
-          topSkills: p.top_skills,
-          socialLinks: p.social_links,
-          coins: p.coins || 0,
-          isPaid: p.is_paid,
-          isPreLaunch: p.is_pre_launch,
-          hasPurchasedSignUpPack: p.has_purchased_sign_up_pack,
-          preferredLocation: p.preferred_location as Location,
-          panicModeOptIn: p.panic_mode_opt_in || false,
-          panicModePrice: p.panic_mode_price || 0,
-          availabilityStatus: p.availability_status || 'AVAILABLE',
-          blockedDates: p.blocked_dates || [],
-          lastAvailabilityUpdate: p.last_availability_update ? new Date(p.last_availability_update).getTime() : Date.now()
-        }));
-        setUsers(mappedUsers as unknown as User[]);
-      }
-
-      const { data: requests } = await supabase.from('unlocks').select('*');
-      if (requests && requests.length > 0) {
-        setServiceRequests(requests.map(r => ({
-          id: r.id,
-          clientId: r.organiser_id,
-          creatorId: r.vendor_profile_id,
-          status: r.status,
-          amount: r.amount,
-          paymentType: r.tier,
-          timestamp: r.created_at
-        })));
-      }
-    };
-    initData();
-  }, []);
+    if (convexUnlocks) {
+      setServiceRequests(convexUnlocks.map(r => ({
+        id: r._id,
+        clientId: r.organiserId,
+        creatorId: r.vendorProfileId,
+        status: r.status,
+        amount: r.amount,
+        paymentType: r.tier as 'standard' | 'urgent',
+        timestamp: r._creationTime
+      })));
+    }
+  }, [convexUnlocks]);
 
   useEffect(() => {
     let result = users.filter(u => u.isCreator && !u.isSuspended);
@@ -316,32 +282,6 @@ const App: React.FC = () => {
         lastAvailabilityUpdate: Date.now()
       };
 
-      if (supabase) {
-        supabase.from('profiles').insert({
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-          is_creator: newUser.isCreator,
-          panic_mode_opt_in: newUser.panicModeOptIn,
-          panic_mode_price: newUser.panicModePrice,
-          availability_status: newUser.availabilityStatus,
-          blocked_dates: newUser.blockedDates,
-          last_availability_update: new Date(newUser.lastAvailabilityUpdate).toISOString(),
-          location: newUser.location,
-          kyc_verified: newUser.kycVerified,
-          kyc_status: newUser.kycStatus,
-          avatar: newUser.avatar,
-          reliability_score: newUser.reliabilityScore,
-          total_unlocks: newUser.totalUnlocks,
-          is_suspended: newUser.isSuspended,
-          coins: 2, // Grant 2 free coins in DB
-          is_pre_launch: newUser.isPreLaunch,
-          is_paid: false,
-          has_purchased_sign_up_pack: false,
-          trial_start_date: newUser.trialStartDate
-        }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
-      }
-
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
     }
@@ -389,17 +329,12 @@ const App: React.FC = () => {
       return newRequests;
     });
 
-    if (supabase) {
-      supabase.from('unlocks').insert({
-        organiser_id: newRequest.clientId,
-        vendor_profile_id: newRequest.creatorId,
-        tier: newRequest.paymentType,
-        amount: newRequest.amount,
-        status: newRequest.status,
-        payment_reference: `hmb-${newRequest.id}` // placeholder ref
-      }).then(({ error }) => { if (error) console.error("Supabase insert error:", error) });
-    }
-
+    insertUnlockMutation({
+      vendorProfileId: vendorId as any, // using strings as fallback mapped in data
+      tier: newRequest.paymentType,
+      amount: newRequest.amount,
+      status: newRequest.status
+    }).catch(console.error);
     setUsers(prev => prev.map(u => {
       if (u.id === vendorId) {
         return { ...u, totalUnlocks: (u.totalUnlocks || 0) + 1 };
@@ -415,52 +350,34 @@ const App: React.FC = () => {
     if (!currentUser) return;
 
     const isSignUpPack = coinsToAdd === 3 && !currentUser.hasPurchasedSignUpPack;
-    const newBalance = (currentUser.coins || 0) + coinsToAdd;
-    const updatedUser = {
-      ...currentUser,
-      coins: newBalance,
-      hasPurchasedSignUpPack: isSignUpPack ? true : currentUser.hasPurchasedSignUpPack
-    };
-
-    setCurrentUser(updatedUser);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
     setIsProcessingPayment(true);
     const startTime = Date.now();
 
-    if (supabase) {
-      const { data: rpcResult, error: rpcError } = await supabase.rpc('credit_coins', {
-        p_user_id: currentUser.id,
-        p_amount: coinsToAdd,
-        p_description: `Coin Purchase – ${coinsToAdd} coins`,
-        p_reference: `purchase-${Date.now()}`
+    try {
+      await creditCoinsMutation({
+        amount: coinsToAdd,
+        description: `Coin Purchase – ${coinsToAdd} coins`,
       });
 
-      if (rpcError || !rpcResult?.success) {
-        console.error('[HMB] Credit coins failed:', rpcError?.message);
-        // Fallback: direct update
-        await supabase.from('profiles').update({
-          coins: newBalance,
-          has_purchased_sign_up_pack: updatedUser.hasPurchasedSignUpPack
-        }).eq('id', currentUser.id);
-      } else {
-        // Also update sign up pack flag if needed
-        if (isSignUpPack) {
-          await supabase.from('profiles').update({ has_purchased_sign_up_pack: true }).eq('id', currentUser.id);
-        }
+      if (isSignUpPack) {
+        updateProfileMutation({ has_purchased_sign_up_pack: true }).catch(console.error);
       }
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
+
+      setShowCoinMarket(false);
+      setSuccessAnim({
+        isVisible: true,
+        actionText: `+${coinsToAdd} Coins Added`,
+      });
+    } catch (error) {
+      console.error('[HMB] Credit coins failed:', error);
+      alert("Failed to confirm payment.");
+    } finally {
+      setIsProcessingPayment(false);
     }
-
-    const elapsed = Date.now() - startTime;
-    if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
-    setIsProcessingPayment(false);
-
-    setShowCoinMarket(false);
-
-    setSuccessAnim({
-      isVisible: true,
-      actionText: `+${coinsToAdd} Coins Added`,
-    });
   };
 
   const handleUnlockWithCoins = async (vendor: User) => {
@@ -483,40 +400,17 @@ const App: React.FC = () => {
       const isUrgentUnlock = vendor.availableToday && vendor.panicModeOptIn;
       const unlockDesc = isUrgentUnlock ? `Panic Unlock – ${vendor.businessName || vendor.name}` : `Contact Unlock – ${vendor.businessName || vendor.name}`;
 
-      let newBalance = currentUser.coins - requiredCoins;
-
-      // Use server-side RPC for coin deduction (validates balance server-side)
-      if (supabase) {
-        const { data: rpcResult, error: rpcError } = await supabase.rpc('deduct_coins', {
-          p_user_id: currentUser.id,
-          p_amount: requiredCoins,
-          p_description: unlockDesc,
-          p_reference: `unlock-${vendor.id}-${Date.now()}`
-        });
-
-        if (rpcError || !rpcResult?.success) {
-          console.error('[HMB] Coin deduction failed:', rpcError?.message || rpcResult?.error);
-          alert(rpcResult?.error === 'Insufficient coins'
-            ? 'Not enough coins. Please top up your wallet.'
-            : 'Unlock failed. Please try again.');
-          setIsProcessingPayment(false);
-          return;
-        }
-        newBalance = rpcResult.new_balance;
-      }
-
-      const updatedUser = { ...currentUser, coins: newBalance };
-      setCurrentUser(updatedUser);
-      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+      // Call convex mutation
+      await deductCoinsMutation({
+        amount: requiredCoins,
+        description: unlockDesc
+      });
 
       const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
 
       const elapsed = Date.now() - startTime;
       if (elapsed < 1500) await new Promise(res => setTimeout(res, 1500 - elapsed));
       setIsProcessingPayment(false);
-
-      setCurrentUser(updatedUser);
-      setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
       handleUnlockSuccess(vendor.id, unlockAmount, isUrgentUnlock ? 'urgent' : 'standard');
 
@@ -527,13 +421,13 @@ const App: React.FC = () => {
         onCompleteCallback: () => setCurrentView('my-connections')
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Coin unlock error:", error);
-      alert("Error processing protocol unlock.");
-    } finally {
+      alert(error.message === 'Insufficient coins' ? 'Not enough coins. Please top up your wallet.' : 'Unlock failed. Please try again.');
       setIsProcessingPayment(false);
     }
   };
+
 
   const handleCalendarUnlock = async (vendor: User, isUrgentUnlock: boolean, selectedDate: Date) => {
     // similar logic to handleUnlockWithCoins but driven by the calendar
@@ -556,15 +450,13 @@ const App: React.FC = () => {
     try {
       const startTime = Date.now();
 
+      await deductCoinsMutation({
+        amount: requiredCoins,
+        description: isUrgentUnlock ? `Panic Calendar Unlock – ${vendor.businessName || vendor.name}` : `Calendar Unlock – ${vendor.businessName || vendor.name}`
+      });
+
       const newBalance = currentUser.coins - requiredCoins;
       const updatedUser = { ...currentUser, coins: newBalance };
-
-      if (supabase) {
-        await supabase
-          .from('profiles')
-          .update({ coins: newBalance })
-          .eq('id', currentUser.id);
-      }
 
       const unlockAmount = isUrgentUnlock ? (vendor.panicModePrice || 0) : 0;
 
@@ -612,15 +504,13 @@ const App: React.FC = () => {
     try {
       const startTime = Date.now();
 
+      await deductCoinsMutation({
+        amount: 1,
+        description: `Date Request – ${vendor.businessName || vendor.name}`
+      });
+
       const newBalance = currentUser.coins - 1;
       const updatedUser = { ...currentUser, coins: newBalance };
-
-      if (supabase) {
-        await supabase
-          .from('profiles')
-          .update({ coins: newBalance })
-          .eq('id', currentUser.id);
-      }
 
       const dateStr = selectedDate.toLocaleDateString();
       const message = encodeURIComponent(`Hello ${vendor.businessName || vendor.name}, I am interested in booking your services for ${dateStr}. I connected with you on HoldMyBeer.`);
@@ -660,13 +550,12 @@ const App: React.FC = () => {
   const handleUpdateUser = (updatedUser: User) => {
     if (currentUser && currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
-    }
-    if (activeUser && activeUser.id === updatedUser.id) {
-      setActiveUser(updatedUser);
-    }
+      if (activeUser && activeUser.id === updatedUser.id) {
+        setActiveUser(updatedUser);
+      }
 
-    if (supabase) {
-      supabase.from('profiles').update({
+      // Fire mutation to our database asynchronously for normal users updating their own profile
+      updateProfileMutation({
         name: updatedUser.name,
         business_name: updatedUser.businessName,
         category: updatedUser.category,
@@ -675,17 +564,31 @@ const App: React.FC = () => {
         has_purchased_sign_up_pack: updatedUser.hasPurchasedSignUpPack,
         preferred_location: updatedUser.preferredLocation,
         available_today: updatedUser.availableToday,
-        price_range: updatedUser.priceRange,
         top_skills: updatedUser.topSkills,
-        services: updatedUser.services,
-        experience: updatedUser.experience,
-        industries: updatedUser.industries,
         social_links: updatedUser.socialLinks,
         avatar: updatedUser.avatar,
-        portfolio: updatedUser.portfolio
-      }).eq('id', updatedUser.id).then(({ error }) => {
-        if (error) console.error("Supabase update error:", error);
-      });
+        portfolio: updatedUser.portfolio,
+        is_creator: updatedUser.isCreator,
+        phone: updatedUser.phone,
+        availability_status: updatedUser.availabilityStatus,
+        panic_mode_opt_in: updatedUser.panicModeOptIn,
+        panic_mode_price: updatedUser.panicModePrice
+      }).catch(console.error);
+    } else {
+      // Admin update context! Call the admin mutation route for the target ID
+      if (activeUser && activeUser.id === updatedUser.id) {
+        setActiveUser(updatedUser);
+      }
+      adminUpdateProfileMutation({
+        userId: updatedUser.id,
+        kyc_verified: updatedUser.kycVerified,
+        kyc_status: updatedUser.kycStatus,
+        is_suspended: updatedUser.isSuspended,
+        coins: updatedUser.coins,
+        reliability_score: updatedUser.reliabilityScore,
+        panic_mode_opt_in: updatedUser.panicModeOptIn,
+        panic_mode_price: updatedUser.panicModePrice,
+      }).catch(console.error);
     }
 
     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
@@ -770,7 +673,7 @@ const App: React.FC = () => {
         onNavigate={setCurrentView}
         currentUser={currentUser}
         onLogout={async () => {
-          if (supabase) await supabase.auth.signOut();
+          await signOut();
           setCurrentUser(null);
           setCurrentView('home');
         }}
