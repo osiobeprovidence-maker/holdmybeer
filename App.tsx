@@ -20,7 +20,7 @@ import Discovery from './pages/Discovery';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Auth from './pages/Auth';
-import SignUp from './pages/SignUp';
+import CompleteProfile from './pages/CompleteProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import CoinMarket from './pages/CoinMarket';
 import ForVendors from './pages/ForVendors';
@@ -86,6 +86,7 @@ const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
   const convexUser = useQuery(api.api.current);
+  const profileStatus = useQuery(api.api.getProfileStatus);
   const convexProfiles = useQuery(api.api.searchProfiles);
   const convexUnlocks = useQuery(api.api.getUnlocks);
 
@@ -107,11 +108,27 @@ const App: React.FC = () => {
       kycStatus: convexUser.kyc_status,
       reliabilityScore: convexUser.reliability_score || 70,
       totalUnlocks: 0,
-      avatar: convexUser.avatar || `https://ui-avatars.com/api/?name=${convexUser.name || 'User'}&background=000&color=fff`,
+      avatar: convexUser.avatar || `https://ui-avatars.com/api/?name=${convexUser.full_name || convexUser.name || 'User'}&background=000&color=fff`,
       hasPurchasedSignUpPack: convexUser.has_purchased_sign_up_pack,
     } as unknown as User;
   }, [convexUser, currentUserLocal]);
   const setCurrentUser = setCurrentUserLocal;
+
+  // === SMART AUTH ROUTING ===
+  // After magic link login, redirect new users to CompleteProfile
+  // and returning users to the dashboard.
+  useEffect(() => {
+    if (profileStatus === undefined) return; // still loading
+    if (profileStatus === null) return;      // not logged in
+
+    if (!profileStatus.isComplete) {
+      // First-time user — needs to complete their profile
+      setCurrentView('complete-profile');
+    } else if (currentView === 'auth' || currentView === 'complete-profile') {
+      // Returning user or just finished profile — go to dashboard
+      setCurrentView('dashboard');
+    }
+  }, [profileStatus]);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [showCoinMarket, setShowCoinMarket] = useState(false);
 
@@ -660,7 +677,18 @@ const App: React.FC = () => {
       case 'policies': return <PrivacyPolicy />;
       case 'refund-policy': return <RefundPolicy />;
       case 'auth': return <Auth onLogin={handleLogin} />;
-      case 'signup': return <SignUp onLogin={handleLogin} onNavigate={setCurrentView} />;
+      case 'complete-profile': return (
+        <CompleteProfile
+          onComplete={() => {
+            setSuccessAnim({
+              isVisible: true,
+              actionText: '2 Coins Activated 🎉',
+              onCompleteCallback: () => setCurrentView('dashboard')
+            });
+          }}
+        />
+      );
+      case 'signup': return <Auth onLogin={handleLogin} />; // Signup now uses the same magic link Auth page
       case 'admin': return <AdminDashboard users={adminUsersList} serviceRequests={serviceRequests} onExit={() => setCurrentView('home')} onUpdateUser={handleUpdateUser} />;
       default: return null;
     }

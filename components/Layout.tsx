@@ -102,8 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         ) : (
           <div className="hidden lg:flex items-center gap-6">
-            <button onClick={() => onNavigate('auth')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Login</button>
-            <button onClick={() => onNavigate('signup')} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Sign Up</button>
+            <button onClick={() => onNavigate('auth')} className="bg-black text-white px-5 py-2 rounded-full text-[11px] font-black hover:opacity-80 transition-all uppercase tracking-widest">Sign In</button>
           </div>
         )}
 
@@ -194,10 +193,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               ) : (
                 <div className="space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] text-center mb-6">Join the Protocol</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Login</button>
-                    <button onClick={() => { onNavigate('signup'); setIsMenuOpen(false); }} className="py-5 bg-[#f5f5f7] rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign Up</button>
-                  </div>
+                  <button onClick={() => { onNavigate('auth'); setIsMenuOpen(false); }} className="w-full py-5 bg-black text-white rounded-[24px] text-[12px] font-black uppercase tracking-widest">Sign In with Magic Link</button>
                 </div>
               )}
             </div>

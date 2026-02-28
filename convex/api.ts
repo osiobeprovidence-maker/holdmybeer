@@ -173,3 +173,73 @@ export const deductCoins = mutation({
         });
     },
 });
+
+// Called by CompleteProfile page after first-time user fills in name + phone
+export const completeProfile = mutation({
+    args: {
+        full_name: v.string(),
+        phone: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
+        const profile = await ctx.db
+            .query("profiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .unique();
+
+        if (!profile) throw new Error("Profile not found");
+
+        // Patch profile with real name + phone
+        await ctx.db.patch(profile._id, {
+            full_name: args.full_name,
+            phone: args.phone,
+            name: args.full_name,
+            coins: 2, // Signup bonus
+        });
+
+        // Create wallet if it doesn't exist
+        const existingWallet = await ctx.db
+            .query("wallets")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .unique();
+
+        if (!existingWallet) {
+            await ctx.db.insert("wallets", {
+                userId,
+                balance: 0,
+            });
+        }
+
+        // Log the 2-coin signup bonus transaction
+        await ctx.db.insert("transactions", {
+            userId,
+            amount: 2,
+            type: "credit",
+            description: "Signup bonus – 2 free coins",
+        });
+    },
+});
+
+// Check if current user has a completed profile (name + phone filled)
+export const getProfileStatus = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) return null;
+
+        const profile = await ctx.db
+            .query("profiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .unique();
+
+        if (!profile) return null;
+
+        return {
+            isComplete: !!(profile.full_name && profile.phone),
+            profile,
+        };
+    },
+});
+
