@@ -119,14 +119,16 @@ const App: React.FC = () => {
   // and returning users to the dashboard.
   useEffect(() => {
     if (profileStatus === undefined) return; // still loading
-    if (profileStatus === null) return;      // not logged in
+    if (profileStatus === null) return;      // not logged in — stay on current view
 
     if (!profileStatus.isComplete) {
-      // First-time user — needs to complete their profile
+      // First-time user — show profile completion page
       setCurrentView('complete-profile');
-    } else if (currentView === 'auth' || currentView === 'complete-profile') {
-      // Returning user or just finished profile — go to dashboard
-      setCurrentView('dashboard');
+    } else {
+      // Returning user — go to dashboard if they're on an auth/empty screen
+      if (currentView === 'auth' || currentView === 'signup' || currentView === 'complete-profile' || currentView === 'home') {
+        setCurrentView('dashboard');
+      }
     }
   }, [profileStatus]);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
@@ -693,6 +695,21 @@ const App: React.FC = () => {
       default: return null;
     }
   };
+
+  // Full-screen intercept: if logged in but profile is incomplete, always show CompleteProfile
+  if (profileStatus !== undefined && profileStatus !== null && !profileStatus.isComplete) {
+    return (
+      <CompleteProfile
+        onComplete={() => {
+          setSuccessAnim({
+            isVisible: true,
+            actionText: '2 Coins Activated 🎉',
+            onCompleteCallback: () => setCurrentView('dashboard')
+          });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black overflow-x-hidden w-full relative">
