@@ -9,6 +9,10 @@ const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
 const ResendOTPProvider = Email({
     id: "resend-otp",
     maxAge: 60 * 15, // code is valid for 15 minutes
+    // Generate a clean 6-digit numeric code (e.g. 482910)
+    generateVerificationToken: async () => {
+        return String(Math.floor(100000 + Math.random() * 900000));
+    },
     async sendVerificationRequest({ identifier: email, token }) {
         const resend = new Resend(process.env.AUTH_RESEND_KEY);
         const { error } = await resend.emails.send({
