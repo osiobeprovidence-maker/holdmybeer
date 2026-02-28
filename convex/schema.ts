@@ -4,6 +4,10 @@ import { v } from "convex/values";
 export default defineSchema({
     users: defineTable({
         email: v.string(),
+        emailVerificationTime: v.optional(v.number()),
+        phone: v.optional(v.string()),
+        phoneVerificationTime: v.optional(v.number()),
+        isAnonymous: v.optional(v.boolean()),
     }).index("by_email", ["email"]),
 
     sessions: defineTable({
