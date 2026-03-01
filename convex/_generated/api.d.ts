@@ -10,7 +10,6 @@
 
 import type * as api_ from "../api.js";
 import type * as auth from "../auth.js";
-import type * as get_env from "../get_env.js";
 import type * as http from "../http.js";
 
 import type {
@@ -22,7 +21,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   api: typeof api_;
   auth: typeof auth;
-  get_env: typeof get_env;
   http: typeof http;
 }>;
 

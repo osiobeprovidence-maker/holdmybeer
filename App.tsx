@@ -126,18 +126,20 @@ const App: React.FC = () => {
   const [currentUserLocal, setCurrentUserLocal] = useState<User | null>(null);
   const currentUser = React.useMemo(() => {
     if (!convexUser) return currentUserLocal;
+    const profile = (convexUser as any).profile || {};
     return {
       ...convexUser,
+      ...profile,
       id: convexUser._id,
-      name: convexUser.fullName || 'User',
-      coins: convexUser.coins || 0,
+      name: profile.name || convexUser.fullName || 'User',
+      coins: profile.coins || convexUser.coins || 0,
       profileCompleted: convexUser.profileCompleted,
-      isCreator: false, // Defaulting for simple user
-      kycVerified: false,
-      kycStatus: 'unverified',
-      reliabilityScore: 70,
-      totalUnlocks: 0,
-      avatar: `https://ui-avatars.com/api/?name=${convexUser.fullName || 'User'}&background=000&color=fff`,
+      isCreator: profile.is_creator || false,
+      kycVerified: profile.kyc_verified || false,
+      kycStatus: profile.kyc_status || 'unverified',
+      reliabilityScore: profile.reliability_score || 70,
+      totalUnlocks: profile.total_unlocks || 0,
+      avatar: profile.avatar || `https://ui-avatars.com/api/?name=${convexUser.fullName || 'User'}&background=000&color=fff`,
     } as unknown as User;
   }, [convexUser, currentUserLocal]);
   const setCurrentUser = setCurrentUserLocal;
@@ -258,7 +260,7 @@ const App: React.FC = () => {
         id: r._id,
         clientId: r.organiserId,
         creatorId: r.vendorProfileId,
-        status: r.status,
+        status: r.status as 'unlocked' | 'contacted' | 'completed',
         amount: r.amount,
         paymentType: r.tier as 'standard' | 'urgent',
         timestamp: r._creationTime
@@ -619,7 +621,8 @@ const App: React.FC = () => {
         phone: updatedUser.phone,
         availability_status: updatedUser.availabilityStatus,
         panic_mode_opt_in: updatedUser.panicModeOptIn,
-        panic_mode_price: updatedUser.panicModePrice
+        panic_mode_price: updatedUser.panicModePrice,
+        avatarStorageId: updatedUser.avatarStorageId
       }).catch(console.error);
     } else {
       // Admin update context! Call the admin mutation route for the target ID
@@ -651,8 +654,9 @@ const App: React.FC = () => {
       isCreator: false,
       location: Location.LAGOS_ISLAND,
       kycVerified: false,
-      kycStatus: 'unverified' as const,
-      isSuspended: false
+      kycStatus: 'unverified' as 'unverified' | 'verified',
+      isSuspended: false,
+      coins: 0
     }));
   }, [serviceRequests]);
 

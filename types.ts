@@ -235,6 +235,7 @@ export interface User {
   email: string;
   isCreator: boolean;
   avatar?: string;
+  avatarStorageId?: string;
   location: Location;
   kycVerified: boolean;
   kycStatus: 'unverified' | 'verified';

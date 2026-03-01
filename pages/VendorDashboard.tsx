@@ -130,13 +130,9 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
           body: file,
         });
         const { storageId } = await result.json();
-        // Construct the URL directly based on Convex's generated domain
-        // In a real app we'd query this using a backend function, but for demo we can map the domain statically from window.location or proxy.
-        // Or we can save storageId directly. Let's save storageId and have the app render it.
-        // To be safe we'll use URL.createObjectURL for instant preview, then save storage ID
         const url = URL.createObjectURL(file);
         setFormData({ ...formData, avatar: url });
-        onUpdateUser({ ...user, avatar: url });
+        onUpdateUser({ ...user, avatar: url, avatarStorageId: storageId });
       } catch (err) {
         console.error("Avatar upload failed:", err);
         alert("Failed to upload avatar.");

@@ -28,7 +28,17 @@ export const current = query({
         if (!userId) return null;
 
         const user = await ctx.db.get(userId);
-        return user;
+        if (!user) return null;
+
+        const profile = await ctx.db
+            .query("profiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .unique();
+
+        return {
+            ...user,
+            profile: profile || null,
+        };
     },
 });
 
@@ -53,6 +63,7 @@ export const updateProfile = mutation({
         availability_status: v.optional(v.string()),
         phone: v.optional(v.string()),
         avatar: v.optional(v.string()),
+        avatarStorageId: v.optional(v.string()),
         portfolio: v.optional(v.array(v.string())),
         preferred_location: v.optional(v.string()),
         available_today: v.optional(v.boolean()),
@@ -71,7 +82,13 @@ export const updateProfile = mutation({
 
         if (!profile) throw new Error("Profile not found");
 
-        const { sessionToken, ...patchArgs } = args;
+        const { sessionToken, avatarStorageId, ...patchArgs } = args;
+
+        if (avatarStorageId) {
+            const url = await ctx.storage.getUrl(avatarStorageId);
+            if (url) patchArgs.avatar = url;
+        }
+
         await ctx.db.patch(profile._id, patchArgs);
     },
 });
@@ -110,6 +127,13 @@ export const adminUpdateProfile = mutation({
 
 export const generateUploadUrl = mutation(async (ctx) => {
     return await ctx.storage.generateUploadUrl();
+});
+
+export const getStorageUrl = query({
+    args: { storageId: v.string() },
+    handler: async (ctx, args) => {
+        return await ctx.storage.getUrl(args.storageId);
+    },
 });
 
 export const getUnlocks = query({

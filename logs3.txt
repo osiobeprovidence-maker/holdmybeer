@@ -1,0 +1,15 @@
+28/02/2026, 13:48:07 [CONVEX M(auth:store)] [INFO] '`auth:store` type: createVerificationCode'
+28/02/2026, 13:48:48 [CONVEX M(auth:store)] [INFO] '`auth:store` type: verifyCodeAndSignIn'
+28/02/2026, 13:48:48 [CONVEX M(auth:store)] Uncaught Error: Missing environment variable `JWT_PRIVATE_KEY`
+
+28/02/2026, 13:48:48 [CONVEX A(auth:signIn)] Uncaught Error: Uncaught Error: Missing environment variable `JWT_PRIVATE_KEY`
+
+
+28/02/2026, 13:53:42 [CONVEX M(auth:store)] [INFO] '`auth:store` type: createVerificationCode'
+28/02/2026, 13:53:58 [CONVEX M(auth:store)] [INFO] '`auth:store` type: verifyCodeAndSignIn'
+28/02/2026, 13:53:58 [CONVEX M(auth:store)] Uncaught Error: Missing environment variable `JWT_PRIVATE_KEY`
+
+28/02/2026, 13:53:58 [CONVEX A(auth:signIn)] Uncaught Error: Uncaught Error: Missing environment variable `JWT_PRIVATE_KEY`
+
+
+Terminate batch job (Y/N)? 
