@@ -80,16 +80,31 @@ export const updateProfile = mutation({
             .withIndex("by_userId", (q) => q.eq("userId", userId))
             .unique();
 
-        if (!profile) throw new Error("Profile not found");
-
         const { sessionToken, avatarStorageId, ...patchArgs } = args;
 
         if (avatarStorageId) {
             const url = await ctx.storage.getUrl(avatarStorageId);
-            if (url) patchArgs.avatar = url;
+            if (url) (patchArgs as any).avatar = url;
         }
 
-        await ctx.db.patch(profile._id, patchArgs);
+        if (!profile) {
+            // Upsert: Create profile if missing
+            await ctx.db.insert("profiles", {
+                userId: userId,
+                email: "", // Will be filled if needed or fetched from user
+                has_purchased_sign_up_pack: false,
+                panic_mode_opt_in: false,
+                panic_mode_price: 0,
+                coins: 0,
+                kyc_status: "unverified",
+                kyc_verified: false,
+                is_creator: patchArgs.is_creator || false,
+                is_suspended: false,
+                ...patchArgs,
+            } as any);
+        } else {
+            await ctx.db.patch(profile._id, patchArgs);
+        }
     },
 });
 

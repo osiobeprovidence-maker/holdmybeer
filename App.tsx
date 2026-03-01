@@ -127,7 +127,8 @@ const App: React.FC = () => {
   const currentUser = React.useMemo(() => {
     if (!convexUser) return currentUserLocal;
     const profile = (convexUser as any).profile || {};
-    return {
+
+    const mappedUser = {
       ...convexUser,
       ...profile,
       id: convexUser._id,
@@ -135,12 +136,41 @@ const App: React.FC = () => {
       coins: profile.coins || convexUser.coins || 0,
       profileCompleted: convexUser.profileCompleted,
       isCreator: profile.is_creator || false,
+      businessName: profile.business_name || '',
+      category: profile.category || '',
+      bio: profile.bio || '',
+      location: profile.location || '',
+      phone: profile.phone || convexUser.phone || '',
       kycVerified: profile.kyc_verified || false,
       kycStatus: profile.kyc_status || 'unverified',
       reliabilityScore: profile.reliability_score || 70,
       totalUnlocks: profile.total_unlocks || 0,
       avatar: profile.avatar || `https://ui-avatars.com/api/?name=${convexUser.fullName || 'User'}&background=000&color=fff`,
+      panicModeOptIn: profile.panic_mode_opt_in || false,
+      panicModePrice: profile.panic_mode_price || 0,
+      availabilityStatus: profile.availability_status || 'AVAILABLE',
+      blockedDates: profile.blocked_dates || [],
+      lastAvailabilityUpdate: profile.last_availability_update || 0,
+      venueCapacity: profile.venue_capacity || 0,
+      venueType: profile.venue_type || 'Indoor',
+      hasParking: profile.has_parking || false,
+      isPaid: profile.is_paid || false,
+      isPreLaunch: profile.is_pre_launch || false,
+      preferredLocation: profile.preferred_location || '',
+      availableToday: profile.available_today || false,
+      trialStartDate: profile.trial_start_date || 0,
+      completedJobs: profile.completed_jobs || 0,
+      avgDeliveryTime: profile.avg_delivery_time || '24h',
+      topSkills: profile.top_skills || [],
+      portfolio: profile.portfolio || [],
+      socialLinks: profile.social_links || {},
     } as unknown as User;
+
+    // Merge with local state for optimistic UI updates
+    if (currentUserLocal && currentUserLocal.id === mappedUser.id) {
+      return { ...mappedUser, ...currentUserLocal };
+    }
+    return mappedUser;
   }, [convexUser, currentUserLocal]);
   const setCurrentUser = setCurrentUserLocal;
 

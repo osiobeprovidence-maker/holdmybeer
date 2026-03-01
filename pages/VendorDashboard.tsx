@@ -33,6 +33,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   // Packages state
   const [packages, setPackages] = useState<ServicePackage[]>(user.packages || []);
@@ -344,6 +345,15 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             </label>
           </div>
         </div>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter italic">{user.businessName || user.name}</h1>
+          <div className="flex items-center gap-3">
+            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${user.isCreator ? 'bg-black text-white' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
+              {user.isCreator ? 'Professional / Expert' : 'Standard User / Organiser'}
+            </span>
+            {user.isPaid && <span className="bg-green-500 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">Verified Spot</span>}
+          </div>
+        </div>
         <div className="flex gap-4 w-full md:w-auto">
           {!user.isCreator ? (
             <button
@@ -464,20 +474,29 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             </div>
 
             <button
-              onClick={() => {
+              disabled={isInitializing}
+              onClick={async () => {
                 if (!formData.businessName || !formData.bio) return alert("Please fill in business name and bio.");
-                onUpdateUser({
-                  ...user,
-                  ...formData,
-                  isCreator: true,
-                  priceRange: [formData.minPrice, formData.maxPrice]
-                });
-                setShowOnboarding(false);
-                setActiveTab('overview');
+
+                setIsInitializing(true);
+                try {
+                  await onUpdateUser({
+                    ...user,
+                    ...formData,
+                    isCreator: true,
+                    priceRange: [formData.minPrice, formData.maxPrice]
+                  });
+                  setShowOnboarding(false);
+                  setActiveTab('overview');
+                } catch (err) {
+                  alert("Protocol initialization failed. Please check connection.");
+                } finally {
+                  setIsInitializing(false);
+                }
               }}
-              className="w-full btn-apple py-8 text-xl uppercase tracking-widest mt-12 shadow-2xl"
+              className="w-full btn-apple py-8 text-xl uppercase tracking-widest mt-12 shadow-2xl disabled:opacity-50"
             >
-              Initialize Professional Hub
+              {isInitializing ? 'INITIALIZING PROTOCOL...' : 'Initialize Professional Hub'}
             </button>
           </div>
         </div>
