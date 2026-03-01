@@ -56,7 +56,12 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+      let siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+      if (!siteUrl) {
+        const cloudUrl = import.meta.env.VITE_CONVEX_URL;
+        siteUrl = cloudUrl?.replace(".cloud", ".site");
+      }
+
       const response = await fetch(`${siteUrl}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

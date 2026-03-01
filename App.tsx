@@ -111,7 +111,10 @@ const App: React.FC = () => {
         await logoutMutation({ sessionToken }).catch(() => { });
 
         // 2. Call HTTP endpoint to clear HttpOnly cookie
-        const siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+        let siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+        if (!siteUrl) {
+          siteUrl = import.meta.env.VITE_CONVEX_URL?.replace(".cloud", ".site");
+        }
         await fetch(`${siteUrl}/auth/logout`, { method: 'POST' }).catch(() => { });
       }
     } finally {
