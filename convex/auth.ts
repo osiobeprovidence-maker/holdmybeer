@@ -1,7 +1,19 @@
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import { action, internalMutation, mutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { Resend } from "resend";
+
+export const getLatestOTP = internalQuery({
+    args: { email: v.string() },
+    handler: async (ctx, args) => {
+        const otps = await ctx.db
+            .query("otps")
+            .withIndex("by_email", (q) => q.eq("email", args.email))
+            .collect();
+        otps.sort((a, b) => b._creationTime - a._creationTime);
+        return otps[0];
+    },
+});
 
 export const storeOTP = internalMutation({
     args: { email: v.string(), code: v.string(), expiresAt: v.number() },
@@ -17,6 +29,13 @@ export const storeOTP = internalMutation({
 export const sendOTP = action({
     args: { email: v.string() },
     handler: async (ctx, args) => {
+        // Cooldown check: 60 seconds
+        const latestOTP = await ctx.runQuery(internal.auth.getLatestOTP, { email: args.email });
+        if (latestOTP && Date.now() - latestOTP._creationTime < 60000) {
+            const secondsLeft = Math.ceil((60000 - (Date.now() - latestOTP._creationTime)) / 1000);
+            throw new Error(`Please wait ${secondsLeft} seconds before requesting a new code.`);
+        }
+
         // Generate 6 digit code
         const code = args.email === 'test@holdmybeer.sbs' ? '123456' : String(Math.floor(100000 + Math.random() * 900000));
         const expiresAt = Date.now() + 15 * 60 * 1000;
@@ -29,7 +48,7 @@ export const sendOTP = action({
         });
 
         // Send email using Resend
-        const resend = new Resend(process.env.AUTH_RESEND_KEY);
+        const resend = new Resend(process.env.RESEND_API_KEY);
         const { error } = await resend.emails.send({
             from: "login@holdmybeer.sbs",
             to: [args.email],
@@ -37,8 +56,8 @@ export const sendOTP = action({
             html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #000;">
               <div style="text-align: center; margin-bottom: 32px;">
-                  <span style="font-size: 40px;">🍺</span>
-                  <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 12px 0 0; color: #000;">HoldMyBeer</h1>
+                   <span style="font-size: 40px;">🍺</span>
+                   <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 12px 0 0; color: #000;">HoldMyBeer</h1>
               </div>
               <div style="background: #f5f5f7; border-radius: 24px; padding: 40px; text-align: center;">
                   <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3em; color: #86868b; margin: 0 0 16px;">Your Login Code</p>
@@ -91,11 +110,17 @@ export const verifyOTP = mutation({
 
         let isNewUser = false;
         if (!user) {
-            const userId = await ctx.db.insert("users", { email: args.email });
+            const userId = await ctx.db.insert("users", {
+                email: args.email,
+                profileCompleted: false,
+                coins: 0,
+                fullName: "",
+                phone: ""
+            });
             user = await ctx.db.get(userId);
             isNewUser = true;
 
-            // Auto-create basic profile
+            // Optional: Still create a profile if other parts of the app depend on it
             await ctx.db.insert("profiles", {
                 userId: userId,
                 email: args.email,
@@ -111,19 +136,41 @@ export const verifyOTP = mutation({
             });
         }
 
+        // Generate a secure random sessionToken
+        const sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+
+        const expiresAt = Date.now() + (1000 * 60 * 60 * 24 * 30); // 30 days
+
         // Create session
-        const sessionId = await ctx.db.insert("sessions", {
+        await ctx.db.insert("sessions", {
             userId: user!._id,
+            sessionToken,
+            expiresAt,
         });
 
-        return { sessionId, isNewUser };
+        console.log({
+            event: "auth_success",
+            email: args.email,
+            userId: user!._id,
+            isNewUser
+        });
+
+        return { sessionToken, isNewUser };
     },
 });
 
 export const logout = mutation({
-    args: { sessionId: v.id("sessions") },
+    args: { sessionToken: v.string() },
     handler: async (ctx, args) => {
-        await ctx.db.delete(args.sessionId);
+        const session = await ctx.db
+            .query("sessions")
+            .withIndex("by_token", (q) => q.eq("sessionToken", args.sessionToken))
+            .unique();
+        if (session) {
+            await ctx.db.delete(session._id);
+        }
         return { success: true };
     },
 });

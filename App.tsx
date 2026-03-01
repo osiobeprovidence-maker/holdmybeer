@@ -84,10 +84,10 @@ const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
-  const sessionId = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
+  const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
 
-  const convexUser = useQuery(api.api.current, { sessionId });
-  const profileStatus = useQuery(api.api.getProfileStatus, { sessionId });
+  const convexUser = useQuery(api.api.current, { sessionToken });
+  const profileStatus = useQuery(api.api.getProfileStatus, { sessionToken });
   const convexProfiles = useQuery(api.api.searchProfiles);
   const convexUnlocks = useQuery(api.api.getUnlocks);
 
@@ -97,17 +97,27 @@ const App: React.FC = () => {
   const _deductCoinsMutation = useMutation(api.api.deductCoins);
   const _insertUnlockMutation = useMutation(api.api.insertUnlock);
 
-  const updateProfileMutation = (args: any) => _updateProfileMutation({ ...args, sessionId });
-  const adminUpdateProfileMutation = (args: any) => _adminUpdateProfileMutation({ ...args, sessionId });
-  const creditCoinsMutation = (args: any) => _creditCoinsMutation({ ...args, sessionId });
-  const deductCoinsMutation = (args: any) => _deductCoinsMutation({ ...args, sessionId });
-  const insertUnlockMutation = (args: any) => _insertUnlockMutation({ ...args, sessionId });
+  const updateProfileMutation = (args: any) => _updateProfileMutation({ ...args, sessionToken });
+  const adminUpdateProfileMutation = (args: any) => _adminUpdateProfileMutation({ ...args, sessionToken });
+  const creditCoinsMutation = (args: any) => _creditCoinsMutation({ ...args, sessionToken });
+  const deductCoinsMutation = (args: any) => _deductCoinsMutation({ ...args, sessionToken });
+  const insertUnlockMutation = (args: any) => _insertUnlockMutation({ ...args, sessionToken });
 
   const logoutMutation = useMutation(api.auth.logout);
   const signOut = async () => {
-    if (sessionId) await logoutMutation({ sessionId: sessionId as any }).catch(() => { });
-    localStorage.removeItem("hmb_session_id");
-    window.location.reload();
+    try {
+      if (sessionToken) {
+        // 1. Call standard mutation to delete session from DB
+        await logoutMutation({ sessionToken }).catch(() => { });
+
+        // 2. Call HTTP endpoint to clear HttpOnly cookie
+        const siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+        await fetch(`${siteUrl}/auth/logout`, { method: 'POST' }).catch(() => { });
+      }
+    } finally {
+      localStorage.removeItem("hmb_session_id");
+      window.location.reload();
+    }
   };
 
   const [currentUserLocal, setCurrentUserLocal] = useState<User | null>(null);
@@ -115,15 +125,16 @@ const App: React.FC = () => {
     if (!convexUser) return currentUserLocal;
     return {
       ...convexUser,
-      id: convexUser.userId,
-      name: convexUser.name || convexUser.full_name || 'User',
-      isCreator: convexUser.is_creator,
-      kycVerified: convexUser.kyc_verified,
-      kycStatus: convexUser.kyc_status,
-      reliabilityScore: convexUser.reliability_score || 70,
+      id: convexUser._id,
+      name: convexUser.fullName || 'User',
+      coins: convexUser.coins || 0,
+      profileCompleted: convexUser.profileCompleted,
+      isCreator: false, // Defaulting for simple user
+      kycVerified: false,
+      kycStatus: 'unverified',
+      reliabilityScore: 70,
       totalUnlocks: 0,
-      avatar: convexUser.avatar || `https://ui-avatars.com/api/?name=${convexUser.full_name || convexUser.name || 'User'}&background=000&color=fff`,
-      hasPurchasedSignUpPack: convexUser.has_purchased_sign_up_pack,
+      avatar: `https://ui-avatars.com/api/?name=${convexUser.fullName || 'User'}&background=000&color=fff`,
     } as unknown as User;
   }, [convexUser, currentUserLocal]);
   const setCurrentUser = setCurrentUserLocal;

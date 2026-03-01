@@ -16,31 +16,61 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const [cooldown, setCooldown] = useState(0);
+
+  // Cooldown timer logic
+  React.useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
+
   // Step 1: Send OTP to email
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0) return;
+
     setLoading(true);
     setErrorMsg('');
     try {
       await sendOTP({ email });
+      setCooldown(60); // 60 seconds cooldown
       setStep('code');
     } catch (error: any) {
       console.error(error);
+      const msg = error.message || "";
+      if (msg.includes("wait")) {
+        const match = msg.match(/\d+/);
+        if (match) setCooldown(parseInt(match[0]));
+      }
       setErrorMsg(error.message || "Failed to send code. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: Verify OTP code — ConvexAuthProvider handles session creation automatically
+  // Step 2: Verify OTP code — Now using HTTP endpoint for cookie support
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
     try {
-      const result = await verifyOTP({ email, code });
-      if (result.sessionId) {
-        localStorage.setItem("hmb_session_id", result.sessionId);
+      const siteUrl = import.meta.env.VITE_CONVEX_SITE_URL;
+      const response = await fetch(`${siteUrl}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Invalid or expired code.");
+      }
+
+      const result = await response.json();
+      if (result.sessionToken) {
+        localStorage.setItem("hmb_session_id", result.sessionToken);
       }
 
       // Force navigation or reload upon successful session creation
@@ -166,10 +196,10 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
               <button
                 type="button"
                 onClick={handleSendCode}
-                disabled={loading}
-                className="w-full text-[11px] font-bold text-[#86868b] hover:text-black transition-colors uppercase tracking-widest py-2"
+                disabled={loading || cooldown > 0}
+                className="w-full text-[11px] font-bold text-[#86868b] hover:text-black transition-colors uppercase tracking-widest py-2 disabled:opacity-50"
               >
-                Resend Code
+                {cooldown > 0 ? `Resend Code in ${cooldown}s` : 'Resend Code'}
               </button>
             </form>
           </>

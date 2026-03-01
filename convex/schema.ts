@@ -4,15 +4,21 @@ import { v } from "convex/values";
 export default defineSchema({
     users: defineTable({
         email: v.string(),
+        fullName: v.string(),
+        phone: v.string(),
+        profileCompleted: v.boolean(),
+        coins: v.number(),
         emailVerificationTime: v.optional(v.number()),
-        phone: v.optional(v.string()),
         phoneVerificationTime: v.optional(v.number()),
         isAnonymous: v.optional(v.boolean()),
     }).index("by_email", ["email"]),
 
     sessions: defineTable({
         userId: v.id("users"),
-    }).index("by_userId", ["userId"]),
+        sessionToken: v.string(),
+        expiresAt: v.number(),
+    }).index("by_userId", ["userId"])
+        .index("by_token", ["sessionToken"]),
 
     otps: defineTable({
         email: v.string(),

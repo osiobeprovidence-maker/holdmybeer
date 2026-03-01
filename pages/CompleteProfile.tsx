@@ -12,25 +12,60 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [success, setSuccess] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!fullName.trim() || !phone.trim()) {
-            setErrorMsg('Both fields are required.');
+        if (!fullName.trim() || !phone.trim() || fullName.trim().length < 2) {
+            setErrorMsg('Full name must be at least 2 characters.');
             return;
         }
         setLoading(true);
         setErrorMsg('');
         try {
-            await completeProfileMutation({ full_name: fullName.trim(), phone: phone.trim() });
-            onComplete();
+            const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
+
+            if (!sessionToken) {
+                setErrorMsg('Your session has expired or is missing. Please log in again.');
+                setLoading(false);
+                return;
+            }
+
+            // Simple phone normalization: remove everything except digits and leading +
+            const normalizedPhone = phone.trim().replace(/(?!^\+)\D/g, '');
+
+            await completeProfileMutation({
+                fullName: fullName.trim(),
+                phone: normalizedPhone,
+                sessionToken
+            });
+
+            setSuccess(true);
+            setTimeout(() => {
+                onComplete();
+            }, 2500);
+
         } catch (err: any) {
-            console.error(err);
+            console.error({ event: 'profile_completion_error', error: err });
             setErrorMsg(err.message || 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
     };
+
+    if (success) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-white px-4 py-16 animate-in fade-in zoom-in duration-700">
+                <div className="text-center">
+                    <div className="w-32 h-32 bg-black rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] animate-bounce">
+                        <span className="text-6xl">🪙</span>
+                    </div>
+                    <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 leading-none">Profile<br />Activated</h2>
+                    <p className="text-lg font-bold text-[#86868b] tracking-tight">2 Bonus Coins have been added to your wallet.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white px-4 py-16">
