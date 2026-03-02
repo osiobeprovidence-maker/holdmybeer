@@ -43,7 +43,9 @@ export const adminListPartners = query({
   args: {},
   handler: async (ctx) => {
     try {
+      console.log("adminListPartners called");
       const partners = await ctx.db.query("partners").collect();
+      console.log("adminListPartners returning count:", (partners && partners.length) || 0);
       return partners || [];
     } catch (error) {
       console.error("adminListPartners failed:", error);
@@ -67,18 +69,20 @@ export const createPartner = mutation({
   handler: async (ctx, args) => {
     try {
       console.log("createPartner called with:", args);
-      const doc = await ctx.db.insert("partners", {
-        name: args.name,
-        logo_url: args.logo_url || null,
-        website_url: args.website_url,
-        referral_link: args.referral_link || null,
-        placement_type: args.placement_type || null,
-        priority_level: args.priority_level ?? 0,
-        is_active: args.is_active ?? true,
-        start_date: args.start_date || null,
-        end_date: args.end_date || null,
-      } as any);
-      return { success: true, id: doc._id };
+      const docData: any = {
+        name: String(args.name),
+        logo_url: args.logo_url ?? null,
+        website_url: String(args.website_url),
+        referral_link: args.referral_link ?? null,
+        placement_type: args.placement_type ?? null,
+        priority_level: typeof args.priority_level === 'number' ? args.priority_level : (args.priority_level ? Number(args.priority_level) : 0),
+        is_active: args.is_active === undefined ? true : Boolean(args.is_active),
+        start_date: typeof args.start_date === 'number' ? args.start_date : (args.start_date ? Number(args.start_date) : null),
+        end_date: typeof args.end_date === 'number' ? args.end_date : (args.end_date ? Number(args.end_date) : null),
+      };
+      const doc = await ctx.db.insert("partners", docData as any);
+      console.log("createPartner inserted:", doc);
+      return { success: true, id: doc._id, doc };
     } catch (error) {
       console.error("createPartner failed:", error);
       return { success: false, error: String(error) };
@@ -93,7 +97,11 @@ export const updatePartner = mutation({
   },
   handler: async (ctx, args) => {
     try {
-      await ctx.db.patch(args.id, args.patch as any);
+      console.log("updatePartner called for id:", args.id, "patch:", args.patch);
+      const patch: any = { ...args.patch };
+      if (patch.is_active !== undefined) patch.is_active = Boolean(patch.is_active);
+      await ctx.db.patch(args.id, patch as any);
+      console.log("updatePartner success for id:", args.id);
       return { success: true };
     } catch (error) {
       console.error("updatePartner failed:", error);
@@ -106,7 +114,9 @@ export const deletePartner = mutation({
   args: { id: v.string() },
   handler: async (ctx, args) => {
     try {
+      console.log("deletePartner called for id:", args.id);
       await ctx.db.delete(args.id);
+      console.log("deletePartner success for id:", args.id);
       return { success: true };
     } catch (error) {
       console.error("deletePartner failed:", error);
