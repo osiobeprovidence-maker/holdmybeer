@@ -486,7 +486,18 @@ export default AdminDashboard;
 
       const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await createPartner(form);
+        const payload: any = {
+          name: form.name,
+          website_url: form.website_url,
+          logo_url: form.logo_url || undefined,
+          referral_link: form.referral_link || undefined,
+          placement_type: form.placement_type || undefined,
+          priority_level: form.priority_level !== undefined ? form.priority_level : undefined,
+          is_active: form.is_active === undefined ? true : !!form.is_active,
+          start_date: form.start_date ?? undefined,
+          end_date: form.end_date ?? undefined,
+        };
+        const res = await createPartner(payload);
         if (res && res.success) {
           setForm({ name: '', website_url: '', is_active: true });
         }
@@ -500,7 +511,14 @@ export default AdminDashboard;
       const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editing) return;
-        await updatePartner({ id: editing, patch: form });
+        const patch: any = { ...form };
+        // remove _id if present
+        delete patch._id;
+        // normalize nulls to undefined
+        Object.keys(patch).forEach(k => {
+          if (patch[k] === null) delete patch[k];
+        });
+        await updatePartner({ id: editing, patch });
         setEditing(null);
         setForm({ name: '', website_url: '', is_active: true });
       };
