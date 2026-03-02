@@ -498,6 +498,7 @@ export default AdminDashboard;
           end_date: form.end_date ?? undefined,
         };
         const res = await createPartner(payload);
+        console.log('createPartner response', res);
         if (res && res.success) {
           setForm({ name: '', website_url: '', is_active: true });
           // simple refresh to ensure list shows the newly created partner
@@ -520,7 +521,8 @@ export default AdminDashboard;
         Object.keys(patch).forEach(k => {
           if (patch[k] === null) delete patch[k];
         });
-        await updatePartner({ id: editing, patch });
+        const upRes = await updatePartner({ id: editing, patch });
+        console.log('updatePartner response', upRes);
         setEditing(null);
         setForm({ name: '', website_url: '', is_active: true });
         window.location.reload();
@@ -528,7 +530,8 @@ export default AdminDashboard;
 
       const handleDelete = async (id: string) => {
         if (!confirm('Delete partner?')) return;
-        await deletePartner({ id });
+        const delRes = await deletePartner({ id });
+        console.log('deletePartner response', delRes);
         window.location.reload();
       };
 
