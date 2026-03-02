@@ -66,6 +66,7 @@ export const createPartner = mutation({
   },
   handler: async (ctx, args) => {
     try {
+      console.log("createPartner called with:", args);
       const doc = await ctx.db.insert("partners", {
         name: args.name,
         logo_url: args.logo_url || null,

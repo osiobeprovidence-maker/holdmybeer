@@ -500,6 +500,8 @@ export default AdminDashboard;
         const res = await createPartner(payload);
         if (res && res.success) {
           setForm({ name: '', website_url: '', is_active: true });
+          // simple refresh to ensure list shows the newly created partner
+          window.location.reload();
         }
       };
 
@@ -521,11 +523,13 @@ export default AdminDashboard;
         await updatePartner({ id: editing, patch });
         setEditing(null);
         setForm({ name: '', website_url: '', is_active: true });
+        window.location.reload();
       };
 
       const handleDelete = async (id: string) => {
         if (!confirm('Delete partner?')) return;
         await deletePartner({ id });
+        window.location.reload();
       };
 
       return (
