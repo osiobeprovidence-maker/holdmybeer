@@ -1,6 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { User, ServiceRequest } from '../types';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 interface AdminDashboardProps {
   users: User[];
@@ -9,7 +11,7 @@ interface AdminDashboardProps {
   onUpdateUser: (user: User) => void;
 }
 
-type AdminTab = 'overview' | 'users' | 'transactions' | 'panic';
+type AdminTab = 'overview' | 'users' | 'transactions' | 'panic' | 'partners';
 
 const StatCard = ({ label, value, sub, dark }: { label: string; value: string | number; sub?: string; dark?: boolean }) => (
   <div className={`p-6 md:p-8 rounded-[32px] ${dark ? 'bg-black text-white' : 'bg-[#f5f5f7]'}`}>
@@ -154,11 +156,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
       {/* Tab Nav */}
       <div className="flex gap-8 mb-12 border-b border-black/5 overflow-x-auto scrollbar-hide">
         {([
-          { id: 'overview', label: 'Overview' },
-          { id: 'users', label: `Users (${users.length})` },
-          { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
-          { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
-        ] as { id: AdminTab; label: string }[]).map(t => (
+                { id: 'overview', label: 'Overview' },
+                { id: 'users', label: `Users (${users.length})` },
+                { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
+                { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
+                { id: 'partners', label: `Partners` },
+              ] as { id: AdminTab; label: string }[]).map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
@@ -461,8 +464,85 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
           )}
         </div>
       )}
+
+          {/* ── PARTNERS TAB ── */}
+          {activeTab === 'partners' && (
+            <PartnersManager />
+          )}
     </div>
   );
 };
 
 export default AdminDashboard;
+
+    const PartnersManager: React.FC = () => {
+      const partners = useQuery(api.partners.adminListPartners) ?? [];
+      const createPartner = useMutation(api.partners.createPartner);
+      const updatePartner = useMutation(api.partners.updatePartner);
+      const deletePartner = useMutation(api.partners.deletePartner);
+
+      const [form, setForm] = useState<any>({ name: '', website_url: '', is_active: true });
+      const [editing, setEditing] = useState<string | null>(null);
+
+      const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const res = await createPartner(form);
+        if (res && res.success) {
+          setForm({ name: '', website_url: '', is_active: true });
+        }
+      };
+
+      const startEdit = (p: any) => {
+        setEditing(p._id);
+        setForm({ ...p });
+      };
+
+      const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editing) return;
+        await updatePartner({ id: editing, patch: form });
+        setEditing(null);
+        setForm({ name: '', website_url: '', is_active: true });
+      };
+
+      const handleDelete = async (id: string) => {
+        if (!confirm('Delete partner?')) return;
+        await deletePartner({ id });
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="bg-white border border-black/5 p-6 rounded-[24px]">
+            <h3 className="font-black text-lg mb-4">Create / Edit Partner</h3>
+            <form onSubmit={editing ? handleUpdate : handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" className="p-3 rounded-md border" required />
+              <input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} placeholder="Website URL" className="p-3 rounded-md border" required />
+              <div className="flex gap-2">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={!!form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
+                <button className="btn-apple px-4" type="submit">{editing ? 'Update' : 'Create'}</button>
+                {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', website_url: '', is_active: true }); }} className="px-4">Cancel</button>}
+              </div>
+            </form>
+          </div>
+
+          <div className="space-y-3">
+            {partners.length === 0 ? (
+              <div className="py-12 text-center bg-[#f5f5f7] rounded-[24px]">No partners yet.</div>
+            ) : (
+              partners.map((p: any) => (
+                <div key={p._id} className="flex items-center justify-between bg-white border border-black/5 p-4 rounded-[16px]">
+                  <div>
+                    <div className="font-black">{p.name}</div>
+                    <div className="text-sm text-[#86868b]">{p.website_url}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => startEdit(p)} className="px-3 py-1 border rounded">Edit</button>
+                    <button onClick={() => handleDelete(p._id)} className="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    };
