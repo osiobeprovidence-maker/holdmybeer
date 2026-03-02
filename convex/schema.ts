@@ -58,6 +58,7 @@ export default defineSchema({
         is_paid: v.optional(v.boolean()),
         is_pre_launch: v.optional(v.boolean()),
         preferred_location: v.optional(v.string()),
+        location: v.optional(v.string()),
         availability_status: v.optional(v.string()),
         blocked_dates: v.optional(v.array(v.string())),
         last_availability_update: v.optional(v.number()),
