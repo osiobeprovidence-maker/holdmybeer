@@ -220,4 +220,4 @@ const Home: React.FC<HomeProps> = ({
   );
 };
 
-      {/* PartnershipBanner temporarily disabled: partners backend/schema may be missing. */}
+      <PartnershipBanner placement="home_header" />

@@ -77,6 +77,18 @@ export default defineSchema({
         reference: v.optional(v.string()),
     }).index("by_userId", ["userId"]),
 
+    partners: defineTable({
+        name: v.string(),
+        logo_url: v.optional(v.string()),
+        website_url: v.string(),
+        referral_link: v.optional(v.string()),
+        placement_type: v.optional(v.string()),
+        priority_level: v.optional(v.number()),
+        is_active: v.boolean(),
+        start_date: v.optional(v.number()),
+        end_date: v.optional(v.number()),
+    }),
+
     unlocks: defineTable({
         organiserId: v.string(),
         vendorProfileId: v.id("profiles"), // Links to the vendor's profile document
