@@ -3,6 +3,7 @@ import React from 'react';
 import { Category, Vendor, Location, CATEGORY_GROUPS, User } from '../types';
 import SearchAssistant from '../components/SearchAssistant';
 import VendorCard from '../components/VendorCard';
+import { PartnershipBanner } from '../components/PartnershipBanner';
 
 interface HomeProps {
   vendors: Vendor[];
@@ -206,6 +207,8 @@ const Home: React.FC<HomeProps> = ({
         </div>
       )}
 
+      <PartnershipBanner placement="home_header" />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
         {filteredVendors.map(v => (
           <VendorCard
@@ -220,4 +223,4 @@ const Home: React.FC<HomeProps> = ({
   );
 };
 
-      <PartnershipBanner placement="home_header" />
+export default Home;
