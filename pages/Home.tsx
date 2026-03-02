@@ -220,4 +220,4 @@ const Home: React.FC<HomeProps> = ({
   );
 };
 
-export default Home;
+      {/* PartnershipBanner temporarily disabled: partners backend/schema may be missing. */}
