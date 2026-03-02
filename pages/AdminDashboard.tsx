@@ -481,7 +481,8 @@ export default AdminDashboard;
       const updatePartner = useMutation(api.partners.updatePartner);
       const deletePartner = useMutation(api.partners.deletePartner);
 
-      const [form, setForm] = useState<any>({ name: '', website_url: '', is_active: true });
+        const [form, setForm] = useState<any>({ name: '', website_url: '', is_active: true });
+        const [lastCreateResponse, setLastCreateResponse] = useState<any>(null);
       const [editing, setEditing] = useState<string | null>(null);
 
       const handleCreate = async (e: React.FormEvent) => {
@@ -497,12 +498,15 @@ export default AdminDashboard;
           start_date: form.start_date ?? undefined,
           end_date: form.end_date ?? undefined,
         };
+        console.log('createPartner payload', payload);
         const res = await createPartner(payload);
-        console.log('createPartner response', res);
+        // stringify via JSON roundtrip to avoid circular console issues in some browsers
+        console.log('createPartner response', JSON.parse(JSON.stringify(res)));
+        setLastCreateResponse(res ?? null);
         if (res && res.success) {
           setForm({ name: '', website_url: '', is_active: true });
-          // simple refresh to ensure list shows the newly created partner
-          window.location.reload();
+          // delay reload briefly so developer can inspect logs/response
+          setTimeout(() => window.location.reload(), 900);
         }
       };
 
@@ -548,6 +552,12 @@ export default AdminDashboard;
                 {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', website_url: '', is_active: true }); }} className="px-4">Cancel</button>}
               </div>
             </form>
+            {lastCreateResponse && (
+              <div className="mt-4 p-3 bg-black/5 rounded">
+                <div className="text-sm font-black mb-2">Last create response:</div>
+                <pre className="text-xs max-h-40 overflow-auto">{JSON.stringify(lastCreateResponse, null, 2)}</pre>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
