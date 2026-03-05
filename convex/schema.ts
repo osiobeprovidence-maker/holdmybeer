@@ -10,6 +10,7 @@ export default defineSchema({
         coins: v.number(),
         username: v.optional(v.string()),
         referral_code: v.optional(v.string()),
+        createdAt: v.number(),
         emailVerificationTime: v.optional(v.number()),
         phoneVerificationTime: v.optional(v.number()),
         isAnonymous: v.optional(v.boolean()),
@@ -131,7 +132,7 @@ export default defineSchema({
     }).index("by_session", ["sessionId"]),
     // --- Referral System ---
     referrals: defineTable({
-        referrerId: v.id("users"),
+        referrerId: v.optional(v.id("users")),
         referredUserId: v.optional(v.id("users")),
         referredEmail: v.optional(v.string()),
         createdAt: v.number(),
