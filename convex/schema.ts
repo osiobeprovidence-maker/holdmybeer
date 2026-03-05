@@ -10,7 +10,7 @@ export default defineSchema({
         coins: v.number(),
         username: v.optional(v.string()),
         referral_code: v.optional(v.string()),
-        createdAt: v.number(),
+        createdAt: v.optional(v.number()),
         emailVerificationTime: v.optional(v.number()),
         phoneVerificationTime: v.optional(v.number()),
         isAnonymous: v.optional(v.boolean()),
