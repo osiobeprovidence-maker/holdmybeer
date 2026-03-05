@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { User, ServiceRequest } from '../types';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import AdminReports from './AdminReports';
 
 interface AdminDashboardProps {
   users: User[];
@@ -11,7 +12,7 @@ interface AdminDashboardProps {
   onUpdateUser: (user: User) => void;
 }
 
-type AdminTab = 'overview' | 'users' | 'transactions' | 'panic' | 'partners' | 'tests';
+type AdminTab = 'overview' | 'users' | 'transactions' | 'panic' | 'reports' | 'partners' | 'tests';
 
 const StatCard = ({ label, value, sub, dark }: { label: string; value: string | number; sub?: string; dark?: boolean }) => (
   <div className={`p-6 md:p-8 rounded-[32px] ${dark ? 'bg-black text-white' : 'bg-[#f5f5f7]'}`}>
@@ -30,6 +31,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
   const [nodeSearch, setNodeSearch] = useState('');
   const [coinAdjust, setCoinAdjust] = useState<Record<string, number>>({});
   const [filterType, setFilterType] = useState<'all' | 'vendors' | 'clients' | 'suspended' | 'unverified'>('all');
+  const reportsQuery = useQuery(api.api.getReports) ?? [];
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,11 +157,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
 
       {/* Tab Nav */}
       <div className="flex gap-8 mb-12 border-b border-black/5 overflow-x-auto scrollbar-hide">
-        {([
+                {([
                 { id: 'overview', label: 'Overview' },
                 { id: 'users', label: `Users (${users.length})` },
                 { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
                 { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
+                { id: 'reports', label: `Reports (${reportsQuery.length})` },
                 { id: 'tests', label: `Test Analytics` },
                 { id: 'partners', label: `Partners` },
               ] as { id: AdminTab; label: string }[]).map(t => (
@@ -470,6 +473,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
       {activeTab === 'tests' && (
         <div className="animate-in fade-in duration-500">
           <TestAnalytics users={users} />
+        </div>
+      )}
+
+      {/* ── REPORTS TAB ── */}
+      {activeTab === 'reports' && (
+        <div className="animate-in fade-in duration-500">
+          <AdminReports />
         </div>
       )}
 
