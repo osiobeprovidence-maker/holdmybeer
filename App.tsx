@@ -310,7 +310,7 @@ const App: React.FC = () => {
         setShowTestIntroModal(true);
         localStorage.setItem('hmb_seen_test_intro', '1');
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [convexUser]);
 
   // Sync Unlocks
@@ -838,21 +838,16 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Floating small card to continue the test */}
-      {showFloatingTestCard && (
+      {/* Persistent Test Lab launcher — always visible when logged in */}
+      {convexUser && (
         <div className="fixed right-4 bottom-6 z-[390] md:right-8 md:bottom-8">
-          <div className="bg-white rounded-xl shadow-lg p-3 w-64 md:w-72">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold">HoldMyBeer Test</div>
-                <div className="text-xs text-gray-500">Continue your usability test</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="text-xs text-gray-500" onClick={() => setShowFloatingTestCard(false)}>Dismiss</button>
-                <button className="px-3 py-1 bg-amber-400 rounded text-sm font-bold" onClick={() => { setShowTestIntroModal(true); setShowFloatingTestCard(false); }}>Open</button>
-              </div>
-            </div>
-          </div>
+          <button
+            onClick={() => setShowTestIntroModal(true)}
+            className="flex items-center gap-2 px-4 py-3 bg-amber-400 hover:bg-amber-500 active:scale-95 transition-all rounded-2xl shadow-xl font-bold text-sm text-black"
+            title="Open HoldMyBeer Test Lab"
+          >
+            🍺 <span>Start Test</span>
+          </button>
         </div>
       )}
 
