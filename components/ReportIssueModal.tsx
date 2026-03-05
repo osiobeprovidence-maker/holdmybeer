@@ -39,12 +39,19 @@ const ReportIssueModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setSubmitting(true);
     try {
       const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
-      await createReport({ title, description, category, severity, pageUrl, screenshotStorageId });
+      const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('hmb_session_id') || undefined : undefined;
+      await createReport({ title, description, category, severity, pageUrl, screenshotStorageId, sessionToken });
       alert('Thanks — report submitted');
       onClose();
     } catch (err) {
-      console.error(err);
-      alert('Failed to submit report');
+      console.error('Create report failed', err);
+      try {
+        // if Convex error object has message
+        const msg = (err as any)?.message || JSON.stringify(err);
+        alert(`Failed to submit report: ${msg}`);
+      } catch (e) {
+        alert('Failed to submit report');
+      }
     } finally {
       setSubmitting(false);
     }
