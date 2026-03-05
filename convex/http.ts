@@ -30,8 +30,8 @@ http.route({
     method: "POST",
     handler: httpAction(async (ctx, request) => {
         try {
-            const { email, code } = await request.json();
-            const result = await ctx.runMutation(api.auth.verifyOTP, { email, code });
+            const { email, code, referralCode } = await request.json();
+            const result = await ctx.runMutation(api.auth.verifyOTP, { email, code, referralCode });
 
             const cookie = `hmb_session_id=${result.sessionToken}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60 * 24 * 30}`;
 

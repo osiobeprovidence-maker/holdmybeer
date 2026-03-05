@@ -62,10 +62,11 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
         siteUrl = cloudUrl?.replace(".cloud", ".site");
       }
 
+      const referralCode = typeof window !== 'undefined' ? localStorage.getItem('hmb_referral') || undefined : undefined;
       const response = await fetch(`${siteUrl}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email, code, referralCode }),
       });
 
       if (!response.ok) {

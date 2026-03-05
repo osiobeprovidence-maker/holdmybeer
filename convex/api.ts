@@ -255,6 +255,38 @@ export const createDefaultTasks = mutation({
     },
 });
 
+// --- Referral APIs ---
+export const getReferralHistory = query({
+    args: { sessionToken: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionToken);
+        if (!userId) return [];
+
+        const refs = await ctx.db.query('referrals').withIndex('by_referrer', (q: any) => q.eq('referrerId', userId)).collect();
+
+        // Attach referred user's basic info when available
+        const results = [] as any[];
+        for (const r of refs) {
+            let referredUser = null;
+            if (r.referredUserId) {
+                try {
+                    referredUser = await ctx.db.get(r.referredUserId);
+                } catch (e) { referredUser = null; }
+            }
+            results.push({
+                id: r._id,
+                referredUserId: r.referredUserId || null,
+                referredEmail: r.referredEmail || (referredUser ? referredUser.email : null),
+                referredUsername: referredUser ? (referredUser.username || referredUser.referral_code || null) : null,
+                createdAt: r.createdAt,
+            });
+        }
+        // sort newest first
+        results.sort((a, b) => b.createdAt - a.createdAt);
+        return results;
+    },
+});
+
 export const insertUnlock = mutation({
     args: {
         vendorProfileId: v.id("profiles"),

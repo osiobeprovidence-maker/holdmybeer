@@ -78,7 +78,7 @@ export const sendOTP = action({
 });
 
 export const verifyOTP = mutation({
-    args: { email: v.string(), code: v.string() },
+    args: { email: v.string(), code: v.string(), referralCode: v.optional(v.string()) },
     handler: async (ctx, args) => {
         // Find the OTP matching the email and code
         const otps = await ctx.db
@@ -120,7 +120,7 @@ export const verifyOTP = mutation({
             user = await ctx.db.get(userId);
             isNewUser = true;
 
-            // Optional: Still create a profile if other parts of the app depend on it
+            // Create a profile for compatibility
             await ctx.db.insert("profiles", {
                 userId: userId,
                 email: args.email,
@@ -134,6 +134,39 @@ export const verifyOTP = mutation({
                 is_suspended: false,
                 reliability_score: 70,
             });
+
+            // Generate a referral code for this new user (based on email local-part)
+            try {
+                const base = (args.email.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'user';
+                let candidate = base;
+                // Ensure uniqueness
+                let attempts = 0;
+                while (attempts < 10) {
+                    const existing = await ctx.db.query('users').withIndex('by_referral', (q: any) => q.eq('referral_code', candidate)).unique();
+                    if (!existing) break;
+                    candidate = base + Math.random().toString(36).slice(2, 6);
+                    attempts++;
+                }
+                await ctx.db.patch(userId, { referral_code: candidate, username: base });
+                user = await ctx.db.get(userId);
+            } catch (e) {
+                console.warn('Failed to generate referral code', e);
+            }
+
+            // If a referralCode was supplied, link the referral
+            if (args.referralCode) {
+                try {
+                    const referrer = await ctx.db.query('users').withIndex('by_referral', (q: any) => q.eq('referral_code', args.referralCode)).unique();
+                    await ctx.db.insert('referrals', {
+                        referrerId: referrer ? referrer._id : null,
+                        referredUserId: userId,
+                        referredEmail: args.email,
+                        createdAt: Date.now(),
+                    } as any);
+                } catch (e) {
+                    console.warn('Failed to record referral', e);
+                }
+            }
         }
 
         // Generate a secure random sessionToken

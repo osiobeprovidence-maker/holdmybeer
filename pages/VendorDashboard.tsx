@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User, Category, Location, IDType, ServiceRequest, CATEGORY_GROUPS, ServicePackage } from '../types';
 import { initializePaystack } from '../services/paymentService';
+import ReferralPanel from '../components/ReferralPanel';
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 
@@ -371,6 +372,10 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             </button>
           )}
         </div>
+      </div>
+      {/* Referral Panel */}
+      <div className="mb-8">
+        <ReferralPanel sessionToken={typeof window !== 'undefined' ? localStorage.getItem('hmb_session_id') || undefined : undefined} currentUser={user} />
       </div>
 
       {/* Exit Confirmation Overlay */}

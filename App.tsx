@@ -288,6 +288,19 @@ const App: React.FC = () => {
     }
   }, [convexProfiles]);
 
+  // Capture referral code from URL (e.g., /referral/{code}) and persist to localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const path = window.location.pathname || '';
+      const m = path.match(/\/referral\/(.+)$/i);
+      if (m && m[1]) {
+        const code = decodeURIComponent(m[1]);
+        localStorage.setItem('hmb_referral', code);
+      }
+    } catch (e) { }
+  }, []);
+
   // Sync Unlocks
   useEffect(() => {
     if (convexUnlocks) {
