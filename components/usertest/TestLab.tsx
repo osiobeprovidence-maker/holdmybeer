@@ -35,7 +35,7 @@ const RatingButtons: React.FC<{ value: number | null; onChange: (v: number) => v
   );
 };
 
-export const TestLab: React.FC = () => {
+export const TestLab: React.FC<{ onSessionCreated?: (id: string) => void }> = ({ onSessionCreated }) => {
   const tasksQuery = useQuery(api.api.getTasks);
   const createSession = useMutation(api.api.createTestSession);
   const submitTask = useMutation(api.api.submitTaskFeedback);
@@ -72,8 +72,10 @@ export const TestLab: React.FC = () => {
       // create session
       (async () => {
         const id = await createSession({ sessionToken: undefined });
-        setSessionId(id as string);
-        localStorage.setItem('hmb_test_session_id', id as string);
+        const sid = id as string;
+        setSessionId(sid);
+        localStorage.setItem('hmb_test_session_id', sid);
+        if (onSessionCreated) onSessionCreated(sid);
       })();
     }
   }, [started]);

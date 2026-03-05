@@ -221,6 +221,9 @@ const App: React.FC = () => {
   });
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
+  // Test Lab modal & floating card state
+  const [showTestIntroModal, setShowTestIntroModal] = useState(false);
+  const [showFloatingTestCard, setShowFloatingTestCard] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState<string | null>(null);
   const [filteredVendors, setFilteredVendors] = useState<User[]>(MOCK_USERS);
 
@@ -367,6 +370,8 @@ const App: React.FC = () => {
       setCurrentUser(newUser);
     }
     setCurrentView('home');
+    // Show Test Lab intro modal to both new and returning users
+    setShowTestIntroModal(true);
 
     // Show welcome coins animation for brand-new signups
     if (isNewUser) {
@@ -770,7 +775,11 @@ const App: React.FC = () => {
           setSuccessAnim({
             isVisible: true,
             actionText: '2 Coins Activated 🎉',
-            onCompleteCallback: () => setCurrentView('dashboard')
+            onCompleteCallback: () => {
+              setCurrentView('dashboard');
+              // show test intro after completing profile
+              setShowTestIntroModal(true);
+            }
           });
         }}
       />
@@ -791,6 +800,36 @@ const App: React.FC = () => {
         onShowCoinMarket={() => setShowCoinMarket(true)}
       />
       <main className="flex-grow max-w-7xl mx-auto px-6 pt-24 pb-12 md:pt-40 w-full">{renderCurrentView()}</main>
+
+      {/* Full-screen TestLab intro modal */}
+      {showTestIntroModal && (
+        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={() => { setShowTestIntroModal(false); setShowFloatingTestCard(true); }} />
+          <div className="relative w-full max-w-3xl mx-auto h-full md:h-auto md:rounded-xl overflow-auto">
+            <div className="bg-white rounded-xl h-full md:h-auto p-4 md:p-6 shadow-xl">
+              <TestLab onSessionCreated={(sid) => { setShowTestIntroModal(false); setShowFloatingTestCard(true); }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating small card to continue the test */}
+      {showFloatingTestCard && (
+        <div className="fixed right-4 bottom-6 z-[390] md:right-8 md:bottom-8">
+          <div className="bg-white rounded-xl shadow-lg p-3 w-64 md:w-72">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-bold">HoldMyBeer Test</div>
+                <div className="text-xs text-gray-500">Continue your usability test</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="text-xs text-gray-500" onClick={() => setShowFloatingTestCard(false)}>Dismiss</button>
+                <button className="px-3 py-1 bg-amber-400 rounded text-sm font-bold" onClick={() => { setShowTestIntroModal(true); setShowFloatingTestCard(false); }}>Open</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCoinMarket && (
         <CoinMarket
