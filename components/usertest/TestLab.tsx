@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
 
 type Task = {
-  _id: string;
+  _id: Id<"tasks">;
   title: string;
   instruction: string;
   order: number;
@@ -41,9 +42,9 @@ export const TestLab: React.FC<{ onSessionCreated?: (id: string) => void }> = ({
   const submitTask = useMutation(api.api.submitTaskFeedback);
   const submitFinal = useMutation(api.api.submitFinalFeedback);
 
-  const [sessionId, setSessionId] = useState<string | null>(() => {
+  const [sessionId, setSessionId] = useState<Id<"test_sessions"> | null>(() => {
     try {
-      return localStorage.getItem('hmb_test_session_id');
+      return localStorage.getItem('hmb_test_session_id') as Id<"test_sessions"> | null;
     } catch { return null; }
   });
 
@@ -72,10 +73,10 @@ export const TestLab: React.FC<{ onSessionCreated?: (id: string) => void }> = ({
       // create session
       (async () => {
         const id = await createSession({ sessionToken: undefined });
-        const sid = id as string;
+        const sid = id as Id<"test_sessions">;
         setSessionId(sid);
-        localStorage.setItem('hmb_test_session_id', sid);
-        if (onSessionCreated) onSessionCreated(sid);
+        localStorage.setItem('hmb_test_session_id', sid as string);
+        if (onSessionCreated) onSessionCreated(sid as string);
       })();
     }
   }, [started]);
@@ -198,8 +199,8 @@ const FinalFeedback: React.FC<{ onSubmit: (overall: number, confusingPart: strin
     <div>
       <h4 className="font-semibold">Overall how easy was HoldMyBeer to use?</h4>
       <div className="mt-2 flex gap-2">
-        {[1,2,3,4,5].map(s => (
-          <button key={s} className={`px-3 py-2 rounded ${overall===s? 'bg-amber-400 font-bold' : 'bg-white'}`} onClick={() => setOverall(s)}>{'⭐'.repeat(s)}</button>
+        {[1, 2, 3, 4, 5].map(s => (
+          <button key={s} className={`px-3 py-2 rounded ${overall === s ? 'bg-amber-400 font-bold' : 'bg-white'}`} onClick={() => setOverall(s)}>{'⭐'.repeat(s)}</button>
         ))}
       </div>
 

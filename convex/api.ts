@@ -163,11 +163,11 @@ export const createTestSession = mutation({
     args: { sessionToken: v.optional(v.string()) },
     handler: async (ctx, args) => {
         const userId = await getSessionUserId(ctx, args.sessionToken);
-        const doc = await ctx.db.insert("test_sessions", {
+        const id = await ctx.db.insert("test_sessions", {
             userId: userId || null,
             startedAt: Date.now(),
         } as any);
-        return doc._id;
+        return id;
     },
 });
 

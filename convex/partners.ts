@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 export const listPartners = query({
   args: { placement: v.optional(v.string()) },
@@ -80,9 +81,9 @@ export const createPartner = mutation({
         start_date: typeof args.start_date === 'number' ? args.start_date : (args.start_date ? Number(args.start_date) : null),
         end_date: typeof args.end_date === 'number' ? args.end_date : (args.end_date ? Number(args.end_date) : null),
       };
-      const doc = await ctx.db.insert("partners", docData as any);
-      console.log("createPartner inserted:", doc);
-      return { success: true, id: doc._id, doc };
+      const id = await ctx.db.insert("partners", docData as any);
+      console.log("createPartner inserted:", id);
+      return { success: true, id };
     } catch (error) {
       console.error("createPartner failed:", error);
       return { success: false, error: String(error) };
@@ -100,7 +101,7 @@ export const updatePartner = mutation({
       console.log("updatePartner called for id:", args.id, "patch:", args.patch);
       const patch: any = { ...args.patch };
       if (patch.is_active !== undefined) patch.is_active = Boolean(patch.is_active);
-      await ctx.db.patch(args.id, patch as any);
+      await ctx.db.patch(args.id as Id<"partners">, patch as any);
       console.log("updatePartner success for id:", args.id);
       return { success: true };
     } catch (error) {
@@ -115,7 +116,7 @@ export const deletePartner = mutation({
   handler: async (ctx, args) => {
     try {
       console.log("deletePartner called for id:", args.id);
-      await ctx.db.delete(args.id);
+      await ctx.db.delete(args.id as Id<"partners">);
       console.log("deletePartner success for id:", args.id);
       return { success: true };
     } catch (error) {
