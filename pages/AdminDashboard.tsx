@@ -11,7 +11,7 @@ interface AdminDashboardProps {
   onUpdateUser: (user: User) => void;
 }
 
-type AdminTab = 'overview' | 'users' | 'transactions' | 'panic' | 'partners';
+type AdminTab = 'overview' | 'users' | 'transactions' | 'panic' | 'partners' | 'tests';
 
 const StatCard = ({ label, value, sub, dark }: { label: string; value: string | number; sub?: string; dark?: boolean }) => (
   <div className={`p-6 md:p-8 rounded-[32px] ${dark ? 'bg-black text-white' : 'bg-[#f5f5f7]'}`}>
@@ -160,6 +160,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                 { id: 'users', label: `Users (${users.length})` },
                 { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
                 { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
+                { id: 'tests', label: `Test Analytics` },
                 { id: 'partners', label: `Partners` },
               ] as { id: AdminTab; label: string }[]).map(t => (
           <button
@@ -465,6 +466,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
         </div>
       )}
 
+      {/* ── TEST ANALYTICS TAB ── */}
+      {activeTab === 'tests' && (
+        <div className="animate-in fade-in duration-500">
+          <TestAnalytics users={users} />
+        </div>
+      )}
+
           {/* ── PARTNERS TAB ── */}
           {activeTab === 'partners' && (
             <PartnersManager />
@@ -576,6 +584,74 @@ export default AdminDashboard;
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const TestAnalytics: React.FC<{ users: User[] }> = ({ users }) => {
+      const data = useQuery(api.api.adminGetTestResponses) ?? { sessions: [], tasks: [], feedback: [], finals: [] };
+      const sessions = data.sessions || [];
+      const tasks = data.tasks || [];
+      const feedback = data.feedback || [];
+      const finals = data.finals || [];
+
+      const completed = sessions.filter((s: any) => s.completedAt).length;
+      const avgFinalRating = finals.length > 0 ? (finals.reduce((a: any, f: any) => a + (f.overallRating || 0), 0) / finals.length).toFixed(2) : '—';
+
+      return (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <StatCard label="Test Sessions" value={sessions.length} />
+            <StatCard label="Completed" value={completed} />
+            <StatCard label="Task Feedback" value={feedback.length} />
+            <StatCard label="Avg Final Rating" value={avgFinalRating} />
+          </div>
+
+          <div className="bg-white border border-black/5 rounded-[24px] p-4">
+            <h3 className="font-black mb-3">Recent Test Sessions</h3>
+            {sessions.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[#86868b]">No test sessions recorded.</div>
+            ) : (
+              <div className="space-y-3">
+                {sessions.sort((a: any, b: any) => (b.startedAt || 0) - (a.startedAt || 0)).slice(0, 20).map((s: any) => {
+                  const final = finals.find((f: any) => String(f.sessionId) === String(s._id));
+                  const feedbackCount = feedback.filter((fb: any) => String(fb.sessionId) === String(s._id)).length;
+                  const user = users.find(u => u.id === s.userId) || null;
+                  return (
+                    <div key={s._id} className="flex items-center justify-between p-3 rounded-md bg-[#f9f9f9]">
+                      <div>
+                        <div className="font-bold">{user ? (user.name || user.email) : (s.userId || 'Guest')}</div>
+                        <div className="text-xs text-[#86868b]">Started: {s.startedAt ? new Date(s.startedAt).toLocaleString() : '—'} · Completed: {s.completedAt ? new Date(s.completedAt).toLocaleString() : '—'}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-black">Final: {final ? (final.overallRating ?? '—') : '—'}</div>
+                        <div className="text-xs text-[#86868b]">Task feedback: {feedbackCount}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white border border-black/5 rounded-[24px] p-4">
+            <h3 className="font-black mb-3">Tasks</h3>
+            {tasks.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[#86868b]">No tasks defined.</div>
+            ) : (
+              <ul className="space-y-2">
+                {tasks.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).map((t: any) => (
+                  <li key={t._id} className="p-2 rounded-md bg-[#f9f9f9] flex items-center justify-between">
+                    <div>
+                      <div className="font-bold">{t.title}</div>
+                      <div className="text-xs text-[#86868b]">{t.instruction || ''}</div>
+                    </div>
+                    <div className="text-sm text-[#86868b]">Order {t.order}</div>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
