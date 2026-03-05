@@ -301,6 +301,18 @@ const App: React.FC = () => {
     } catch (e) { }
   }, []);
 
+  // Auto-open Test Lab intro for existing logged-in users who haven't seen it yet
+  useEffect(() => {
+    if (!convexUser) return; // wait until convex user info loads
+    try {
+      const seen = localStorage.getItem('hmb_seen_test_intro');
+      if (!seen) {
+        setShowTestIntroModal(true);
+        localStorage.setItem('hmb_seen_test_intro', '1');
+      }
+    } catch (e) {}
+  }, [convexUser]);
+
   // Sync Unlocks
   useEffect(() => {
     if (convexUnlocks) {
