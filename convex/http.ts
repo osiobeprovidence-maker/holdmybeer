@@ -82,4 +82,40 @@ http.route({
     }),
 });
 
+// Friendly referral redirect: set a readable cookie then redirect to root
+http.route({
+    path: "/referral/:code",
+    method: "GET",
+    handler: httpAction(async (ctx, request) => {
+        try {
+            const url = new URL(request.url);
+            const parts = url.pathname.split('/');
+            const code = parts[parts.length - 1] || '';
+            const cookie = `hmb_referral=${encodeURIComponent(code)}; Path=/; Max-Age=${60 * 60 * 24 * 30}`;
+            return new Response(null, {
+                status: 302,
+                headers: {
+                    ...corsHeaders(request),
+                    Location: '/',
+                    'Set-Cookie': cookie,
+                },
+            });
+        } catch (e) {
+            return new Response(null, { status: 302, headers: { Location: '/' } });
+        }
+    }),
+});
+
+http.route({
+    path: "/referral",
+    method: "GET",
+    handler: httpAction(async (ctx, request) => {
+        // No code present — just redirect to root
+        return new Response(null, {
+            status: 302,
+            headers: { Location: '/' },
+        });
+    }),
+});
+
 export default http;

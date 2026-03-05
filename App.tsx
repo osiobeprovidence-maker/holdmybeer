@@ -297,6 +297,18 @@ const App: React.FC = () => {
       if (m && m[1]) {
         const code = decodeURIComponent(m[1]);
         localStorage.setItem('hmb_referral', code);
+        // remove any referral cookie left by server redirect
+        try { document.cookie = 'hmb_referral=; Max-Age=0; Path=/'; } catch (e) { }
+      } else {
+        // Fallback: if server redirected with a readable cookie, use it
+        try {
+          const match = document.cookie.match(/(?:^|; )hmb_referral=([^;]+)/);
+          if (match && match[1]) {
+            const code = decodeURIComponent(match[1]);
+            localStorage.setItem('hmb_referral', code);
+            document.cookie = 'hmb_referral=; Max-Age=0; Path=/';
+          }
+        } catch (e) { }
       }
     } catch (e) { }
   }, []);
