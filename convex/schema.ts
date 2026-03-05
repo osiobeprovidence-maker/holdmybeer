@@ -98,4 +98,31 @@ export default defineSchema({
         paymentReference: v.optional(v.string()),
     }).index("by_organiser", ["organiserId"])
         .index("by_vendor", ["vendorProfileId"]),
+    // --- User Testing System Tables ---
+    test_sessions: defineTable({
+        userId: v.optional(v.id("users")),
+        startedAt: v.number(),
+        completedAt: v.optional(v.number()),
+    }).index("by_user", ["userId"]),
+
+    tasks: defineTable({
+        title: v.string(),
+        instruction: v.string(),
+        order: v.number(),
+    }).index("by_order", ["order"]),
+
+    task_feedback: defineTable({
+        sessionId: v.id("test_sessions"),
+        taskId: v.id("tasks"),
+        difficultyRating: v.number(),
+        confusionText: v.optional(v.string()),
+        improvementText: v.optional(v.string()),
+    }).index("by_session", ["sessionId"]),
+
+    final_feedback: defineTable({
+        sessionId: v.id("test_sessions"),
+        overallRating: v.number(),
+        confusingPart: v.optional(v.string()),
+        featureImprovement: v.optional(v.string()),
+    }).index("by_session", ["sessionId"]),
 });

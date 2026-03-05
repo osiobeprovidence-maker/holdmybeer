@@ -228,6 +228,7 @@ export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNav
               <li><button onClick={() => onNavigate('pricing')} className="hover:text-black uppercase">Pricing</button></li>
               <li><button onClick={() => onNavigate('for-vendors')} className="hover:text-black uppercase">For Vendors</button></li>
               <li><button onClick={() => onNavigate('about')} className="hover:text-black uppercase">About</button></li>
+              <li><button onClick={() => onNavigate('test-lab')} className="hover:text-black uppercase">Test Lab</button></li>
             </ul>
           </div>
           <div>

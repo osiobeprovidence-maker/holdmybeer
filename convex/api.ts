@@ -158,6 +158,103 @@ export const getUnlocks = query({
     },
 });
 
+// --- User Testing System Server Functions ---
+export const createTestSession = mutation({
+    args: { sessionToken: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionToken);
+        const doc = await ctx.db.insert("test_sessions", {
+            userId: userId || null,
+            startedAt: Date.now(),
+        } as any);
+        return doc._id;
+    },
+});
+
+export const getTasks = query({
+    args: {},
+    handler: async (ctx) => {
+        const tasks = await ctx.db.query("tasks").collect();
+        // sort by order on server to keep client simple
+        tasks.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+        return tasks;
+    },
+});
+
+export const submitTaskFeedback = mutation({
+    args: {
+        sessionId: v.id("test_sessions"),
+        taskId: v.id("tasks"),
+        difficultyRating: v.number(),
+        confusionText: v.optional(v.string()),
+        improvementText: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.insert("task_feedback", {
+            sessionId: args.sessionId,
+            taskId: args.taskId,
+            difficultyRating: args.difficultyRating,
+            confusionText: args.confusionText || null,
+            improvementText: args.improvementText || null,
+        } as any);
+        return { success: true };
+    },
+});
+
+export const submitFinalFeedback = mutation({
+    args: {
+        sessionId: v.id("test_sessions"),
+        overallRating: v.number(),
+        confusingPart: v.optional(v.string()),
+        featureImprovement: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.insert("final_feedback", {
+            sessionId: args.sessionId,
+            overallRating: args.overallRating,
+            confusingPart: args.confusingPart || null,
+            featureImprovement: args.featureImprovement || null,
+        } as any);
+
+        // mark session completed
+        const session = await ctx.db.get(args.sessionId as any);
+        if (session) {
+            await ctx.db.patch(session._id, { completedAt: Date.now() });
+        }
+
+        return { success: true };
+    },
+});
+
+export const adminGetTestResponses = query({
+    args: {},
+    handler: async (ctx) => {
+        const sessions = await ctx.db.query("test_sessions").collect();
+        const tasks = await ctx.db.query("tasks").collect();
+        const feedback = await ctx.db.query("task_feedback").collect();
+        const finals = await ctx.db.query("final_feedback").collect();
+
+        return { sessions, tasks, feedback, finals };
+    },
+});
+
+export const createDefaultTasks = mutation({
+    args: {},
+    handler: async (ctx) => {
+        const defaults = [
+            { title: 'Create an account', instruction: 'Create an account on HoldMyBeer using the signup flow.', order: 1 },
+            { title: 'Fund your wallet with ₦2000', instruction: 'Add ₦2000 to your wallet using any available payment option.', order: 2 },
+            { title: 'Browse the platform', instruction: 'Browse the platform and find an experience you like.', order: 3 },
+            { title: 'Attempt to join or book an activity', instruction: 'Try to join or book an activity you found.', order: 4 },
+            { title: 'Edit your profile username', instruction: 'Go to your profile and edit your username.', order: 5 },
+        ];
+        for (const t of defaults) {
+            await ctx.db.insert('tasks', t as any);
+        }
+        return { success: true };
+    },
+});
+
 export const insertUnlock = mutation({
     args: {
         vendorProfileId: v.id("profiles"),

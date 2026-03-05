@@ -8,6 +8,8 @@ import CalendarModal from './components/CalendarModal';
 import { SuccessAnimation } from './components/SuccessAnimation';
 import { LoadingAnimation } from './components/LoadingAnimation';
 import AccessGateModal from './components/AccessGateModal';
+import TestLab from './components/usertest/TestLab';
+import AdminTests from './components/usertest/AdminTests';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "./convex/_generated/api";
 import { initializePaystack } from './services/paymentService';
@@ -754,6 +756,8 @@ const App: React.FC = () => {
       );
       case 'signup': return <Auth onLogin={handleLogin} />; // Signup now uses the same magic link Auth page
       case 'admin': return <AdminDashboard users={adminUsersList} serviceRequests={serviceRequests} onExit={() => setCurrentView('home')} onUpdateUser={handleUpdateUser} />;
+      case 'admin-tests': return <AdminTests />;
+      case 'test-lab': return <TestLab />;
       default: return null;
     }
   };
