@@ -501,3 +501,50 @@ export const wipeEverything = mutation({
         return { success: true };
     },
 });
+
+// Admin utility: backfill missing referral codes and createdAt for existing users
+export const backfillReferralCodes = mutation({
+    args: { secret: v.string() },
+    handler: async (ctx, args) => {
+        // Basic authorization using a shared secret
+        const allowed = process.env.BACKFILL_SECRET || 'BACKFILL_2026';
+        if (args.secret !== allowed) throw new Error('Unauthorized');
+
+        const users = await ctx.db.query('users').collect();
+        let updated = 0;
+        for (const u of users) {
+            const patch: any = {};
+            // Set createdAt if missing
+            if (!u.createdAt) patch.createdAt = Date.now();
+
+            // Ensure referral_code exists
+            if (!u.referral_code) {
+                // base candidate: username or email local-part
+                const base = (u.username || (u.email ? String(u.email).split('@')[0] : 'user') || 'user')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, '')
+                    .slice(0, 16) || 'user';
+                let candidate = base;
+                let attempts = 0;
+                while (attempts < 10) {
+                    const existing = await ctx.db.query('users').withIndex('by_referral', (q: any) => q.eq('referral_code', candidate)).unique();
+                    if (!existing) break;
+                    candidate = base + Math.random().toString(36).slice(2, 6);
+                    attempts++;
+                }
+                patch.referral_code = candidate;
+                if (!u.username) patch.username = base;
+            }
+
+            if (Object.keys(patch).length > 0) {
+                try {
+                    await ctx.db.patch(u._id, patch);
+                    updated++;
+                } catch (e) {
+                    console.warn('Failed to patch user', u._id, e);
+                }
+            }
+        }
+        return { success: true, updated };
+    },
+});

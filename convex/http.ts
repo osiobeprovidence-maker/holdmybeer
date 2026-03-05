@@ -119,3 +119,31 @@ http.route({
 });
 
 export default http;
+
+// Admin endpoint to trigger backfill migration (POST { secret })
+http.route({
+    path: "/admin/backfill-referrals",
+    method: "POST",
+    handler: httpAction(async (ctx, request) => {
+        try {
+            const body = await request.json();
+            const secret = body && body.secret ? body.secret : '';
+            const result = await ctx.runMutation((await import('./_generated/api')).api.backfillReferralCodes, { secret });
+            return new Response(JSON.stringify(result), {
+                status: 200,
+                headers: {
+                    ...corsHeaders(request),
+                    'Content-Type': 'application/json',
+                },
+            });
+        } catch (e: any) {
+            return new Response(JSON.stringify({ error: e.message || String(e) }), {
+                status: 400,
+                headers: {
+                    ...corsHeaders(request),
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+    }),
+});
