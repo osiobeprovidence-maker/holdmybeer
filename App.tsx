@@ -10,6 +10,7 @@ import { LoadingAnimation } from './components/LoadingAnimation';
 import AccessGateModal from './components/AccessGateModal';
 import TestLab from './components/usertest/TestLab';
 import AdminTests from './components/usertest/AdminTests';
+import ReportIssueButton from './components/ReportIssueButton';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "./convex/_generated/api";
 import { initializePaystack } from './services/paymentService';
@@ -863,6 +864,7 @@ const App: React.FC = () => {
         </div>
       )}
 
+      <ReportIssueButton />
       {showCoinMarket && (
         <CoinMarket
           currentUser={currentUser}

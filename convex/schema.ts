@@ -130,6 +130,18 @@ export default defineSchema({
         confusingPart: v.optional(v.string()),
         featureImprovement: v.optional(v.string()),
     }).index("by_session", ["sessionId"]),
+    // Reports table for user-submitted bug/issue reports
+    reports: defineTable({
+        userId: v.optional(v.id("users")),
+        title: v.string(),
+        description: v.string(),
+        category: v.string(),
+        severity: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical")),
+        pageUrl: v.string(),
+        screenshotUrl: v.optional(v.string()),
+        status: v.union(v.literal("open"), v.literal("investigating"), v.literal("resolved")),
+        createdAt: v.number(),
+    }).index("by_status", ["status"]).index("by_user", ["userId"]),
     // --- Referral System ---
     referrals: defineTable({
         referrerId: v.optional(v.id("users")),

@@ -486,6 +486,80 @@ export const getProfileStatus = query({
     },
 });
 
+// --- Reports API ---
+export const createReport = mutation({
+    args: {
+        title: v.string(),
+        description: v.string(),
+        category: v.string(),
+        severity: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical")),
+        pageUrl: v.string(),
+        screenshotStorageId: v.optional(v.string()),
+        sessionToken: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionToken);
+        let screenshotUrl: string | null = null;
+        if (args.screenshotStorageId) {
+            try {
+                screenshotUrl = await ctx.storage.getUrl(args.screenshotStorageId);
+            } catch (e) {
+                screenshotUrl = null;
+            }
+        }
+
+        const id = await ctx.db.insert("reports", {
+            userId: userId || null,
+            title: args.title,
+            description: args.description,
+            category: args.category,
+            severity: args.severity,
+            pageUrl: args.pageUrl,
+            screenshotUrl: screenshotUrl || null,
+            status: "open",
+            createdAt: Date.now(),
+        } as any);
+
+        return id;
+    },
+});
+
+export const getReports = query({
+    args: { sessionToken: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        const reports = await ctx.db.query("reports").collect();
+        reports.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
+        return reports;
+    },
+});
+
+export const getReport = query({
+    args: { id: v.string() },
+    handler: async (ctx, args) => {
+        return await ctx.db.get(args.id);
+    },
+});
+
+export const updateReportStatus = mutation({
+    args: {
+        id: v.string(),
+        status: v.union(v.literal("open"), v.literal("investigating"), v.literal("resolved")),
+        sessionToken: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.patch(args.id, { status: args.status });
+        return { success: true };
+    },
+});
+
+export const deleteReport = mutation({
+    args: { id: v.string(), sessionToken: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        await ctx.db.delete(args.id);
+        return { success: true };
+    },
+});
+
 export const wipeEverything = mutation({
     args: { secret: v.string() },
     handler: async (ctx, args) => {
