@@ -7,7 +7,9 @@ const ReportIssueButton: React.FC = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-black text-white px-4 py-3 rounded-full shadow-lg"
+        aria-label="Report an issue"
+        className="fixed bottom-6 right-28 md:right-36 z-50 bg-black text-white px-4 py-3 rounded-full shadow-lg animate-bounce"
+        style={{ animationDuration: '1.6s' }}
       >
         Report Issue
       </button>

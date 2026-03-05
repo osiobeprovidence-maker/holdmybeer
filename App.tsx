@@ -864,7 +864,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <ReportIssueButton />
+      {convexUser && <ReportIssueButton />}
       {showCoinMarket && (
         <CoinMarket
           currentUser={currentUser}
