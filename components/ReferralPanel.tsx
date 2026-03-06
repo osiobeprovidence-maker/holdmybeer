@@ -1,9 +1,14 @@
-import React from 'react';
-import { useQuery } from 'convex/react';
+import React, { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
 const ReferralPanel: React.FC<{ sessionToken?: string; currentUser?: any }> = ({ sessionToken, currentUser }) => {
   const history = useQuery(api.api.getReferralHistory, { sessionToken });
+  const updateUsernameMutation = useMutation(api.api.updateUsername);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const referralCode = currentUser?.referral_code || currentUser?.username || '';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://holdmybeer.app';
@@ -36,10 +41,54 @@ const ReferralPanel: React.FC<{ sessionToken?: string; currentUser?: any }> = ({
       <p className="text-sm text-gray-500 mt-2">Share your link and earn early access badges.</p>
 
       <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div className="flex-1 w-full bg-gray-100 px-3 py-2 rounded text-sm break-all">{link}</div>
+        {isEditing ? (
+          <div className="flex-1 w-full flex items-center gap-2">
+            <span className="text-sm text-gray-400">{origin}/referral/</span>
+            <input
+              type="text"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+              placeholder="username"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm outline-none focus:border-amber-400"
+              disabled={isSaving}
+              autoFocus
+            />
+          </div>
+        ) : (
+          <div className="flex-1 w-full bg-gray-100 px-3 py-2 rounded text-sm break-all font-mono">{link}</div>
+        )}
         <div className="flex gap-2">
-          <button onClick={copyLink} className="px-3 py-2 bg-amber-400 rounded text-sm font-bold">Copy</button>
-          <button onClick={share} className="px-3 py-2 bg-white border rounded text-sm font-bold">Share</button>
+          {isEditing ? (
+            <>
+              <button
+                disabled={isSaving}
+                onClick={async () => {
+                  if (newUsername.length < 3) return alert("Username must be at least 3 characters");
+                  setIsSaving(true);
+                  try {
+                    await updateUsernameMutation({ username: newUsername, sessionToken });
+                    setIsEditing(false);
+                    alert("Username updated successfully!");
+                    window.location.reload(); // Reload to refresh user context
+                  } catch (e: any) {
+                    alert(e.message || "Failed to update username");
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+                className="px-3 py-2 bg-amber-400 rounded text-sm font-bold disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button disabled={isSaving} onClick={() => setIsEditing(false)} className="px-3 py-2 bg-white border rounded text-sm font-bold opacity-60">Cancel</button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => { setIsEditing(true); setNewUsername(referralCode); }} className="px-3 py-2 bg-white border rounded text-sm font-bold" title="Customize Username">Edit Mode</button>
+              <button onClick={copyLink} className="px-3 py-2 bg-amber-400 rounded text-sm font-bold">Copy</button>
+              <button onClick={share} className="px-3 py-2 bg-black text-white rounded text-sm font-bold hidden sm:block">Share</button>
+            </>
+          )}
         </div>
       </div>
 

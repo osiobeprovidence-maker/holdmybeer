@@ -8,12 +8,12 @@ import CalendarModal from './components/CalendarModal';
 import { SuccessAnimation } from './components/SuccessAnimation';
 import { LoadingAnimation } from './components/LoadingAnimation';
 import AccessGateModal from './components/AccessGateModal';
-import TestLab from './components/usertest/TestLab';
 import AdminTests from './components/usertest/AdminTests';
 import ReportIssueButton from './components/ReportIssueButton';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "./convex/_generated/api";
 import { initializePaystack } from './services/paymentService';
+import { useNotification } from './components/NotificationProvider';
 import Home from './pages/Home';
 import MyConnections from './pages/MyConnections';
 import VendorDashboard from './pages/VendorDashboard';
@@ -87,6 +87,7 @@ const PriceListSection: React.FC<{ packages: ServicePackage[] }> = ({ packages }
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('home');
+  const { success, error, warning, info } = useNotification();
   const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
 
   const convexUser = useQuery(api.api.current, { sessionToken });
@@ -222,9 +223,6 @@ const App: React.FC = () => {
   });
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
-  // Test Lab modal & floating card state
-  const [showTestIntroModal, setShowTestIntroModal] = useState(false);
-  const [showFloatingTestCard, setShowFloatingTestCard] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState<string | null>(null);
   const [filteredVendors, setFilteredVendors] = useState<User[]>(MOCK_USERS);
 
@@ -314,18 +312,6 @@ const App: React.FC = () => {
     } catch (e) { }
   }, []);
 
-  // Auto-open Test Lab intro for existing logged-in users who haven't seen it yet
-  useEffect(() => {
-    if (!convexUser) return; // wait until convex user info loads
-    try {
-      const seen = localStorage.getItem('hmb_seen_test_intro');
-      if (!seen) {
-        setShowTestIntroModal(true);
-        localStorage.setItem('hmb_seen_test_intro', '1');
-      }
-    } catch (e) { }
-  }, [convexUser]);
-
   // Sync Unlocks
   useEffect(() => {
     if (convexUnlocks) {
@@ -377,7 +363,7 @@ const App: React.FC = () => {
     const existing = users.find(u => u.email === user.email);
     if (existing) {
       if (existing.isSuspended) {
-        alert("This account has been suspended by the Admin Protocol.");
+        error("This account has been suspended by the Admin Protocol.");
         return;
       }
       setCurrentUser(existing);
@@ -408,8 +394,6 @@ const App: React.FC = () => {
       setCurrentUser(newUser);
     }
     setCurrentView('home');
-    // Show Test Lab intro modal to both new and returning users
-    setShowTestIntroModal(true);
 
     // Show welcome coins animation for brand-new signups
     if (isNewUser) {
@@ -496,9 +480,9 @@ const App: React.FC = () => {
         isVisible: true,
         actionText: `+${coinsToAdd} Coins Added`,
       });
-    } catch (error) {
-      console.error('[HMB] Credit coins failed:', error);
-      alert("Failed to confirm payment.");
+    } catch (errorMsg) {
+      console.error('[HMB] Credit coins failed:', errorMsg);
+      error("Failed to confirm payment.");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -545,9 +529,10 @@ const App: React.FC = () => {
         onCompleteCallback: () => setCurrentView('my-connections')
       });
 
-    } catch (error: any) {
-      console.error("Coin unlock error:", error);
-      alert(error.message === 'Insufficient coins' ? 'Not enough coins. Please top up your wallet.' : 'Unlock failed. Please try again.');
+    } catch (err: any) {
+      console.error("Coin unlock error:", err);
+      const errorMsg = err.message === 'Insufficient coins' ? 'Not enough coins. Please top up your wallet.' : 'Unlock failed. Please try again.';
+      error(errorMsg);
       setIsProcessingPayment(false);
     }
   };
@@ -602,9 +587,9 @@ const App: React.FC = () => {
         onCompleteCallback: () => setCurrentView('my-connections')
       });
 
-    } catch (error) {
-      console.error("Coin unlock error:", error);
-      alert("Error processing protocol unlock.");
+    } catch (err) {
+      console.error("Coin unlock error:", err);
+      error("Error processing protocol unlock.");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -658,14 +643,14 @@ const App: React.FC = () => {
           if (phoneNumber) {
             window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
           } else {
-            alert('Vendor phone number not found.');
+            error('Vendor phone number not found.');
           }
         }
       });
 
-    } catch (error) {
-      console.error("Keep date error:", error);
-      alert("Error processing date request.");
+    } catch (err) {
+      console.error("Keep date error:", err);
+      error("Error processing date request.");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -800,7 +785,6 @@ const App: React.FC = () => {
       case 'signup': return <Auth onLogin={handleLogin} />; // Signup now uses the same magic link Auth page
       case 'admin': return <AdminDashboard users={adminUsersList} serviceRequests={serviceRequests} onExit={() => setCurrentView('home')} onUpdateUser={handleUpdateUser} />;
       case 'admin-tests': return <AdminTests />;
-      case 'test-lab': return <TestLab />;
       default: return null;
     }
   };
@@ -815,8 +799,6 @@ const App: React.FC = () => {
             actionText: '2 Coins Activated 🎉',
             onCompleteCallback: () => {
               setCurrentView('dashboard');
-              // show test intro after completing profile
-              setShowTestIntroModal(true);
             }
           });
         }}
@@ -838,31 +820,6 @@ const App: React.FC = () => {
         onShowCoinMarket={() => setShowCoinMarket(true)}
       />
       <main className="flex-grow max-w-7xl mx-auto px-6 pt-24 pb-12 md:pt-40 w-full">{renderCurrentView()}</main>
-
-      {/* Full-screen TestLab intro modal */}
-      {showTestIntroModal && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => { setShowTestIntroModal(false); setShowFloatingTestCard(true); }} />
-          <div className="relative w-full max-w-3xl mx-auto h-full md:h-auto md:rounded-xl overflow-auto">
-            <div className="bg-white rounded-xl h-full md:h-auto p-4 md:p-6 shadow-xl">
-              <TestLab onSessionCreated={(sid) => { setShowTestIntroModal(false); setShowFloatingTestCard(true); }} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Persistent Test Lab launcher — always visible when logged in */}
-      {convexUser && (
-        <div className="fixed right-4 bottom-6 z-[390] md:right-8 md:bottom-8">
-          <button
-            onClick={() => setShowTestIntroModal(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-amber-400 hover:bg-amber-500 active:scale-95 transition-all rounded-2xl shadow-xl font-bold text-sm text-black"
-            title="Open HoldMyBeer Test Lab"
-          >
-            🍺 <span>Start Test</span>
-          </button>
-        </div>
-      )}
 
       {convexUser && <ReportIssueButton />}
       {showCoinMarket && (

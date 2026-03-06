@@ -27,6 +27,7 @@ test("OTP verification and profile completion flow", async () => {
     const completeRes = await t.mutation(api.api.completeProfile, {
         fullName: "Test User",
         phone: "+2348000000000",
+        username: "testuser",
         sessionToken: result.sessionToken,
     });
     expect(completeRes.success).toBe(true);
@@ -40,6 +41,7 @@ test("OTP verification and profile completion flow", async () => {
     const secondRes = await t.mutation(api.api.completeProfile, {
         fullName: "Test User",
         phone: "+2348000000000",
+        username: "testuser",
         sessionToken: result.sessionToken,
     });
     expect(secondRes.alreadyCompleted).toBe(true);

@@ -31,7 +31,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
   const [nodeSearch, setNodeSearch] = useState('');
   const [coinAdjust, setCoinAdjust] = useState<Record<string, number>>({});
   const [filterType, setFilterType] = useState<'all' | 'vendors' | 'clients' | 'suspended' | 'unverified'>('all');
-  const reportsQuery = useQuery(api.api.getReports) ?? [];
+  const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
+  const reportsQuery = useQuery(api.api.getReports, { sessionToken }) ?? [];
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

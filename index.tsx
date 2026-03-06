@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import App from './App';
+import { NotificationProvider } from './components/NotificationProvider';
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string, {
   // Enable verbose logging so we can see auth token exchange in console
@@ -16,6 +17,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <ConvexProvider client={convex}>
-    <App />
+    <NotificationProvider>
+      <App />
+    </NotificationProvider>
   </ConvexProvider>
 );

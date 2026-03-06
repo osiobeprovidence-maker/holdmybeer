@@ -1,0 +1,12 @@
+[
+  {
+    "userId": null,
+    "title": "Import CLI Test 2",
+    "description": "Imported directly into reports table - no screenshot",
+    "category": "Bug",
+    "severity": "Low",
+    "pageUrl": "https://example.test/import2",
+    "status": "open",
+    "createdAt": 1670000000001
+  }
+]

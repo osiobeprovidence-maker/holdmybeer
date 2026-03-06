@@ -140,8 +140,16 @@ export const adminUpdateProfile = mutation({
     },
 });
 
-export const generateUploadUrl = mutation(async (ctx) => {
-    return await ctx.storage.generateUploadUrl();
+export const generateUploadUrl = mutation({
+    args: {},
+    handler: async (ctx) => {
+        try {
+            return await ctx.storage.generateUploadUrl();
+        } catch (e) {
+            console.error('Failed to generate upload URL', e);
+            throw new Error(`Failed to generate upload URL: ${e instanceof Error ? e.message : String(e)}`);
+        }
+    },
 });
 
 export const getStorageUrl = query({
@@ -262,28 +270,36 @@ export const getReferralHistory = query({
         const userId = await getSessionUserId(ctx, args.sessionToken);
         if (!userId) return [];
 
-        const refs = await ctx.db.query('referrals').withIndex('by_referrer', (q: any) => q.eq('referrerId', userId)).collect();
+        try {
+            const refs = await ctx.db.query('referrals').withIndex('by_referrer', (q: any) => q.eq('referrerId', userId)).collect();
 
-        // Attach referred user's basic info when available
-        const results = [] as any[];
-        for (const r of refs) {
-            let referredUser = null;
-            if (r.referredUserId) {
-                try {
-                    referredUser = await ctx.db.get(r.referredUserId);
-                } catch (e) { referredUser = null; }
+            // Attach referred user's basic info when available
+            const results = [] as any[];
+            for (const r of refs) {
+                let referredUser = null;
+                if (r.referredUserId) {
+                    try {
+                        referredUser = await ctx.db.get(r.referredUserId);
+                    } catch (e) {
+                        console.warn('Failed to fetch referred user', { userId: r.referredUserId, error: e });
+                        referredUser = null;
+                    }
+                }
+                results.push({
+                    id: r._id,
+                    referredUserId: r.referredUserId || null,
+                    referredEmail: r.referredEmail || (referredUser ? referredUser.email : null),
+                    referredUsername: referredUser ? (referredUser.username || referredUser.referral_code || null) : null,
+                    createdAt: r.createdAt,
+                });
             }
-            results.push({
-                id: r._id,
-                referredUserId: r.referredUserId || null,
-                referredEmail: r.referredEmail || (referredUser ? referredUser.email : null),
-                referredUsername: referredUser ? (referredUser.username || referredUser.referral_code || null) : null,
-                createdAt: r.createdAt,
-            });
+            // sort newest first
+            results.sort((a, b) => b.createdAt - a.createdAt);
+            return results;
+        } catch (e) {
+            console.error('Failed to get referral history', { userId, error: e });
+            return [];
         }
-        // sort newest first
-        results.sort((a, b) => b.createdAt - a.createdAt);
-        return results;
     },
 });
 
@@ -391,6 +407,7 @@ export const completeProfile = mutation({
     args: {
         fullName: v.string(),
         phone: v.string(),
+        username: v.string(),
         sessionToken: v.string(),
     },
     handler: async (ctx, args) => {
@@ -426,12 +443,26 @@ export const completeProfile = mutation({
             return { success: true, alreadyCompleted: true };
         }
 
-        // 5. Patch user: fullName, phone, profileCompleted = true, coins = user.coins + SIGNUP_REWARD_AMOUNT
+        const newUsername = args.username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (newUsername.length < 3) throw new Error("Username must be at least 3 alphanumeric characters.");
+
+        const existingUsername = await ctx.db
+            .query("users")
+            .withIndex("by_referral", (q) => q.eq("referral_code", newUsername))
+            .unique();
+
+        if (existingUsername && existingUsername._id !== user._id) {
+            throw new Error("Username is already taken. Please choose another one.");
+        }
+
+        // 5. Patch user: fullName, phone, username, referral_code, profileCompleted = true, coins = user.coins + SIGNUP_REWARD_AMOUNT
         const newCoins = (user.coins || 0) + SIGNUP_REWARD_AMOUNT;
 
         await ctx.db.patch(user._id, {
             fullName: args.fullName,
             phone: args.phone,
+            username: newUsername,
+            referral_code: newUsername,
             profileCompleted: true,
             coins: newCoins,
         });
@@ -486,6 +517,39 @@ export const getProfileStatus = query({
     },
 });
 
+export const updateUsername = mutation({
+    args: {
+        username: v.string(),
+        sessionToken: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionToken);
+        if (!userId) throw new Error("Not authenticated");
+
+        const user = await ctx.db.get(userId);
+        if (!user) throw new Error("User not found");
+
+        const newUsername = args.username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (newUsername.length < 3) throw new Error("Username must be at least 3 alphanumeric characters.");
+
+        const existing = await ctx.db
+            .query("users")
+            .withIndex("by_referral", (q) => q.eq("referral_code", newUsername))
+            .unique();
+
+        if (existing && existing._id !== userId) {
+            throw new Error("Username is already taken. Please choose another one.");
+        }
+
+        await ctx.db.patch(userId, {
+            username: newUsername,
+            referral_code: newUsername
+        });
+
+        return { success: true, username: newUsername };
+    }
+});
+
 // --- Reports API ---
 export const createReport = mutation({
     args: {
@@ -498,29 +562,47 @@ export const createReport = mutation({
         sessionToken: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
+        // Validate required fields
+        if (!args.title || args.title.trim().length === 0) {
+            throw new Error("Report title is required");
+        }
+        if (!args.description || args.description.trim().length === 0) {
+            throw new Error("Report description is required");
+        }
+        if (!args.category || args.category.trim().length === 0) {
+            throw new Error("Report category is required");
+        }
+
         const userId = await getSessionUserId(ctx, args.sessionToken);
         let screenshotUrl: string | null = null;
         if (args.screenshotStorageId) {
             try {
                 screenshotUrl = await ctx.storage.getUrl(args.screenshotStorageId);
             } catch (e) {
+                console.error('Failed to retrieve screenshot URL', { storageId: args.screenshotStorageId, error: e });
                 screenshotUrl = null;
             }
         }
 
-        const id = await ctx.db.insert("reports", {
-            userId: userId || null,
-            title: args.title,
-            description: args.description,
-            category: args.category,
-            severity: args.severity,
-            pageUrl: args.pageUrl,
-            screenshotUrl: screenshotUrl || null,
-            status: "open",
-            createdAt: Date.now(),
-        } as any);
+        try {
+            const id = await ctx.db.insert("reports", {
+                userId: userId || null,
+                title: args.title,
+                description: args.description,
+                category: args.category,
+                severity: args.severity,
+                pageUrl: args.pageUrl,
+                screenshotUrl: screenshotUrl || null,
+                status: "open",
+                createdAt: Date.now(),
+            } as any);
 
-        return id;
+            console.log('Report created successfully', { reportId: id, userId, category: args.category });
+            return id;
+        } catch (e) {
+            console.error('Failed to create report', { error: e, args });
+            throw new Error(`Failed to submit report: ${e instanceof Error ? e.message : String(e)}`);
+        }
     },
 });
 
@@ -534,7 +616,7 @@ export const getReports = query({
 });
 
 export const getReport = query({
-    args: { id: v.string() },
+    args: { id: v.id("reports") },
     handler: async (ctx, args) => {
         return await ctx.db.get(args.id);
     },
@@ -542,7 +624,7 @@ export const getReport = query({
 
 export const updateReportStatus = mutation({
     args: {
-        id: v.string(),
+        id: v.id("reports"),
         status: v.union(v.literal("open"), v.literal("investigating"), v.literal("resolved")),
         sessionToken: v.optional(v.string()),
     },
@@ -553,7 +635,7 @@ export const updateReportStatus = mutation({
 });
 
 export const deleteReport = mutation({
-    args: { id: v.string(), sessionToken: v.optional(v.string()) },
+    args: { id: v.id("reports"), sessionToken: v.optional(v.string()) },
     handler: async (ctx, args) => {
         await ctx.db.delete(args.id);
         return { success: true };
@@ -586,6 +668,7 @@ export const backfillReferralCodes = mutation({
 
         const users = await ctx.db.query('users').collect();
         let updated = 0;
+        let failed = 0;
         for (const u of users) {
             const patch: any = {};
             // Set createdAt if missing
@@ -615,10 +698,12 @@ export const backfillReferralCodes = mutation({
                     await ctx.db.patch(u._id, patch);
                     updated++;
                 } catch (e) {
-                    console.warn('Failed to patch user', u._id, e);
+                    console.error('Failed to patch user during backfill', { userId: u._id, patch, error: e });
+                    failed++;
                 }
             }
         }
-        return { success: true, updated };
+        console.log('Backfill referral codes completed', { updated, failed, totalUsers: users.length });
+        return { success: true, updated, failed, totalUsers: users.length };
     },
 });

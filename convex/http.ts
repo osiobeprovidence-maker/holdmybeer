@@ -128,7 +128,9 @@ http.route({
         try {
             const body = await request.json();
             const secret = body && body.secret ? body.secret : '';
-            const result = await ctx.runMutation((await import('./_generated/api')).api.backfillReferralCodes, { secret });
+            // Use any-cast to call admin backfill mutation (generated types may be out-of-sync)
+            const gen: any = (await import('./_generated/api')).api;
+            const result = await ctx.runMutation(gen.backfillReferralCodes, { secret });
             return new Response(JSON.stringify(result), {
                 status: 200,
                 headers: {

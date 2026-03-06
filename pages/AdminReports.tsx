@@ -10,18 +10,19 @@ const severityColor = (s: string) => {
 };
 
 const AdminReports: React.FC = () => {
-  const reports = useQuery(api.api.getReports) ?? [];
+  const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
+  const reports = useQuery(api.api.getReports, { sessionToken }) ?? [];
   const updateStatus = useMutation(api.api.updateReportStatus);
   const deleteReport = useMutation(api.api.deleteReport);
   const [selected, setSelected] = useState<any | null>(null);
 
   const onChangeStatus = async (id: string, status: string) => {
-    await updateStatus({ id, status });
+    await updateStatus({ id: id as any, status: status as "open" | "investigating" | "resolved", sessionToken });
   };
 
   const onDelete = async (id: string) => {
     if (!confirm('Delete this report?')) return;
-    await deleteReport({ id });
+    await deleteReport({ id: id as any, sessionToken });
   };
 
   return (

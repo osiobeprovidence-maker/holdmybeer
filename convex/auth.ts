@@ -150,21 +150,28 @@ export const verifyOTP = mutation({
                 await ctx.db.patch(userId, { referral_code: candidate, username: base });
                 user = await ctx.db.get(userId);
             } catch (e) {
-                console.warn('Failed to generate referral code', e);
+                console.error('Failed to generate referral code', e);
+                throw new Error(`Failed to generate referral code: ${e instanceof Error ? e.message : String(e)}`);
             }
 
             // If a referralCode was supplied, link the referral
             if (args.referralCode) {
                 try {
                     const referrer = await ctx.db.query('users').withIndex('by_referral', (q: any) => q.eq('referral_code', args.referralCode)).unique();
-                    await ctx.db.insert('referrals', {
-                        referrerId: referrer ? referrer._id : null,
-                        referredUserId: userId,
-                        referredEmail: args.email,
-                        createdAt: Date.now(),
-                    } as any);
+                    if (!referrer) {
+                        console.warn('Referral code not found', { referralCode: args.referralCode });
+                    } else {
+                        await ctx.db.insert('referrals', {
+                            referrerId: referrer._id,
+                            referredUserId: userId,
+                            referredEmail: args.email,
+                            createdAt: Date.now(),
+                        } as any);
+                        console.log('Referral recorded successfully', { referrerId: referrer._id, referredUserId: userId });
+                    }
                 } catch (e) {
-                    console.warn('Failed to record referral', e);
+                    console.error('Failed to record referral', e);
+                    throw new Error(`Failed to record referral: ${e instanceof Error ? e.message : String(e)}`);
                 }
             }
         }

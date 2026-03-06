@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { useNotification } from "../components/NotificationProvider";
 
 interface AuthProps {
   onLogin?: (user: any) => void;
@@ -8,6 +9,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
+  const { success, error: notifyError, info } = useNotification();
   const sendOTP = useAction(api.auth.sendOTP);
   const verifyOTP = useMutation(api.auth.verifyOTP);
   const [step, setStep] = useState<'email' | 'code'>('email');
@@ -37,14 +39,17 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
       await sendOTP({ email });
       setCooldown(60); // 60 seconds cooldown
       setStep('code');
-    } catch (error: any) {
-      console.error(error);
-      const msg = error.message || "";
+      success(`Login code sent to ${email}`);
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.message || "";
       if (msg.includes("wait")) {
         const match = msg.match(/\d+/);
         if (match) setCooldown(parseInt(match[0]));
       }
-      setErrorMsg(error.message || "Failed to send code. Please try again.");
+      const errorMessage = err.message || "Failed to send code. Please try again.";
+      setErrorMsg(errorMessage);
+      notifyError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -77,6 +82,7 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
       const result = await response.json();
       if (result.sessionToken) {
         localStorage.setItem("hmb_session_id", result.sessionToken);
+        success("Welcome! You're signed in.");
       }
 
       // Force navigation or reload upon successful session creation
@@ -85,9 +91,11 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
       } else {
         window.location.reload();
       }
-    } catch (error: any) {
-      console.error(error);
-      setErrorMsg(error.message || "Invalid or expired code. Please try again.");
+    } catch (err: any) {
+      console.error(err);
+      const errorMessage = err.message || "Invalid or expired code. Please try again.";
+      setErrorMsg(errorMessage);
+      notifyError(errorMessage);
     } finally {
       setLoading(false);
     }

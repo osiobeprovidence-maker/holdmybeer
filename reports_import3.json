@@ -1,0 +1,11 @@
+[
+  {
+    "title": "Import CLI Test 3",
+    "description": "Imported directly into reports table - minimal",
+    "category": "Bug",
+    "severity": "Low",
+    "pageUrl": "https://example.test/import3",
+    "status": "open",
+    "createdAt": 1670000000002
+  }
+]

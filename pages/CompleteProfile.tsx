@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import { useNotification } from '../components/NotificationProvider';
 
 interface CompleteProfileProps {
     onComplete: () => void;
 }
 
 const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
+    const { success: notifySuccess, error: notifyError } = useNotification();
     const completeProfileMutation = useMutation(api.api.completeProfile);
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
+    const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [success, setSuccess] = useState(false);
@@ -17,7 +20,9 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!fullName.trim() || !phone.trim() || fullName.trim().length < 2) {
-            setErrorMsg('Full name must be at least 2 characters.');
+            const error = 'Full name must be at least 2 characters.';
+            setErrorMsg(error);
+            notifyError(error);
             return;
         }
         setLoading(true);
@@ -26,7 +31,9 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
             const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
 
             if (!sessionToken) {
-                setErrorMsg('Your session has expired or is missing. Please log in again.');
+                const error = 'Your session has expired or is missing. Please log in again.';
+                setErrorMsg(error);
+                notifyError(error);
                 setLoading(false);
                 return;
             }
@@ -37,17 +44,21 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
             await completeProfileMutation({
                 fullName: fullName.trim(),
                 phone: normalizedPhone,
+                username: username.trim(),
                 sessionToken
             });
 
             setSuccess(true);
+            notifySuccess('Profile activated! 🎉 2 bonus coins added to your wallet.');
             setTimeout(() => {
                 onComplete();
             }, 2500);
 
         } catch (err: any) {
             console.error({ event: 'profile_completion_error', error: err });
-            setErrorMsg(err.message || 'Something went wrong. Please try again.');
+            const errorMsg = err.message || 'Something went wrong. Please try again.';
+            setErrorMsg(errorMsg);
+            notifyError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -135,6 +146,21 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ onComplete }) => {
                                 onChange={(e) => setPhone(e.target.value)}
                                 className="w-full bg-[#f5f5f7] border-none rounded-[28px] px-7 py-4 text-black outline-none focus:ring-2 focus:ring-black/10 transition-all font-bold text-base placeholder:text-black/20"
                                 placeholder="+234 800 000 0000"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#86868b] ml-4">
+                                Choose Username
+                            </label>
+                            <input
+                                id="complete-profile-username"
+                                type="text"
+                                required
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                                className="w-full bg-[#f5f5f7] border-none rounded-[28px] px-7 py-4 text-black outline-none focus:ring-2 focus:ring-black/10 transition-all font-bold text-base placeholder:text-black/20"
+                                placeholder="coolguy99"
                             />
                         </div>
 
