@@ -293,9 +293,12 @@ const App: React.FC = () => {
     try {
       const path = window.location.pathname || '';
       const m = path.match(/\/referral\/(.+)$/i);
+      let foundReferral = false;
+
       if (m && m[1]) {
         const code = decodeURIComponent(m[1]);
         localStorage.setItem('hmb_referral', code);
+        foundReferral = true;
         // remove any referral cookie left by server redirect
         try { document.cookie = 'hmb_referral=; Max-Age=0; Path=/'; } catch (e) { }
       } else {
@@ -305,9 +308,17 @@ const App: React.FC = () => {
           if (match && match[1]) {
             const code = decodeURIComponent(match[1]);
             localStorage.setItem('hmb_referral', code);
+            foundReferral = true;
             document.cookie = 'hmb_referral=; Max-Age=0; Path=/';
           }
         } catch (e) { }
+      }
+
+      // If a valid referral was found on load, auto-open the signup flow
+      if (foundReferral) {
+        setCurrentView('signup');
+        // Clear the URL to normal state so refreshes don't re-trigger
+        window.history.replaceState({}, document.title, "/");
       }
     } catch (e) { }
   }, []);
@@ -782,7 +793,7 @@ const App: React.FC = () => {
           }}
         />
       );
-      case 'signup': return <Auth onLogin={handleLogin} />; // Signup now uses the same magic link Auth page
+      case 'signup': return <Auth onNavigate={setCurrentView} onLogin={handleLogin} isSignup={true} />; // Signup now uses the same magic link Auth page
       case 'admin': return <AdminDashboard users={adminUsersList} serviceRequests={serviceRequests} onExit={() => setCurrentView('home')} onUpdateUser={handleUpdateUser} />;
       case 'admin-tests': return <AdminTests />;
       default: return null;

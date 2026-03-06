@@ -6,9 +6,10 @@ import { useNotification } from "../components/NotificationProvider";
 interface AuthProps {
   onLogin?: (user: any) => void;
   onNavigate?: (view: string) => void;
+  isSignup?: boolean;
 }
 
-const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
+const Auth: React.FC<AuthProps> = ({ onNavigate, isSignup }) => {
   const { success, error: notifyError, info } = useNotification();
   const sendOTP = useAction(api.auth.sendOTP);
   const verifyOTP = useMutation(api.auth.verifyOTP);
@@ -109,8 +110,17 @@ const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
         {step === 'email' ? (
           <>
             <div className="mb-12">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] mb-3">Passwordless Access</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter text-black uppercase">Sign In</h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#86868b] mb-3">
+                {isSignup ? "Join Protocol" : "Passwordless Access"}
+              </p>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter text-black uppercase">
+                {isSignup ? "Create Account" : "Sign In"}
+              </h2>
+              {typeof window !== 'undefined' && localStorage.getItem('hmb_referral') && (
+                <div className="mb-4 inline-block bg-amber-50 text-amber-600 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest border border-amber-100">
+                  🎁 Referral Code Applied: <span className="text-black">{localStorage.getItem('hmb_referral')}</span>
+                </div>
+              )}
               <p className="text-[#86868b] font-medium text-sm leading-relaxed">
                 Enter your email and we'll send you a 6-digit login code. No password needed.
               </p>
