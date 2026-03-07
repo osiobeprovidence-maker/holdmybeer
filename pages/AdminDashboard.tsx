@@ -33,6 +33,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
   const [filterType, setFilterType] = useState<'all' | 'vendors' | 'clients' | 'suspended' | 'unverified'>('all');
   const sessionToken = typeof window !== 'undefined' ? localStorage.getItem("hmb_session_id") || undefined : undefined;
   const reportsQuery = useQuery(api.api.getReports, { sessionToken }) ?? [];
+  const inviteAdminMutation = useMutation(api.api.inviteAdmin);
+
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteStatus, setInviteStatus] = useState<{ loading: boolean; msg: string }>({ loading: false, msg: '' });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +78,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
       onUpdateUser({ ...user, panicModeOptIn: !user.panicModeOptIn });
       setActionLoading(null);
     }, 400);
+  };
+
+  const handleInviteAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail) return;
+    setInviteStatus({ loading: true, msg: '' });
+    try {
+      await inviteAdminMutation({ email: inviteEmail, sessionToken });
+      setInviteStatus({ loading: false, msg: 'Admin invited successfully!' });
+      setInviteEmail('');
+      setTimeout(() => setInviteStatus({ loading: false, msg: '' }), 3000);
+    } catch (err: any) {
+      setInviteStatus({ loading: false, msg: err.message || 'Invitation failed' });
+    }
   };
 
   // ── Stats ──────────────────────────────────────────
@@ -158,15 +176,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
 
       {/* Tab Nav */}
       <div className="flex gap-8 mb-12 border-b border-black/5 overflow-x-auto scrollbar-hide">
-                {([
-                { id: 'overview', label: 'Overview' },
-                { id: 'users', label: `Users (${users.length})` },
-                { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
-                { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
-                { id: 'reports', label: `Reports (${reportsQuery.length})` },
-                { id: 'tests', label: `Test Analytics` },
-                { id: 'partners', label: `Partners` },
-              ] as { id: AdminTab; label: string }[]).map(t => (
+        {([
+          { id: 'overview', label: 'Overview' },
+          { id: 'users', label: `Users (${users.length})` },
+          { id: 'transactions', label: `Transactions (${serviceRequests.length})` },
+          { id: 'panic', label: `🚨 Panic Monitor (${panicVendors.length})` },
+          { id: 'reports', label: `Reports (${reportsQuery.length})` },
+          { id: 'tests', label: `Test Analytics` },
+          { id: 'partners', label: `Partners` },
+        ] as { id: AdminTab; label: string }[]).map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
@@ -251,6 +269,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="bg-white border border-black/5 rounded-[28px] p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+            <div>
+              <h3 className="font-black uppercase tracking-tight text-lg">Invite Administrator</h3>
+              <p className="text-[10px] uppercase font-bold text-[#86868b] tracking-widest mt-1">Grant super admin privileges via email</p>
+            </div>
+            <form onSubmit={handleInviteAdmin} className="flex gap-2 w-full md:w-auto">
+              <input
+                type="email"
+                placeholder="Admin Email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="bg-[#f5f5f7] border-none rounded-full px-5 py-3 text-[11px] font-bold outline-none flex-1 md:w-64"
+                required
+              />
+              <button disabled={inviteStatus.loading} type="submit" className="bg-black text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-all disabled:opacity-50">
+                {inviteStatus.loading ? '...' : 'Invite'}
+              </button>
+            </form>
+            {inviteStatus.msg && <p className={`text-[10px] font-bold uppercase tracking-widest ${inviteStatus.msg.includes('success') ? 'text-green-500' : 'text-red-500'}`}>{inviteStatus.msg}</p>}
           </div>
 
           <p className="text-[10px] font-black text-[#86868b] uppercase tracking-widest mb-6">{filteredNodes.length} nodes found</p>
@@ -367,304 +406,315 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, serviceRequests,
             )}
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* ── TRANSACTIONS TAB ── */}
-      {activeTab === 'transactions' && (
-        <div className="animate-in fade-in duration-500">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <StatCard label="Total Unlocks" value={serviceRequests.length} />
-            <StatCard label="Unlock Revenue" value={`₦${totalRevenue.toLocaleString()}`} dark />
-            <StatCard label="Panic Unlocks" value={urgentRequests} sub={`${serviceRequests.length > 0 ? Math.round((urgentRequests / serviceRequests.length) * 100) : 0}% of total`} />
-            <StatCard label="Subscription Revenue" value={`₦${subscriptionRevenue.toLocaleString()}`} />
-          </div>
+      {
+        activeTab === 'transactions' && (
+          <div className="animate-in fade-in duration-500">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              <StatCard label="Total Unlocks" value={serviceRequests.length} />
+              <StatCard label="Unlock Revenue" value={`₦${totalRevenue.toLocaleString()}`} dark />
+              <StatCard label="Panic Unlocks" value={urgentRequests} sub={`${serviceRequests.length > 0 ? Math.round((urgentRequests / serviceRequests.length) * 100) : 0}% of total`} />
+              <StatCard label="Subscription Revenue" value={`₦${subscriptionRevenue.toLocaleString()}`} />
+            </div>
 
-          <div className="space-y-4">
-            {serviceRequests.length > 0 ? serviceRequests.sort((a, b) => b.timestamp - a.timestamp).map(req => {
-              const creator = users.find(u => u.id === req.creatorId);
-              const client = users.find(u => u.id === req.clientId);
-              return (
-                <div key={req.id} className="bg-white border border-black/5 p-5 md:p-6 rounded-[24px]">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-[8px] font-black uppercase px-2.5 py-1 rounded-full ${req.paymentType === 'urgent' ? 'bg-red-500 text-white' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
-                          {req.paymentType === 'urgent' ? '🚨 Panic Unlock' : 'Standard Unlock'}
-                        </span>
-                        <span className="text-[9px] text-[#86868b] font-bold">{new Date(req.timestamp).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mt-3">
-                        <div>
-                          <p className="text-[8px] font-black text-[#86868b] uppercase tracking-widest mb-0.5">Vendor</p>
-                          <p className="text-[11px] font-black text-black truncate">{creator?.businessName || creator?.name || 'Unknown'}</p>
-                          <p className="text-[9px] text-[#86868b] truncate">{creator?.category}</p>
+            <div className="space-y-4">
+              {serviceRequests.length > 0 ? serviceRequests.sort((a, b) => b.timestamp - a.timestamp).map(req => {
+                const creator = users.find(u => u.id === req.creatorId);
+                const client = users.find(u => u.id === req.clientId);
+                return (
+                  <div key={req.id} className="bg-white border border-black/5 p-5 md:p-6 rounded-[24px]">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`text-[8px] font-black uppercase px-2.5 py-1 rounded-full ${req.paymentType === 'urgent' ? 'bg-red-500 text-white' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
+                            {req.paymentType === 'urgent' ? '🚨 Panic Unlock' : 'Standard Unlock'}
+                          </span>
+                          <span className="text-[9px] text-[#86868b] font-bold">{new Date(req.timestamp).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </div>
-                        <div>
-                          <p className="text-[8px] font-black text-[#86868b] uppercase tracking-widest mb-0.5">Client</p>
-                          <p className="text-[11px] font-black text-black truncate">{client?.name || req.clientId.slice(0, 12) + '...'}</p>
-                          <p className="text-[9px] text-[#86868b] font-mono truncate">{req.id}</p>
+                        <div className="grid grid-cols-2 gap-4 mt-3">
+                          <div>
+                            <p className="text-[8px] font-black text-[#86868b] uppercase tracking-widest mb-0.5">Vendor</p>
+                            <p className="text-[11px] font-black text-black truncate">{creator?.businessName || creator?.name || 'Unknown'}</p>
+                            <p className="text-[9px] text-[#86868b] truncate">{creator?.category}</p>
+                          </div>
+                          <div>
+                            <p className="text-[8px] font-black text-[#86868b] uppercase tracking-widest mb-0.5">Client</p>
+                            <p className="text-[11px] font-black text-black truncate">{client?.name || req.clientId.slice(0, 12) + '...'}</p>
+                            <p className="text-[9px] text-[#86868b] font-mono truncate">{req.id}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-2xl font-black text-black">₦{req.amount.toLocaleString()}</p>
-                      <p className="text-[9px] font-bold text-[#86868b] uppercase">{req.status}</p>
+                      <div className="shrink-0 text-right">
+                        <p className="text-2xl font-black text-black">₦{req.amount.toLocaleString()}</p>
+                        <p className="text-[9px] font-bold text-[#86868b] uppercase">{req.status}</p>
+                      </div>
                     </div>
                   </div>
+                );
+              }) : (
+                <div className="py-20 text-center bg-[#f5f5f7] rounded-[32px]">
+                  <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em]">No transactions recorded yet.</p>
                 </div>
-              );
-            }) : (
+              )}
+            </div>
+          </div>
+        )
+      }
+
+      {/* ── PANIC MONITOR TAB ── */}
+      {
+        activeTab === 'panic' && (
+          <div className="animate-in fade-in duration-500">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              <StatCard label="Panic-Ready Vendors" value={panicVendors.length} dark />
+              <StatCard label="Panic Unlocks" value={urgentRequests} />
+              <StatCard label="Avg Panic Rate" value={panicVendors.length > 0 ? `₦${Math.round(panicVendors.reduce((a, u) => a + (u.panicModePrice || 0), 0) / panicVendors.length).toLocaleString()}` : '—'} />
+              <StatCard label="Available Today" value={panicVendors.filter(u => u.availableToday).length} sub="Currently available for panic" />
+            </div>
+
+            {panicVendors.length === 0 ? (
               <div className="py-20 text-center bg-[#f5f5f7] rounded-[32px]">
-                <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em]">No transactions recorded yet.</p>
+                <p className="text-4xl mb-4">🚨</p>
+                <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em]">No vendors have opted into Panic Mode.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {panicVendors.map(u => (
+                  <div key={u.id} className="bg-white border border-black/5 rounded-[24px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.name}&background=000&color=fff`} className="w-12 h-12 rounded-[14px] object-cover border border-black/5 shrink-0" />
+                      <div>
+                        <p className="font-black text-black uppercase tracking-tight text-sm">{u.businessName || u.name}</p>
+                        <p className="text-[10px] text-[#86868b] font-bold">{u.category} · {u.location}</p>
+                        <div className="flex gap-2 mt-1.5">
+                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${u.availableToday ? 'bg-green-50 text-green-600' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
+                            {u.availableToday ? '● Available Now' : '○ Not Available'}
+                          </span>
+                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500">
+                            Rate: ₦{(u.panicModePrice || 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePanic(u)}
+                      disabled={!!actionLoading}
+                      className="px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-black transition-all disabled:opacity-40 shrink-0"
+                    >
+                      {actionLoading === `panic-${u.id}` ? '...' : 'Disable Panic'}
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* ── PANIC MONITOR TAB ── */}
-      {activeTab === 'panic' && (
-        <div className="animate-in fade-in duration-500">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <StatCard label="Panic-Ready Vendors" value={panicVendors.length} dark />
-            <StatCard label="Panic Unlocks" value={urgentRequests} />
-            <StatCard label="Avg Panic Rate" value={panicVendors.length > 0 ? `₦${Math.round(panicVendors.reduce((a, u) => a + (u.panicModePrice || 0), 0) / panicVendors.length).toLocaleString()}` : '—'} />
-            <StatCard label="Available Today" value={panicVendors.filter(u => u.availableToday).length} sub="Currently available for panic" />
-          </div>
-
-          {panicVendors.length === 0 ? (
-            <div className="py-20 text-center bg-[#f5f5f7] rounded-[32px]">
-              <p className="text-4xl mb-4">🚨</p>
-              <p className="text-[10px] font-bold text-[#86868b] uppercase tracking-[0.4em]">No vendors have opted into Panic Mode.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {panicVendors.map(u => (
-                <div key={u.id} className="bg-white border border-black/5 rounded-[24px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.name}&background=000&color=fff`} className="w-12 h-12 rounded-[14px] object-cover border border-black/5 shrink-0" />
-                    <div>
-                      <p className="font-black text-black uppercase tracking-tight text-sm">{u.businessName || u.name}</p>
-                      <p className="text-[10px] text-[#86868b] font-bold">{u.category} · {u.location}</p>
-                      <div className="flex gap-2 mt-1.5">
-                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${u.availableToday ? 'bg-green-50 text-green-600' : 'bg-[#f5f5f7] text-[#86868b]'}`}>
-                          {u.availableToday ? '● Available Now' : '○ Not Available'}
-                        </span>
-                        <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-500">
-                          Rate: ₦{(u.panicModePrice || 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleTogglePanic(u)}
-                    disabled={!!actionLoading}
-                    className="px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-black transition-all disabled:opacity-40 shrink-0"
-                  >
-                    {actionLoading === `panic-${u.id}` ? '...' : 'Disable Panic'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )
+      }
 
       {/* ── TEST ANALYTICS TAB ── */}
-      {activeTab === 'tests' && (
-        <div className="animate-in fade-in duration-500">
-          <TestAnalytics users={users} />
-        </div>
-      )}
+      {
+        activeTab === 'tests' && (
+          <div className="animate-in fade-in duration-500">
+            <TestAnalytics users={users} />
+          </div>
+        )
+      }
 
       {/* ── REPORTS TAB ── */}
-      {activeTab === 'reports' && (
-        <div className="animate-in fade-in duration-500">
-          <AdminReports />
-        </div>
-      )}
+      {
+        activeTab === 'reports' && (
+          <div className="animate-in fade-in duration-500">
+            <AdminReports />
+          </div>
+        )
+      }
 
-          {/* ── PARTNERS TAB ── */}
-          {activeTab === 'partners' && (
-            <PartnersManager />
-          )}
-    </div>
+      {/* ── PARTNERS TAB ── */}
+      {
+        activeTab === 'partners' && (
+          <PartnersManager />
+        )
+      }
+    </div >
   );
 };
 
 export default AdminDashboard;
 
-    const PartnersManager: React.FC = () => {
-      const partners = useQuery(api.partners.adminListPartners) ?? [];
-      const createPartner = useMutation(api.partners.createPartner);
-      const updatePartner = useMutation(api.partners.updatePartner);
-      const deletePartner = useMutation(api.partners.deletePartner);
+const PartnersManager: React.FC = () => {
+  const partners = useQuery(api.partners.adminListPartners) ?? [];
+  const createPartner = useMutation(api.partners.createPartner);
+  const updatePartner = useMutation(api.partners.updatePartner);
+  const deletePartner = useMutation(api.partners.deletePartner);
 
-        const [form, setForm] = useState<any>({ name: '', website_url: '', is_active: true });
-        const [lastCreateResponse, setLastCreateResponse] = useState<any>(null);
-      const [editing, setEditing] = useState<string | null>(null);
+  const [form, setForm] = useState<any>({ name: '', website_url: '', is_active: true });
+  const [lastCreateResponse, setLastCreateResponse] = useState<any>(null);
+  const [editing, setEditing] = useState<string | null>(null);
 
-      const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const payload: any = {
-          name: form.name,
-          website_url: form.website_url,
-          logo_url: form.logo_url || undefined,
-          referral_link: form.referral_link || undefined,
-          placement_type: form.placement_type || undefined,
-          priority_level: form.priority_level !== undefined ? form.priority_level : undefined,
-          is_active: form.is_active === undefined ? true : !!form.is_active,
-          start_date: form.start_date ?? undefined,
-          end_date: form.end_date ?? undefined,
-        };
-        console.log('createPartner payload', payload);
-        const res = await createPartner(payload);
-        // stringify via JSON roundtrip to avoid circular console issues in some browsers
-        console.log('createPartner response', JSON.parse(JSON.stringify(res)));
-        setLastCreateResponse(res ?? null);
-        if (res && res.success) {
-          setForm({ name: '', website_url: '', is_active: true });
-          // delay reload briefly so developer can inspect logs/response
-          setTimeout(() => window.location.reload(), 900);
-        }
-      };
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload: any = {
+      name: form.name,
+      website_url: form.website_url,
+      logo_url: form.logo_url || undefined,
+      referral_link: form.referral_link || undefined,
+      placement_type: form.placement_type || undefined,
+      priority_level: form.priority_level !== undefined ? form.priority_level : undefined,
+      is_active: form.is_active === undefined ? true : !!form.is_active,
+      start_date: form.start_date ?? undefined,
+      end_date: form.end_date ?? undefined,
+    };
+    console.log('createPartner payload', payload);
+    const res = await createPartner(payload);
+    // stringify via JSON roundtrip to avoid circular console issues in some browsers
+    console.log('createPartner response', JSON.parse(JSON.stringify(res)));
+    setLastCreateResponse(res ?? null);
+    if (res && res.success) {
+      setForm({ name: '', website_url: '', is_active: true });
+      // delay reload briefly so developer can inspect logs/response
+      setTimeout(() => window.location.reload(), 900);
+    }
+  };
 
-      const startEdit = (p: any) => {
-        setEditing(p._id);
-        setForm({ ...p });
-      };
+  const startEdit = (p: any) => {
+    setEditing(p._id);
+    setForm({ ...p });
+  };
 
-      const handleUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editing) return;
-        const patch: any = { ...form };
-        // remove _id if present
-        delete patch._id;
-        // normalize nulls to undefined
-        Object.keys(patch).forEach(k => {
-          if (patch[k] === null) delete patch[k];
-        });
-        const upRes = await updatePartner({ id: editing, patch });
-        console.log('updatePartner response', upRes);
-        setEditing(null);
-        setForm({ name: '', website_url: '', is_active: true });
-        window.location.reload();
-      };
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const patch: any = { ...form };
+    // remove _id if present
+    delete patch._id;
+    // normalize nulls to undefined
+    Object.keys(patch).forEach(k => {
+      if (patch[k] === null) delete patch[k];
+    });
+    const upRes = await updatePartner({ id: editing, patch });
+    console.log('updatePartner response', upRes);
+    setEditing(null);
+    setForm({ name: '', website_url: '', is_active: true });
+    window.location.reload();
+  };
 
-      const handleDelete = async (id: string) => {
-        if (!confirm('Delete partner?')) return;
-        const delRes = await deletePartner({ id });
-        console.log('deletePartner response', delRes);
-        window.location.reload();
-      };
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete partner?')) return;
+    const delRes = await deletePartner({ id });
+    console.log('deletePartner response', delRes);
+    window.location.reload();
+  };
 
-      return (
-        <div className="space-y-6">
-          <div className="bg-white border border-black/5 p-6 rounded-[24px]">
-            <h3 className="font-black text-lg mb-4">Create / Edit Partner</h3>
-            <form onSubmit={editing ? handleUpdate : handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" className="p-3 rounded-md border" required />
-              <input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} placeholder="Website URL" className="p-3 rounded-md border" required />
-              <div className="flex gap-2">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={!!form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
-                <button className="btn-apple px-4" type="submit">{editing ? 'Update' : 'Create'}</button>
-                {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', website_url: '', is_active: true }); }} className="px-4">Cancel</button>}
-              </div>
-            </form>
-            {lastCreateResponse && (
-              <div className="mt-4 p-3 bg-black/5 rounded">
-                <div className="text-sm font-black mb-2">Last create response:</div>
-                <pre className="text-xs max-h-40 overflow-auto">{JSON.stringify(lastCreateResponse, null, 2)}</pre>
-              </div>
-            )}
+  return (
+    <div className="space-y-6">
+      <div className="bg-white border border-black/5 p-6 rounded-[24px]">
+        <h3 className="font-black text-lg mb-4">Create / Edit Partner</h3>
+        <form onSubmit={editing ? handleUpdate : handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" className="p-3 rounded-md border" required />
+          <input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} placeholder="Website URL" className="p-3 rounded-md border" required />
+          <div className="flex gap-2">
+            <label className="flex items-center gap-2"><input type="checkbox" checked={!!form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
+            <button className="btn-apple px-4" type="submit">{editing ? 'Update' : 'Create'}</button>
+            {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', website_url: '', is_active: true }); }} className="px-4">Cancel</button>}
           </div>
+        </form>
+        {lastCreateResponse && (
+          <div className="mt-4 p-3 bg-black/5 rounded">
+            <div className="text-sm font-black mb-2">Last create response:</div>
+            <pre className="text-xs max-h-40 overflow-auto">{JSON.stringify(lastCreateResponse, null, 2)}</pre>
+          </div>
+        )}
+      </div>
 
+      <div className="space-y-3">
+        {partners.length === 0 ? (
+          <div className="py-12 text-center bg-[#f5f5f7] rounded-[24px]">No partners yet.</div>
+        ) : (
+          partners.map((p: any) => (
+            <div key={p._id} className="flex items-center justify-between bg-white border border-black/5 p-4 rounded-[16px]">
+              <div>
+                <div className="font-black">{p.name}</div>
+                <div className="text-sm text-[#86868b]">{p.website_url}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => startEdit(p)} className="px-3 py-1 border rounded">Edit</button>
+                <button onClick={() => handleDelete(p._id)} className="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TestAnalytics: React.FC<{ users: User[] }> = ({ users }) => {
+  const data = useQuery(api.api.adminGetTestResponses) ?? { sessions: [], tasks: [], feedback: [], finals: [] };
+  const sessions = data.sessions || [];
+  const tasks = data.tasks || [];
+  const feedback = data.feedback || [];
+  const finals = data.finals || [];
+
+  const completed = sessions.filter((s: any) => s.completedAt).length;
+  const avgFinalRating = finals.length > 0 ? (finals.reduce((a: any, f: any) => a + (f.overallRating || 0), 0) / finals.length).toFixed(2) : '—';
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <StatCard label="Test Sessions" value={sessions.length} />
+        <StatCard label="Completed" value={completed} />
+        <StatCard label="Task Feedback" value={feedback.length} />
+        <StatCard label="Avg Final Rating" value={avgFinalRating} />
+      </div>
+
+      <div className="bg-white border border-black/5 rounded-[24px] p-4">
+        <h3 className="font-black mb-3">Recent Test Sessions</h3>
+        {sessions.length === 0 ? (
+          <div className="py-8 text-center text-sm text-[#86868b]">No test sessions recorded.</div>
+        ) : (
           <div className="space-y-3">
-            {partners.length === 0 ? (
-              <div className="py-12 text-center bg-[#f5f5f7] rounded-[24px]">No partners yet.</div>
-            ) : (
-              partners.map((p: any) => (
-                <div key={p._id} className="flex items-center justify-between bg-white border border-black/5 p-4 rounded-[16px]">
+            {sessions.sort((a: any, b: any) => (b.startedAt || 0) - (a.startedAt || 0)).slice(0, 20).map((s: any) => {
+              const final = finals.find((f: any) => String(f.sessionId) === String(s._id));
+              const feedbackCount = feedback.filter((fb: any) => String(fb.sessionId) === String(s._id)).length;
+              const user = users.find(u => u.id === s.userId) || null;
+              return (
+                <div key={s._id} className="flex items-center justify-between p-3 rounded-md bg-[#f9f9f9]">
                   <div>
-                    <div className="font-black">{p.name}</div>
-                    <div className="text-sm text-[#86868b]">{p.website_url}</div>
+                    <div className="font-bold">{user ? (user.name || user.email) : (s.userId || 'Guest')}</div>
+                    <div className="text-xs text-[#86868b]">Started: {s.startedAt ? new Date(s.startedAt).toLocaleString() : '—'} · Completed: {s.completedAt ? new Date(s.completedAt).toLocaleString() : '—'}</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => startEdit(p)} className="px-3 py-1 border rounded">Edit</button>
-                    <button onClick={() => handleDelete(p._id)} className="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                  <div className="text-right">
+                    <div className="font-black">Final: {final ? (final.overallRating ?? '—') : '—'}</div>
+                    <div className="text-xs text-[#86868b]">Task feedback: {feedbackCount}</div>
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
-        </div>
-      );
-    };
+        )}
+      </div>
 
-    const TestAnalytics: React.FC<{ users: User[] }> = ({ users }) => {
-      const data = useQuery(api.api.adminGetTestResponses) ?? { sessions: [], tasks: [], feedback: [], finals: [] };
-      const sessions = data.sessions || [];
-      const tasks = data.tasks || [];
-      const feedback = data.feedback || [];
-      const finals = data.finals || [];
-
-      const completed = sessions.filter((s: any) => s.completedAt).length;
-      const avgFinalRating = finals.length > 0 ? (finals.reduce((a: any, f: any) => a + (f.overallRating || 0), 0) / finals.length).toFixed(2) : '—';
-
-      return (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <StatCard label="Test Sessions" value={sessions.length} />
-            <StatCard label="Completed" value={completed} />
-            <StatCard label="Task Feedback" value={feedback.length} />
-            <StatCard label="Avg Final Rating" value={avgFinalRating} />
-          </div>
-
-          <div className="bg-white border border-black/5 rounded-[24px] p-4">
-            <h3 className="font-black mb-3">Recent Test Sessions</h3>
-            {sessions.length === 0 ? (
-              <div className="py-8 text-center text-sm text-[#86868b]">No test sessions recorded.</div>
-            ) : (
-              <div className="space-y-3">
-                {sessions.sort((a: any, b: any) => (b.startedAt || 0) - (a.startedAt || 0)).slice(0, 20).map((s: any) => {
-                  const final = finals.find((f: any) => String(f.sessionId) === String(s._id));
-                  const feedbackCount = feedback.filter((fb: any) => String(fb.sessionId) === String(s._id)).length;
-                  const user = users.find(u => u.id === s.userId) || null;
-                  return (
-                    <div key={s._id} className="flex items-center justify-between p-3 rounded-md bg-[#f9f9f9]">
-                      <div>
-                        <div className="font-bold">{user ? (user.name || user.email) : (s.userId || 'Guest')}</div>
-                        <div className="text-xs text-[#86868b]">Started: {s.startedAt ? new Date(s.startedAt).toLocaleString() : '—'} · Completed: {s.completedAt ? new Date(s.completedAt).toLocaleString() : '—'}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-black">Final: {final ? (final.overallRating ?? '—') : '—'}</div>
-                        <div className="text-xs text-[#86868b]">Task feedback: {feedbackCount}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white border border-black/5 rounded-[24px] p-4">
-            <h3 className="font-black mb-3">Tasks</h3>
-            {tasks.length === 0 ? (
-              <div className="py-8 text-center text-sm text-[#86868b]">No tasks defined.</div>
-            ) : (
-              <ul className="space-y-2">
-                {tasks.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).map((t: any) => (
-                  <li key={t._id} className="p-2 rounded-md bg-[#f9f9f9] flex items-center justify-between">
-                    <div>
-                      <div className="font-bold">{t.title}</div>
-                      <div className="text-xs text-[#86868b]">{t.instruction || ''}</div>
-                    </div>
-                    <div className="text-sm text-[#86868b]">Order {t.order}</div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      );
-    };
+      <div className="bg-white border border-black/5 rounded-[24px] p-4">
+        <h3 className="font-black mb-3">Tasks</h3>
+        {tasks.length === 0 ? (
+          <div className="py-8 text-center text-sm text-[#86868b]">No tasks defined.</div>
+        ) : (
+          <ul className="space-y-2">
+            {tasks.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).map((t: any) => (
+              <li key={t._id} className="p-2 rounded-md bg-[#f9f9f9] flex items-center justify-between">
+                <div>
+                  <div className="font-bold">{t.title}</div>
+                  <div className="text-xs text-[#86868b]">{t.instruction || ''}</div>
+                </div>
+                <div className="text-sm text-[#86868b]">Order {t.order}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};

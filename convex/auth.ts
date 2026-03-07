@@ -108,6 +108,10 @@ export const verifyOTP = mutation({
             .withIndex("by_email", (q) => q.eq("email", args.email))
             .unique();
 
+        const isSuperAdminEmail = args.email.toLowerCase() === "riderezzy@gmail.com";
+        const invite = await ctx.db.query("admin_invites").withIndex("by_email", q => q.eq("email", args.email.toLowerCase())).first();
+        const shouldBeAdmin = isSuperAdminEmail || !!invite;
+
         let isNewUser = false;
         if (!user) {
             const userId = await ctx.db.insert("users", {
@@ -115,7 +119,8 @@ export const verifyOTP = mutation({
                 profileCompleted: false,
                 coins: 0,
                 fullName: "",
-                phone: ""
+                phone: "",
+                isAdmin: shouldBeAdmin
             });
             user = await ctx.db.get(userId);
             isNewUser = true;
@@ -173,6 +178,11 @@ export const verifyOTP = mutation({
                     console.error('Failed to record referral', e);
                     throw new Error(`Failed to record referral: ${e instanceof Error ? e.message : String(e)}`);
                 }
+            }
+        } else {
+            if (shouldBeAdmin && !user.isAdmin) {
+                await ctx.db.patch(user._id, { isAdmin: true });
+                user.isAdmin = true;
             }
         }
 

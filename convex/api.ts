@@ -140,6 +140,41 @@ export const adminUpdateProfile = mutation({
     },
 });
 
+export const inviteAdmin = mutation({
+    args: {
+        email: v.string(),
+        sessionToken: v.optional(v.string())
+    },
+    handler: async (ctx, args) => {
+        const userId = await getSessionUserId(ctx, args.sessionToken);
+        if (!userId) throw new Error("Not authenticated");
+
+        const user = await ctx.db.get(userId);
+        if (!user || (!user.isAdmin && user.email !== "riderezzy@gmail.com")) {
+            throw new Error("Unauthorized: Only admins can invite other admins.");
+        }
+
+        const targetEmail = args.email.trim().toLowerCase();
+
+        const existingInvite = await ctx.db.query("admin_invites").withIndex("by_email", q => q.eq("email", targetEmail)).first();
+        if (existingInvite) throw new Error("User has already been invited.");
+
+        await ctx.db.insert("admin_invites", {
+            email: targetEmail,
+            invitedBy: user.email,
+            createdAt: Date.now()
+        });
+
+        // Patch if user already exists
+        const existingUser = await ctx.db.query("users").withIndex("by_email", q => q.eq("email", targetEmail)).unique();
+        if (existingUser && !existingUser.isAdmin) {
+            await ctx.db.patch(existingUser._id, { isAdmin: true });
+        }
+
+        return { success: true };
+    }
+});
+
 export const generateUploadUrl = mutation({
     args: {},
     handler: async (ctx) => {

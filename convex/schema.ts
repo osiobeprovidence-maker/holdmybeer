@@ -14,6 +14,7 @@ export default defineSchema({
         emailVerificationTime: v.optional(v.number()),
         phoneVerificationTime: v.optional(v.number()),
         isAnonymous: v.optional(v.boolean()),
+        isAdmin: v.optional(v.boolean()),
     }).index("by_email", ["email"]).index("by_referral", ["referral_code"]),
     // add an index to look up by referral code
     // note: Convex requires indexes to be declared on tables directly; we'll add one below via a virtual index entry
@@ -149,6 +150,12 @@ export default defineSchema({
         referredEmail: v.optional(v.string()),
         createdAt: v.number(),
     }).index("by_referrer", ["referrerId"]),
+
+    admin_invites: defineTable({
+        email: v.string(),
+        invitedBy: v.string(),
+        createdAt: v.number(),
+    }).index("by_email", ["email"]),
     // Add index on users.referral_code for lookup
     // Convex doesn't provide a separate index declaration API here, but adding an index on users by referral_code
     // can be done by repeating defineTable with index - instead we add a helper virtual index by redeclaring users with index

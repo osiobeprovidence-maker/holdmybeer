@@ -234,6 +234,7 @@ export interface User {
   name: string;
   email: string;
   isCreator: boolean;
+  isAdmin?: boolean;
   avatar?: string;
   avatarStorageId?: string;
   location: Location;

@@ -94,10 +94,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => onNavigate('discovery')}
-              className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#86868b] hover:text-black transition-colors"
+              className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'discovery' ? 'text-black' : 'text-[#86868b] hover:text-black'}`}
             >
               Discovery
             </button>
+            {currentUser.isAdmin && (
+              <button
+                onClick={() => onNavigate('admin')}
+                className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'admin' ? 'text-black' : 'text-[#86868b] hover:text-black'}`}
+              >
+                Admin
+              </button>
+            )}
             <button onClick={onLogout} className="text-[#86868b] text-[11px] font-bold hover:text-black transition-colors uppercase tracking-widest">Exit</button>
           </div>
         ) : (
@@ -135,6 +143,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="text-3xl font-black tracking-tighter uppercase text-black">Discovery</span>
                     <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
                   </button>
+                  {currentUser.isAdmin && (
+                    <button onClick={() => { onNavigate('admin'); setIsMenuOpen(false); }} className="group flex items-center justify-between">
+                      <span className="text-3xl font-black tracking-tighter uppercase text-black">Admin</span>
+                      <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
+                    </button>
+                  )}
                   <button onClick={() => { onNavigate('pricing'); setIsMenuOpen(false); }} className="group flex items-center justify-between">
                     <span className="text-3xl font-black tracking-tighter uppercase text-black">Pricing</span>
                     <span className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">→</span>
@@ -242,9 +256,9 @@ export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNav
       </div>
       <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-black/[0.02] text-[10px] font-bold text-[#86868b] flex justify-between items-center uppercase tracking-[0.3em] opacity-30">
         <p>© 2024 HoldMyBeer.</p>
-        <button onClick={() => onNavigate('admin')} className="hover:text-black transition-colors">
+        <span className="transition-colors">
           Expert Retrieval Nigeria. v2.0.5
-        </button>
+        </span>
       </div>
     </footer>
   );
