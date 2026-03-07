@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import { useNotification } from './NotificationProvider';
 
 const ReferralPanel: React.FC<{ sessionToken?: string; currentUser?: any }> = ({ sessionToken, currentUser }) => {
+  const { success, error } = useNotification();
   const history = useQuery(api.api.getReferralHistory, { sessionToken });
   const updateUsernameMutation = useMutation(api.api.updateUsername);
 
@@ -17,9 +19,9 @@ const ReferralPanel: React.FC<{ sessionToken?: string; currentUser?: any }> = ({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
-      alert('Referral link copied to clipboard');
+      success('Referral link copied to clipboard');
     } catch (e) {
-      alert('Copy failed — please copy manually');
+      error('Copy failed — please copy manually');
     }
   };
 
@@ -63,15 +65,15 @@ const ReferralPanel: React.FC<{ sessionToken?: string; currentUser?: any }> = ({
               <button
                 disabled={isSaving}
                 onClick={async () => {
-                  if (newUsername.length < 3) return alert("Username must be at least 3 characters");
+                  if (newUsername.length < 3) return error("Username must be at least 3 characters");
                   setIsSaving(true);
                   try {
                     await updateUsernameMutation({ username: newUsername, sessionToken });
                     setIsEditing(false);
-                    alert("Username updated successfully!");
+                    success("Username updated successfully!");
                     window.location.reload(); // Reload to refresh user context
                   } catch (e: any) {
-                    alert(e.message || "Failed to update username");
+                    error(e.message || "Failed to update username");
                   } finally {
                     setIsSaving(false);
                   }

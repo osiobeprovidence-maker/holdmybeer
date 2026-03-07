@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
+import { useNotification } from '../NotificationProvider';
 
 type Task = {
   _id: Id<"tasks">;
@@ -37,6 +38,7 @@ const RatingButtons: React.FC<{ value: number | null; onChange: (v: number) => v
 };
 
 export const TestLab: React.FC<{ onSessionCreated?: (id: string) => void }> = ({ onSessionCreated }) => {
+  const { error: notifyError } = useNotification();
   const tasksQuery = useQuery(api.api.getTasks);
   const createSession = useMutation(api.api.createTestSession);
   const submitTask = useMutation(api.api.submitTaskFeedback);
@@ -91,7 +93,7 @@ export const TestLab: React.FC<{ onSessionCreated?: (id: string) => void }> = ({
   };
 
   const handleSubmitFeedback = async () => {
-    if (!sessionId) return alert('Session not started');
+    if (!sessionId) { notifyError('Session not started'); return; }
     const task = tasks[currentIndex];
     await submitTask({ sessionId, taskId: task._id, difficultyRating: rating || 3, confusionText: confusion, improvementText: improve });
     setShowFeedback(false);

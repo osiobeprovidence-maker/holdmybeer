@@ -2,6 +2,7 @@
 import React from 'react';
 import { initializePaystack } from '../services/paymentService';
 import { User } from '../types';
+import { useNotification } from '../components/NotificationProvider';
 
 interface CoinMarketProps {
     currentUser: User | null;
@@ -10,6 +11,8 @@ interface CoinMarketProps {
 }
 
 const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess, onClose }) => {
+    const { success, error } = useNotification();
+
     React.useEffect(() => {
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -35,7 +38,7 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
 
     const handlePurchase = (pkg: any) => {
         if (!currentUser) {
-            alert("Please login to purchase coins.");
+            error("Please login to purchase coins.");
             return;
         }
 
@@ -49,7 +52,7 @@ const CoinMarket: React.FC<CoinMarketProps> = ({ currentUser, onPurchaseSuccess,
             },
             onSuccess: (reference) => {
                 onPurchaseSuccess(pkg.coins);
-                alert(`Success! ${pkg.coins} coins added to your protocol balance.`);
+                success(`Success! ${pkg.coins} coins added to your protocol balance.`);
             },
             onClose: () => {
                 console.log('Payment window closed');

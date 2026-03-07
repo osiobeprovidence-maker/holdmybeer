@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 
 // Paystack public key — embedded directly because this app uses browser ESM (no Vite build step)
 // import.meta.env is NOT processed when using importmap/ESM in index.html directly
@@ -12,13 +13,13 @@ export const initializePaystack = (options: {
 }) => {
   const PaystackPop = (window as any).PaystackPop;
   if (!PaystackPop) {
-    alert('Payment system not available. Please check your internet connection and refresh the page.');
+    toast.error('Payment system not available. Please check your internet connection and refresh the page.');
     console.error('[HMB] Paystack SDK not loaded. Ensure https://js.paystack.co/v1/inline.js is in index.html');
     return;
   }
 
   if (!PAYSTACK_KEY || !PAYSTACK_KEY.startsWith('pk_')) {
-    alert('Payment configuration error. Please contact support.');
+    toast.error('Payment configuration error. Please contact support.');
     console.error('[HMB] Paystack public key is missing or invalid:', PAYSTACK_KEY);
     return;
   }

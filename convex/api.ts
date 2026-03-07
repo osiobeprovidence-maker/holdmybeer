@@ -593,7 +593,7 @@ export const createReport = mutation({
         category: v.string(),
         severity: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High"), v.literal("Critical")),
         pageUrl: v.string(),
-        screenshotStorageId: v.optional(v.string()),
+        screenshotStorageId: v.optional(v.union(v.string(), v.null())),
         sessionToken: v.optional(v.string()),
     },
     handler: async (ctx, args) => {

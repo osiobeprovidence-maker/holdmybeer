@@ -5,6 +5,7 @@ import { initializePaystack } from '../services/paymentService';
 import ReferralPanel from '../components/ReferralPanel';
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { useNotification } from '../components/NotificationProvider';
 
 interface DashboardProps {
   user: User;
@@ -30,6 +31,7 @@ const VENUE_CATEGORIES = [
 ];
 
 const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlockedVendors, serviceRequests, allUsers, onNavigate }) => {
+  const { success, error, warning } = useNotification();
   const [activeTab, setActiveTab] = useState<'overview' | 'spot' | 'packages' | 'availability' | 'portfolio' | 'verification' | 'connections'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -137,7 +139,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
         onUpdateUser({ ...user, avatar: url, avatarStorageId: storageId });
       } catch (err) {
         console.error("Avatar upload failed:", err);
-        alert("Failed to upload avatar.");
+        error("Failed to upload avatar.");
       }
     }
   };
@@ -168,13 +170,13 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
       const remaining = 10 - currentCount;
 
       if (remaining <= 0) {
-        alert("Portfolio limit reached (max 10 items).");
+        warning("Portfolio limit reached (max 10 items).");
         return;
       }
 
       const filesToUpload = Array.from(files).slice(0, remaining);
       if (files.length > remaining) {
-        alert(`Only ${remaining} items were added. Portfolio limit is 10.`);
+        warning(`Only ${remaining} items were added. Portfolio limit is 10.`);
       }
 
       // Upload each file
@@ -232,7 +234,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
   // Verification Logic Branching
   const sendCode = () => {
-    if (phoneInput.length < 10) return alert("Enter valid phone.");
+    if (phoneInput.length < 10) return error("Enter valid phone.");
     setKycStep('otp');
   };
 
@@ -240,12 +242,12 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
     if (otpInput === '1234' || otpInput.length === 4) {
       setKycStep('name');
     } else {
-      alert("Invalid code. Try 1234.");
+      error("Invalid code. Try 1234.");
     }
   };
 
   const submitName = () => {
-    if (nameInput.length < 3) return alert("Enter legal name.");
+    if (nameInput.length < 3) return error("Enter legal name.");
     setKycStep('id_select');
   };
 
@@ -261,7 +263,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
   };
 
   const submitIdNumber = () => {
-    if (kycNumberInput.length < 5) return alert("Enter valid number.");
+    if (kycNumberInput.length < 5) return error("Enter valid number.");
     // All non-Driver-License IDs proceed to photo step
     setKycStep('id_photo');
   };
@@ -300,7 +302,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
       },
       onSuccess: (reference) => {
         onUpdateUser({ ...user, isPaid: true });
-        alert(`Payment successful! Ref: ${reference}. Your profile is now active for 1 year.`);
+        success(`Payment successful! Ref: ${reference}. Your profile is now active for 1 year.`);
       },
       onClose: () => {
         console.log('Payment window closed');
@@ -481,7 +483,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
             <button
               disabled={isInitializing}
               onClick={async () => {
-                if (!formData.businessName || !formData.bio) return alert("Please fill in business name and bio.");
+                if (!formData.businessName || !formData.bio) return error("Please fill in business name and bio.");
 
                 setIsInitializing(true);
                 try {
@@ -494,7 +496,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                   setShowOnboarding(false);
                   setActiveTab('overview');
                 } catch (err) {
-                  alert("Protocol initialization failed. Please check connection.");
+                  error("Protocol initialization failed. Please check connection.");
                 } finally {
                   setIsInitializing(false);
                 }
@@ -569,7 +571,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
                       if (phoneNumber) {
                         window.open(`https://wa.me/${phoneNumber}?text=Hello, I connected with you on HoldMyBeer.`, '_blank');
                       } else {
-                        alert('No contact signal found for this expert.');
+                        error('No contact signal found for this expert.');
                       }
                     }}
                     className="w-full bg-[#f5f5f7] py-4 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all"
@@ -972,7 +974,7 @@ const VendorDashboard: React.FC<DashboardProps> = ({ user, onUpdateUser, unlocke
 
                       <button
                         onClick={() => {
-                          if (!newPackage.name || !newPackage.price) return alert('Package name and price are required.');
+                          if (!newPackage.name || !newPackage.price) return error('Package name and price are required.');
                           const pkg: ServicePackage = { ...newPackage, id: Math.random().toString(36).substr(2, 9) };
                           const updated = [...packages, pkg];
                           setPackages(updated);
